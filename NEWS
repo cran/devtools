@@ -1,0 +1,13 @@
+devtools 0.1
+------------
+
+* Check for presence of `DESCRIPTION` when loading packages to avoid false
+  positives
+
+* `install` now works correctly with `devel_mode` to install packages in your
+  development library
+
+* `release` prints news so you can more easily check it
+
+* All `R CMD xxx` functions now use the current R, not the first R found on
+  the system path.
