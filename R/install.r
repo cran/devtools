@@ -56,18 +56,24 @@ install_deps <- function(pkg = NULL) {
 #' install_github("roxygen")
 #' }
 install_github <- function(repo, username = "hadley") {
+  require("RCurl")
+  
   message("Installing ", repo, " from ", username)
   name <- paste(username, "-", repo, sep = "")
   url <- paste("https://github.com/", username, "/", repo, sep = "")
-  
+
   # Download and unzip repo zip
   zip_url <- paste("https://nodeload.github.com/", username, "/", repo,
     "/zipball/master", sep = "")
   src <- file.path(tempdir(), paste(name, ".zip", sep = ""))
-  download.file(zip_url, src, method = "wget", quiet = TRUE)
+  
+  content <- getBinaryURL(zip_url, .opts = list(
+    followlocation = TRUE, ssl.verifypeer = FALSE))
+  writeBin(content, src)
   on.exit(unlink(src), add = TRUE)
   
-  out_path <- file.path(tempdir(), unzip(src, list = TRUE)$Name[1])
+  pkg_name <- basename(as.character(unzip(src, list = TRUE)$Name[1]))
+  out_path <- file.path(tempdir(), pkg_name)
   unzip(src, exdir = tempdir())
   on.exit(unlink(out_path), add = TRUE)
   
