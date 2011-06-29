@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to make developing R code easier
-Version: 0.1
+Version: 0.2
 Author: Hadley Wickham <h.wickham@gmail.com>
 Maintainer: Hadley Wickham <h.wickham@gmail.com>
 Description: Collection of package development tools
@@ -12,6 +12,6 @@ Collate: 'check.r' 'common-mistakes.r' 'devel-mode.r' 'document.r'
         'package-env.r' 'package.r' 'release.r' 'reload.r'
         'run-examples.r' 'system.r' 'test.r' 'update-src.r' 'utils.r'
         'vignettes.r'
-Packaged: 2011-06-22 16:50:21 UTC; hadley
+Packaged: 2011-06-28 16:35:25 UTC; hadley
 Repository: CRAN
-Date/Publication: 2011-06-22 20:30:54
+Date/Publication: 2011-06-29 09:41:48
