@@ -1,10 +1,10 @@
-\name{update_src}
-\alias{update_src}
-\title{Update the source code of a package...}
-\usage{update_src(pkg)}
+\name{bash}
+\alias{bash}
+\title{Open bash shell in package directory.}
+\usage{bash(pkg)}
 
 \description{
-  Update the source code of a package
+  Open bash shell in package directory.
 }
 \arguments{
   \item{pkg}{package description, can be path or package name.  See
