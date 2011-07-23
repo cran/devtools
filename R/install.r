@@ -16,7 +16,7 @@ install <- function(pkg = NULL, reload = TRUE) {
   message("Installing ", pkg$package)
   install_deps(pkg)  
   
-  built_path <- build(pkg)  
+  built_path <- build(pkg, tempdir())
   on.exit(unlink(built_path))    
 
   install.packages(built_path, repos = NULL, type = "source")
@@ -46,13 +46,14 @@ install_deps <- function(pkg = NULL) {
 #'
 #' @param username Github username
 #' @param repo Repo name
+#' @param branch Desired branch - defaults to \code{"master"}
 #' @export
+#' @importFrom RCurl getBinaryURL
 #' @examples
 #' \dontrun{
 #' install_github("roxygen")
 #' }
-install_github <- function(repo, username = "hadley") {
-  require("RCurl")
+install_github <- function(repo, username = "hadley", branch = "master") {
   
   message("Installing ", repo, " from ", username)
   name <- paste(username, "-", repo, sep = "")
@@ -60,7 +61,7 @@ install_github <- function(repo, username = "hadley") {
 
   # Download and unzip repo zip
   zip_url <- paste("https://nodeload.github.com/", username, "/", repo,
-    "/zipball/master", sep = "")
+    "/zipball/", branch, sep = "")
   src <- file.path(tempdir(), paste(name, ".zip", sep = ""))
   
   content <- getBinaryURL(zip_url, .opts = list(
@@ -79,5 +80,5 @@ install_github <- function(repo, username = "hadley") {
   }
   
   # Install
-  install(out_path, reload = FALSE)
+  install(out_path)
 }
