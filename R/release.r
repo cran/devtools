@@ -1,8 +1,10 @@
 #' Release package to CRAN.
 #'
+#' Run automated and manual tests, then ftp to CRAN.
+#'
 #' The package release process will:
-#'  
-#' \itemize{  %}
+#'
+#' \itemize{
 #'
 #'   \item Confirm that the package passes \code{R CMD check}
 #'   \item Confirm that news is up-to-date
@@ -14,13 +16,19 @@
 #'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
+#' @param check if \code{TRUE}, run checking, otherwise omit it.  This
+#'   is useful if you've just checked your package and you're ready to
+#'   release it.
 #' @export
-release <- function(pkg = NULL) {
+#' @importFrom RCurl ftpUpload
+release <- function(pkg = NULL, check = TRUE) {
   pkg <- as.package(pkg)
 
-  check(pkg)
-  cat("Was package check successful?")
-  if(menu(c("Yes", "No")) == 2) return(invisible())
+  if (check) {
+    check(pkg)
+    cat("Was package check successful?")
+    if(menu(c("Yes", "No")) == 2) return(invisible())    
+  }
   
   try(print(show_news(pkg)))
   cat("Is package news up-to-date?")
@@ -31,9 +39,8 @@ release <- function(pkg = NULL) {
   if(menu(c("Yes", "No")) == 2) return(invisible())
   
   message("Building and uploading")
-  built_path <- build(pkg)
+  built_path <- build(pkg, tempdir())
 
-  require("RCurl", quiet = TRUE)
   ftpUpload(built_path, paste("ftp://cran.R-project.org/incoming/",
     basename(built_path), sep = ""))
   

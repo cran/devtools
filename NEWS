@@ -1,3 +1,51 @@
+devtools 0.4
+------------
+
+NEW FUNCTIONS
+
+* new `wd` function to change the working directory to a package subdirectory.
+
+* `check_doc` now checks package documentation as a whole, in the same way
+  that `R CMD check` does, rather than low-level syntax checking, which is
+  done by `roxygen2. DESCRIPTION checking has been moved into `load_all`.
+  `check_rd` has been removed.
+
+* `build` is now exported, and defaults to building in the package's parent
+  directory. It also gains a new `binary` parameter controls whether a binary
+  or a source version (with no vignettes or manuals) is built. Confusingly,
+  binary packages are built with `R CMD INSTALL`.
+
+* `build_win` sends your package to the R windows builder, allowing you to
+  make a binary version of your package for windows users if you're using
+  linux or a max (if you're using windows already, use `build(binary = T)`)
+
+IMPROVEMENTS AND BUG FIXES
+
+* if using `.Rpackages` config file, default function is used last, not first.
+
+* on Windows, `devtools` now checks for the presence of `Rtools` on startup,
+  and will automatically add it to the path if needed.
+
+* `document` uses `roxygen2` instead of `roxygen`. It now loads package
+  dependency so that they're available when roxygen executes the package
+  source code.
+
+* `document` has new parameter `clean` which clears all roxygen caches and
+  removes all existing man files. `check` now runs `document` in this mode.
+
+* `dev_mode` will create directories recursively, and complain if it can't
+  create them.  It should also work better on windows.
+
+* `install_github` now allows you to specify which branch to download, and
+  automatically reloads package if needed.
+
+* `reload` now will only reload if the package is already loaded.
+
+* `release` gains `check` parameter that allows you to skip package check (if
+  you've just done it.)
+
+* `test` automatically reloads code so you never run tests on old code 
+
 devtools 0.3
 ------------
 

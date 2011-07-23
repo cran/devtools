@@ -13,10 +13,10 @@
 check <- function(pkg = NULL, document = TRUE) {
   pkg <- as.package(pkg)
   
-  document(pkg)
+  document(pkg, clean = TRUE)
   message("Checking ", pkg$package)
 
-  built_path <- build(pkg)  
+  built_path <- build(pkg, tempdir())  
   on.exit(unlink(built_path))
   
   R(paste("CMD check ", built_path, sep = ""), tempdir())
