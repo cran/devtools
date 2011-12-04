@@ -1,3 +1,24 @@
+devtools 0.5
+--------------
+
+NEW FUNCTIONS
+
+* new `show_rd` function that will show the development version of a help
+  file.
+
+IMPROVEMENTS AND BUG FIXES
+
+* external R commands always run in locale `C`, because that's what the CRAN
+  severs do.
+
+* `clean_source` sources an R script into a fresh R environment, ensuring that
+  it can run independently of your current working environment. Optionally
+  (`vanilla = T`), it will source in a vanilla R environment which ignores all
+  local environment settings.
+
+* On windows, `devtools` will also add the path to `mingw` on startup. (Thanks
+  to pointer from Dave Lovell)
+
 devtools 0.4
 ------------
 
