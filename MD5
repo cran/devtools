@@ -1,6 +1,6 @@
-933b0bd631290914ddb46c7f409ea7d3 *DESCRIPTION
+e2ed9a725b479f9fa737305c773ba88d *DESCRIPTION
 7b6fdbc096e1930affeba0a12b1e07f2 *NAMESPACE
-ee44b4aa08e4df3e77368ec6f213022f *NEWS
+ec586f6ac93c8e85be92c24efdc90184 *NEWS
 e4b4c7eb176210b20e95c0cbdc097d5e *R/bash.r
 c6d2c16ad195558b34134e6aa3d323ce *R/build.r
 01000cce35de4913e200bf2006ff868c *R/check.r
@@ -23,7 +23,7 @@ f3ad4b68ed867fc2c662654a1a5feef5 *R/package.r
 4eb5f739e54811db44c6a56ebab83e7f *R/reload.r
 6b6906e1f3b24160c93c201fcc61c953 *R/run-examples.r
 e89c37d1e2d4330eb79ebfbd3e71a6a1 *R/source.r
-d2ce316deeb350a8d517412a309cde29 *R/system.r
+b4e2bd55decadee4887f33e601575090 *R/system.r
 222128218773bbbec8fa993fe200bf3f *R/test.r
 6332eda02bbd505b98092999f8f6f7e2 *R/utils.r
 9cee0eca36ea0137884fc8c09de41ff3 *R/vignettes.r
