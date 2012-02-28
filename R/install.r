@@ -1,4 +1,4 @@
-#' Install a package.
+#' Install a local development package.
 #'
 #' Uses \code{R CMD INSTALL} to install the package. Will also try to install
 #' dependencies of the package from CRAN, if they're not already installed.
@@ -10,9 +10,11 @@
 #'   \code{\link{as.package}} for more information
 #' @param reload if \code{TRUE} (the default), will automatically reload the 
 #'   package after installing.
+#' @param ... Other arguments passed on to \code{\link{install.packages}}.
 #' @export
+#' @family package installation
 #' @importFrom utils install.packages
-install <- function(pkg = NULL, reload = TRUE) {
+install <- function(pkg = NULL, reload = TRUE, ...) {
   pkg <- as.package(pkg)
   message("Installing ", pkg$package)
   install_deps(pkg)  
@@ -20,7 +22,8 @@ install <- function(pkg = NULL, reload = TRUE) {
   built_path <- build(pkg, tempdir())
   on.exit(unlink(built_path))    
 
-  install.packages(built_path, repos = NULL, type = "source")
+  R(paste("CMD INSTALL ", built_path, " --library=", .libPaths()[1], 
+    sep = ""), tempdir())
 
   if (reload) reload(pkg)
   invisible(TRUE)
@@ -43,43 +46,6 @@ install_deps <- function(pkg = NULL) {
   invisible(deps)
 }
 
-#' Attempts to install a package directly from github.
-#'
-#' @param username Github username
-#' @param repo Repo name
-#' @param branch Desired branch - defaults to \code{"master"}
-#' @export
-#' @importFrom RCurl getBinaryURL
-#' @examples
-#' \dontrun{
-#' install_github("roxygen")
-#' }
-install_github <- function(repo, username = "hadley", branch = "master") {
-  
-  message("Installing ", repo, " from ", username)
-  name <- paste(username, "-", repo, sep = "")
-  url <- paste("https://github.com/", username, "/", repo, sep = "")
 
-  # Download and unzip repo zip
-  zip_url <- paste("https://nodeload.github.com/", username, "/", repo,
-    "/zipball/", branch, sep = "")
-  src <- file.path(tempdir(), paste(name, ".zip", sep = ""))
-  
-  content <- getBinaryURL(zip_url, .opts = list(
-    followlocation = TRUE, ssl.verifypeer = FALSE))
-  writeBin(content, src)
-  on.exit(unlink(src), add = TRUE)
-  
-  pkg_name <- basename(as.character(unzip(src, list = TRUE)$Name[1]))
-  out_path <- file.path(tempdir(), pkg_name)
-  unzip(src, exdir = tempdir())
-  on.exit(unlink(out_path), add = TRUE)
-  
-  # Check it's an R package
-  if (!file.exists(file.path(out_path, "DESCRIPTION"))) {
-    stop("Does not appear to be an R package", call. = FALSE)
-  }
-  
-  # Install
-  install(out_path)
-}
+
+

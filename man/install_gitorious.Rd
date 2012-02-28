@@ -1,12 +1,12 @@
-\name{install_github}
-\alias{install_github}
-\title{Attempts to install a package directly from github.}
+\name{install_gitorious}
+\alias{install_gitorious}
+\title{Attempts to install a package directly from gitorious.}
 \usage{
-  install_github(repo, username = "hadley",
+  install_gitorious(repo, project = repo,
     branch = "master", ...)
 }
 \arguments{
-  \item{username}{Github username}
+  \item{project}{Gitorious project name}
 
   \item{repo}{Repo name}
 
@@ -22,12 +22,12 @@
 }
 \examples{
 \dontrun{
-install_github("roxygen")
+install_gitorious("r-mpc-package")
 }
 }
 \seealso{
   Other package installation: \code{\link{install}},
-  \code{\link{install_gitorious}},
-  \code{\link{install_url}}, \code{\link{install_version}}
+  \code{\link{install_github}}, \code{\link{install_url}},
+  \code{\link{install_version}}
 }
 
