@@ -22,12 +22,14 @@
   A gist entry can have multiple code blocks (one file for
   one block). Gist is based on git, which means gist has
   commit histories (i.e., revisions). You can specify a
-  commit by ginving SHA.
+  commit by giving SHA.
 }
 \examples{
 \dontrun{
 source_gist(1654919)
 source_gist("1654919")
+source_gist("https://gist.github.com/1654919")
+source_gist("gist.github.com/1654919")
 source_gist("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r")
 }
 }
