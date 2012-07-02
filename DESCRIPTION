@@ -1,10 +1,10 @@
 Package: devtools
 Title: Tools to make developing R code easier
-Version: 0.7
+Version: 0.7.1
 Author: Hadley Wickham <h.wickham@gmail.com>
 Maintainer: Hadley Wickham <h.wickham@gmail.com>
 Description: Collection of package development tools
-Depends: R (>= 2.13)
+Depends: R (>= 2.15)
 Imports: httr, RCurl, utils, tools, memoise
 Suggests: testthat, roxygen2, BiocInstaller
 License: MIT
@@ -18,6 +18,6 @@ Collate: 'bash.r' 'build.r' 'check.r' 'check-cran.r'
         'install-url.r' 'install-version.r' 'install-gitorious.r'
         'missing-s3.r' 'run-source.r' 'dependencies.r' 'with.r'
         'install-bitbucket.r' 'path.r'
-Packaged: 2012-06-19 17:40:30 UTC; hadley
+Packaged: 2012-07-02 15:12:39 UTC; hadley
 Repository: CRAN
-Date/Publication: 2012-06-19 19:40:09
+Date/Publication: 2012-07-02 15:41:13
