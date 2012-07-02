@@ -1,8 +1,8 @@
-4b23bc28af2be3842a23bb18f3d8be79 *DESCRIPTION
+cd0b475a59b6c7b466a4fe1822bbe8ec *DESCRIPTION
 dc746ee628cc1da7ad508b2fd96bc56a *NAMESPACE
-35498fec3ff257c982d0402e44d5539d *NEWS
+9172c39dac191efd34a10226a36b0a94 *NEWS
 e4b4c7eb176210b20e95c0cbdc097d5e *R/bash.r
-e62d78372e34fe56b177dcd2ea1626ff *R/build.r
+b68721914014669f1b99e00f295e224f *R/build.r
 62b11166275fd21df895cf147da2f512 *R/check-cran.r
 f66562f57308f3b0b86b5b16f970a760 *R/check.r
 cf3ab09246791a0501a2e53336c9ee66 *R/common-mistakes.r
@@ -19,7 +19,7 @@ a00494d8ebb5ad040f5b49d4f78053aa *R/install-url.r
 f0ec5574901842a9cb8fb2ca7a4ba522 *R/install-version.r
 912265a5c0c4c552bb6ce92f8c95b958 *R/install.r
 0344b7194dcf3be7507cf2edb811a040 *R/load-c.r
-47123a924e1d97b3e008bb630dd471bc *R/load-code.r
+dda228c1b58b758e01d9bdd7eba60f67 *R/load-code.r
 f9370de035c70c22d378023f5ef3fea2 *R/load-data.r
 e7c6d844273864c219b0b01e1a736d50 *R/load.r
 2d14aca86bfcd7de8d309011aedc3a48 *R/missing-s3.r
@@ -38,7 +38,7 @@ c0a8c446e83fb3f22d6153cc579c6253 *R/system.r
 5f3a17b6e8d333faeddc408163025a02 *R/vignettes.r
 fe0aa568f2818432b89eccb84bf997c2 *R/wd.r
 0bd086271100f9e5af27ca487824c0cd *R/with.r
-d06eaa7f86f26b21449bf7238b197f4f *R/zzz.r
+b518c45bf76896c705a037efe56c1f23 *R/zzz.r
 d76694d200e044b97d256cadbcdfb185 *README.md
 d911c5496eec3fcdab3e574092884c94 *inst/tests/collate-absent/DESCRIPTION
 870a24794b577e7883169d2d0fa5cbc8 *inst/tests/collate-absent/R/a.r
