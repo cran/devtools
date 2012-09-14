@@ -2,7 +2,7 @@
 \alias{check}
 \title{Build and check a package, cleaning up automatically on success.}
 \usage{
-  check(pkg = NULL, document = TRUE, cleanup = TRUE,
+  check(pkg = ".", document = TRUE, cleanup = TRUE,
     cran = TRUE, args = NULL)
 }
 \arguments{
@@ -30,5 +30,9 @@
   check packages.  Note that this process runs in an
   independent realisation of R, so nothing in your current
   workspace will affect the process.
+}
+\details{
+  After the \code{R CMD check}, this will run checks that
+  are specific to devtools.
 }
 

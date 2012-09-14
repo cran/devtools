@@ -21,11 +21,22 @@
 #'   redownload the packages every time you run the package.
 #' @param bioconductor include bioconductor packages in checking?
 #' @param type binary package type of test
+#' @param threads number of concurrent threads to use for checking.
 #' @return invisible \code{TRUE} if successful and no ERRORs or WARNINGS,
 #' @param ... other parameters passed onto \code{\link{download.packages}}
 #' @importFrom tools package_dependencies
+#' @importFrom parallel mclapply
 #' @export
-check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = libpath, bioconductor  = FALSE, type = getOption("pkgType"), ...) {
+#' @examples
+#' \dontrun{
+#' dep <- revdep("ggplot2")
+#' check_cran(dep, "~/documents/ggplot/ggplot-check")
+#' # Or, equivalently:
+#' revdep_check("ggplot2")
+#' }
+check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
+  srcpath = libpath, bioconductor = FALSE, type = getOption("pkgType"),
+  threads = 1, ...) {
   stopifnot(is.character(pkgs))
   if (length(pkgs) == 0) return()
 
@@ -56,7 +67,8 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = 
     available = available_bin)
   if (!is.null(old)) {
     message("Updating ", nrow(old), " existing dependencies")
-    install.packages(old[, "Package"], libpath, repos = repos, type = type)
+    install.packages(old[, "Package"], libpath, repos = repos, type = type,
+      Ncpus = threads)
   }
   
   # Install missing dependencies
@@ -68,7 +80,8 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = 
 
   if (length(known) > 0) {
     message("Installing ", length(known), " missing binary dependencies")
-    install.packages(known, lib = libpath, quiet = TRUE, repos = repos)    
+    install.packages(known, lib = libpath, quiet = FALSE, repos = repos,
+      Ncpus = threads)
   }
   if (length(unknown) > 0) {
     message("No binary packages available for dependenices: ", 
@@ -91,7 +104,7 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = 
       download.file(url$url, local, quiet = TRUE)
     }
     
-    message("Checking ", pkgs[i])
+    message("Checking ", i , ": ", pkgs[i])
     cmd <- paste("CMD check --as-cran --no-multiarch --no-manual --no-codoc ",
       local, sep = "")
     try(R(cmd, tmp, stdout = NULL), silent = TRUE)
@@ -101,13 +114,18 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = 
     if (length(results) > 0) cat(results, "\n")
     results
   }
-  results <- lapply(seq_along(pkgs), check)
+  results <- mclapply(seq_along(pkgs), check, mc.preschedule = FALSE,
+    mc.cores = threads)
+
   names(results) <- pkgs
   
   n_problems <- sum(vapply(results, length, integer(1)))
   if (n_problems > 0) {
     warning("Found ", n_problems, call. = FALSE)
   }
+
+  # Collect the output
+  collect_check_results(tmp)
   
   invisible(results)
 }
@@ -143,5 +161,61 @@ parse_check_results <- function(path) {
   messages <- pieces[problems & !cran_version]
   if (length(messages)) {
     paste("* ", messages, collapse = "\n")
+  }
+}
+
+# Collects all the results from running check_cran and puts in a
+# directory results/ under the top level tempdir.
+collect_check_results <- function(topdir = tempdir()) {
+  # Directory for storing results
+  rdir <- file.path(topdir, "results")
+  if (!dir.exists(rdir))
+    dir.create(rdir)
+
+  checkdirs <- list.dirs(topdir, recursive=FALSE)
+  checkdirs <- checkdirs[grepl("\\.Rcheck$", checkdirs)]
+  # Make it a named vector so that the output of lapply below contains names
+  names(checkdirs) <- sub("\\.Rcheck$", "", basename(checkdirs))
+
+  # Copy over all the 00check.log and 00install.out files
+  message("Copying check logs to ", rdir)
+  checklogs <- file.path(checkdirs, "00check.log")
+  checklogs_dest <- file.path(rdir, paste(names(checkdirs), "-check", sep=""))
+  names(checklogs_dest) <- names(checkdirs)
+  file.copy(checklogs, checklogs_dest, overwrite = TRUE)
+
+
+  message("Copying install logs to ", rdir)
+  installlogs <- file.path(checkdirs, "00install.out")
+  installlogs_dest <- file.path(rdir, paste(names(checkdirs), "-install", sep=""))
+  file.copy(installlogs, installlogs_dest, overwrite = TRUE)
+
+
+  checkresults <- lapply(checkdirs, devtools:::parse_check_results)
+
+  message("Writing warnings and error summary for each package to ", rdir)
+  for (i in seq_along(checkresults)) {
+    pkgname <- names(checkresults[i])
+    result <- checkresults[[i]]
+
+    if (!is.null(result) && nzchar(result)) {
+      err_filename <- file.path(rdir, paste(pkgname, "-error", sep=""))
+      err_out <- file(err_filename, "w")
+      on.exit(close(err_out))
+
+      cat(pkgname, result, file = err_out)
+    }
+  }
+
+
+  summary_filename <- file.path(rdir, "00check-summary.txt")
+  message("Creating summary of check warnings and errors in ", summary_filename)
+  summary_out <- file(summary_filename, "w")
+  on.exit(close(summary_out))
+
+  for (i in seq_along(checkresults)) {
+    pkgname <- names(checkresults[i])
+    linetext <- paste(rep("=", 72 - nchar(pkgname)), collapse = "")
+    cat(pkgname, linetext, "\n", checkresults[[i]], "\n\n\n", file = summary_out)
   }
 }
