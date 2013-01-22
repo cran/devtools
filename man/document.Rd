@@ -13,8 +13,7 @@
   \item{clean}{if \code{TRUE} will automatically clear all
   roxygen caches and delete current \file{man/} contents to
   ensure that you have the freshest version of the
-  documentation.  check documentation after running
-  roxygen.}
+  documentation.}
 
   \item{roclets}{character vector of roclet names to apply
   to package}

@@ -1,12 +1,13 @@
 #' Unload and reload package.
-#' 
+#'
 #' If the package is not loaded already, this does nothing.
-#' 
-#' See the caveats in \code{\link{detach}} for the many reasons why this 
+#'
+#' See the caveats in \code{\link{detach}} for the many reasons why this
 #' might not work. If in doubt, quit R and restart.
 #'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
+#' @param quiet if \code{TRUE} suppresses output from this function.
 #' @examples
 #' \dontrun{
 #' # Reload package that is in current directory
@@ -20,11 +21,11 @@
 #' reload(inst("ggplot2"))
 #' }
 #' @export
-reload <- function(pkg = ".") {
+reload <- function(pkg = ".", quiet = FALSE) {
   pkg <- as.package(pkg)
-  
+
   if (is_attached(pkg)) {
-    message("Reloading installed ", pkg$package)
+    if (!quiet) message("Reloading installed ", pkg$package)
     unload(pkg)
     require(pkg$package, character.only = TRUE, quietly = TRUE)
   }
@@ -59,6 +60,12 @@ unload <- function(pkg = ".") {
   # they will remain available for use later.
   if (pkg$package == "devtools") {
     as.list(ns_env(pkg))
+  }
+
+  # If the package was loaded with devtools, any s4 classes that were created
+  # by the package need to be removed in a special way.
+  if (!is.null(dev_meta(pkg$package))) {
+    remove_s4_classes(pkg)
   }
 
   if (pkg$package %in% loadedNamespaces()) {

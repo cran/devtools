@@ -8,8 +8,9 @@
 #' @importFrom tools dependsOnPkgs
 #' @export
 #' @examples
-#' revdep("ggplot2")
-revdep <- function(pkg = ".", dependencies = c("Depends", "Imports"), recursive = FALSE) {
+#' \dontrun{revdep("ggplot2")}
+revdep <- function(pkg = NULL, dependencies = c("Depends", "Imports", "Suggests"),
+  recursive = FALSE) {
   sort(dependsOnPkgs(pkg, dependencies, recursive, installed = packages()))
 }
 
@@ -22,8 +23,8 @@ revdep_maintainers <- function(pkg = ".") {
 #' @rdname revdep
 #' @param ... Other parameters passed on to \code{\link{check_cran}}
 #' @export
-revdep_check <- function(pkg = ".", ...) {
-  pkgs <- revdep(pkg)
+revdep_check <- function(pkg = NULL, recursive = FALSE, ...) {
+  pkgs <- revdep(pkg, recursive = recursive)
   check_cran(pkgs, ...)
 }
 

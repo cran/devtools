@@ -71,31 +71,8 @@ Calling `dev_mode()` will switch your version of R into "development mode". In t
 
 ## Referring to a package
 
-All `devtools` functions accept either a path, a name, or nothing.
-
-* Specifying a path is easiest if you're only developing a small number of
-  packages. Just ensuring your working directory is the directory in which
-  your packages live then use (e.g.) `install("mypkg")`
-
-* If you don't specify anything, all `devtools` commands automatically use the
-  last package you referred to.
-
-* Specifying package names is useful if you are developing many packages. In
-  this case, `devtools` will look in `~/.Rpackages`, and try the path given by
-  the default function, if it's not there, it will look up the package name in
-  the list and use that path. 
-
-  For example, a small section of my `~/.Rpackages` looks like this:
-
-        list(
-            default = function(x) {
-              file.path("~/documents/", x, x)
-            }, 
-
-          "describedisplay" = "~/ggobi/describedisplay",
-          "tourr" =    "~/documents/tour/tourr", 
-          "mutatr" = "~/documents/oo/mutatr"
-        )
+All `devtools` functions accept a path as an argument, e.g. `install("mypkg")`.
+If you don't specify a path, the default is `"."`.
 
 ## Other tips
 
@@ -103,7 +80,7 @@ I recommend adding the following code to your `.Rprofile`:
 
     .First <- function() {
       options(
-        repos = c(CRAN = "http://cran.r-project.org/"),
+        repos = c(CRAN = "http://cran.rstudio.com/"),
         browserNLdisabled = TRUE,
         deparse.max.lines = 2)
     }
@@ -114,7 +91,7 @@ I recommend adding the following code to your `.Rprofile`:
 
 This will set up R to:
 
-* always install packages from the main CRAN mirror
+* always install packages from the RStudio CRAN mirror
 * ignore newlines when  `browse()`ing
-* give minimal output from `traceback`
+* give minimal output from `traceback()`
 * automatically load `devtools` in interactive sessions

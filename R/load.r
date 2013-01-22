@@ -17,6 +17,8 @@
 #' the imports environment, which has the name attribute
 #' \code{imports:pkgname}. It is in turn is a child of
 #' \code{<namespace:base>}, which is a child of the global environment.
+#' (There is also a copy of the base namespace that is a child of the empty
+#' environment.)
 #'
 #' The package environment \code{<package:pkgname>} is an ancestor of the
 #' global environment. Normally when loading a package, the objects
@@ -31,6 +33,14 @@
 #' loading an installed package with \code{\link{library}}, and can be
 #' useful for checking for missing exports.
 #'
+#' \code{load_all} also inserts shim functions into the imports environment
+#' of the laded package. It presently adds a replacement version of
+#' \code{system.file} which returns different paths from
+#' \code{base::system.file}. This is needed because installed and uninstalled
+#' package sources have different directory structures. Note that this is not
+#' a perfect replacement for \code{base::system.file}.
+#'
+#'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
 #' @param reset clear package environment and reset file cache before loading
@@ -39,6 +49,7 @@
 #' @param export_all If \code{TRUE} (the default), export all objects.
 #'   If \code{FALSE}, export only the objects that are listed as exports
 #'   in the NAMESPACE file.
+#' @param quiet if \code{TRUE} suppresses output from this function.
 #'
 #' @seealso \code{\link{unload}}
 #' @seealso \code{\link{compile_dll}}
@@ -61,11 +72,11 @@
 #' }
 #' @export
 load_all <- function(pkg = ".", reset = FALSE, recompile = FALSE,
-  export_all = TRUE) {
+  export_all = TRUE, quiet = FALSE) {
 
   pkg <- as.package(pkg)
 
-  message("Loading ", pkg$package)
+  if (!quiet) message("Loading ", pkg$package)
 
   # Reloading devtools is a special case. Normally, objects in the
   # namespace become inaccessible if the namespace is unloaded before the
@@ -83,7 +94,7 @@ load_all <- function(pkg = ".", reset = FALSE, recompile = FALSE,
     msg <- capture.output(tools:::print.check_package_description(check))
     message("Invalid DESCRIPTION:\n", paste(msg, collapse = "\n"))
   }
-  
+
   # If installed version of package loaded, unload it
   if (is_loaded(pkg) && is.null(dev_meta(pkg$package))) {
     unload(pkg)
@@ -91,7 +102,7 @@ load_all <- function(pkg = ".", reset = FALSE, recompile = FALSE,
 
   # Unload dlls
   unload_dll(pkg)
-  
+
   if (reset) {
     clear_cache()
     if (is_loaded(pkg)) unload(pkg)
@@ -100,7 +111,7 @@ load_all <- function(pkg = ".", reset = FALSE, recompile = FALSE,
   if (recompile) clean_dll(pkg)
 
   # Compile dll if it exists
-  compile_dll(pkg)
+  compile_dll(pkg, quiet = quiet)
 
 
   # Set up the namespace environment ----------------------------------
@@ -110,28 +121,34 @@ load_all <- function(pkg = ".", reset = FALSE, recompile = FALSE,
 
   out <- list(env = ns_env(pkg))
 
-  # Load dependencies into the imports environment
+  # Load dependencies
+  load_depends(pkg)
   load_imports(pkg)
+  # Add shim objects
+  insert_shims(pkg)
 
   out$data <- load_data(pkg)
   out$code <- load_code(pkg)
   register_s3(pkg)
   out$dll <- load_dll(pkg)
 
+  run_onload(pkg)
+
+  # Invoke namespace load actions
+  run_ns_load_actions(pkg)
+
   # Set up the exports in the namespace metadata (this must happen after
   # the objects are loaded)
   setup_ns_exports(pkg, export_all)
 
-  run_onload(pkg)
-
   # Set up the package environment ------------------------------------
   # Create the package environment if needed
   if (!is_attached(pkg)) attach_ns(pkg)
-  
+
   # Copy over objects from the namespace environment
   export_ns(pkg)
 
   run_onattach(pkg)
 
-  invisible(out)  
+  invisible(out)
 }
