@@ -2,11 +2,14 @@
 \alias{reload}
 \title{Unload and reload package.}
 \usage{
-  reload(pkg = ".")
+  reload(pkg = ".", quiet = FALSE)
 }
 \arguments{
   \item{pkg}{package description, can be path or package
   name.  See \code{\link{as.package}} for more information}
+
+  \item{quiet}{if \code{TRUE} suppresses output from this
+  function.}
 }
 \description{
   If the package is not loaded already, this does nothing.

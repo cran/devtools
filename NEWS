@@ -1,3 +1,105 @@
+devtools 1.0
+-----------------
+
+IMPROVEMENTS TO PACKAGE LOADING
+
+* Rcpp attributes are now automatically compiled during build.
+
+* Packages listed in depends are `require()`d (Fixes #161, #178, #192)
+
+* `load_all` inserts a special version of `system.file` into the package's
+  imports environment. This tries to simulate the behavior of
+  `base::system.file` but gives modified results because the directory structure
+  of installed packages and uninstalled source packages is different. (Fixes
+  #179). In other words, `system.file` should now just work even if the package
+  is loaded with devtools.
+
+* Source files are only recompiled if they've changed since the last run, and 
+  the recompile will be clean (`--preclean`) if any exported header files have
+  changed. (Closes #224)
+
+* The compilation process now performs a mock install instead of using 
+  `R CMD SHLIB`. This means that `Makevars` and makefiles will now be respected
+  and generally there should be fewer mismatches between `load_all` and 
+  the regular install and reload process.
+
+* S4 classes are correctly loaded and unloaded.
+
+WINDOWS
+
+* Rtools detection on windows has been substantially overhauled and should both
+  be more reliable, and when it fails give more information about what is wrong
+  with your install.
+
+* If you don't have rtools installed, devtools now automatically sets the TAR
+  environment variable to internal so you can still build packages.
+
+MINOR FEATURES
+
+* `check_cran` now downloads packages from cran.rstudio.com.
+
+* `check()` now makes the CRAN version check optional, and off by default. The
+  `release()` function still checks the version number against CRAN.
+
+* In `check()`, it is optional to require suggested packages, using the
+  `force_suggests` option.
+
+* When `check()` is called, the new default behavior is to not delete existing
+  .Rd files from man/. This behavior can be set with the "devtools.cleandoc"
+  option.
+
+* `install_bitbucket()` now always uses lowercase repo names. (Thanks to mnel)
+
+* New function `with_lib()`, which runs an expression code with a library path
+  prepended to the existing libpaths. It differs slightly from
+  `with_libpaths()`, which replaces the existing libpaths.
+
+* New function `install_git()` installs a package directly from a git
+  repository. (Thanks to David Coallier)
+
+* If `pdflatex` isn't available, don't try to build vignettes with `install()`
+  or `check()`. (Fixes #173)
+
+* `install_github()` now downloads from a new URL, to reflect changes on how
+  files are hosted on GitHub.
+
+* `build()` now has a `vignettes` option to turn off rebuilding vignettes.
+
+* `install(quick=TRUE)` now builds the package without rebuilding vignettes.
+  (Fixes #167)
+
+* All R commands called from `devtools` now have the environment variable 
+  `NOT_CRAN` set, so that you can perform tasks when you know your code
+  is definitely not running on CRAN. (Closes #227)
+
+* Most devtools functions can a quiet argument that suppresses output. This is
+  particularly useful for testing.
+
+BUG FIXES
+
+* Fixed path issue when looking for Rtools on windows when registry entry is not present. (Fixes #201)
+
+* Reloading a package that requires a forced-unload of the namespace now works.
+
+* When reloading a package that another loaded package depends on, if there
+  was an error loading the code, devtools would print out something about an
+  error in `unloadNamespace`, which was confusing. It now gives more useful
+  errors.
+
+* An intermittent error in `clear_topic_index` related to using `rm()` has
+  been fixed. (Thanks to Gregory Jefferis)
+
+* `revdep()` now lists "Suggests" packages, in addition to "Depends" and
+  "Imports".
+
+* `revdep_check()` now correctly passes the `recursive` argument to `revdep()`.
+
+* The collection of check results at the end of `check_cran()` previously did
+  not remove existing results, but now it does.
+
+* When a package is loaded with `load_all()`, it now passes the name of the
+  package to the `.onLoad()` function. (Thanks to Andrew Redd)
+
 devtools 0.8.0
 --------------
 

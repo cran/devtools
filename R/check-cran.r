@@ -1,6 +1,6 @@
 #' Check a package from CRAN.
 #'
-#' This is useful for automatically checking that dependencies of your 
+#' This is useful for automatically checking that dependencies of your
 #' packages work.
 #'
 #' The downloaded package and check directory are only removed if the check is
@@ -42,11 +42,11 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
 
   message("Checking ", length(pkgs), " CRAN packages")
   old <- options(warn = 1)
-  on.exit(options(old))
+  on.exit(options(old), add = TRUE)
 
   message("Determining available packages") # --------------------------------
   repos <- c(
-    CRAN = "http://cran.r-project.org/", 
+    CRAN = "http://cran.rstudio.com/",
     omegahat = "http://www.omegahat.org/R"
   )
   if (bioconductor) {
@@ -59,100 +59,96 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
   # Create and use temporary library
   if (!file.exists(libpath)) dir.create(libpath)
   libpath <- normalizePath(libpath)
-  .libPaths(c(libpath, .libPaths()))
-  on.exit(.libPaths(setdiff(.libPaths(), libpath)))
+
+  # Add the temoporary library and remove on exit
+  libpaths_orig <- set_libpaths(c(libpath, .libPaths()))
+  on.exit(.libPaths(libpaths_orig), add = TRUE)
 
   # Make sure existing dependencies are up to date ---------------------------
-  old <- old.packages(libpath, repos = repos, type = type, 
+  old <- old.packages(libpath, repos = repos, type = type,
     available = available_bin)
   if (!is.null(old)) {
-    message("Updating ", nrow(old), " existing dependencies")
+    message("Updating ", nrow(old), " existing dependencies: ",
+      paste(old[, "Package"], collapse = ", "))
     install.packages(old[, "Package"], libpath, repos = repos, type = type,
       Ncpus = threads)
   }
-  
+
   # Install missing dependencies
-  deps <- unique(unlist(package_dependencies(pkgs, packages(), 
+  deps <- unique(unlist(package_dependencies(pkgs, packages(),
     which = "all")))
   to_install <- setdiff(deps, installed.packages()[, 1])
   known <- intersect(to_install, rownames(available_bin))
   unknown <- setdiff(to_install, rownames(available_bin))
 
   if (length(known) > 0) {
-    message("Installing ", length(known), " missing binary dependencies")
+    message("Installing ", length(known), " missing dependencies: ",
+      paste(known, collapse = ", "))
     install.packages(known, lib = libpath, quiet = FALSE, repos = repos,
       Ncpus = threads)
   }
   if (length(unknown) > 0) {
-    message("No binary packages available for dependenices: ", 
+    message("No binary packages available for dependenices: ",
       paste(unknown, collapse = ", "))
   }
-    
+
+  # Create directory for storing results.
+  check_dir <- tempfile("check_cran")
+  dir.create(check_dir)
+
   # Download and check each package, parsing output as we go.
-  tmp <- tempdir()
-  check <- function(i) {
+  check_pkg <- function(i) {
     url <- package_url(pkgs[i], repos, available = available_src)
-    
+
     if (length(url$url) == 0) {
       message("Can't find package source. Skipping...")
       return(NULL)
     }
     local <- file.path(srcpath, url$name)
-    
+
     if (!file.exists(local)) {
       message("Downloading ", pkgs[i])
       download.file(url$url, local, quiet = TRUE)
     }
-    
+
     message("Checking ", i , ": ", pkgs[i])
-    cmd <- paste("CMD check --as-cran --no-multiarch --no-manual --no-codoc ",
-      local, sep = "")
-    try(R(cmd, tmp, stdout = NULL), silent = TRUE)
-    
-    check_path <- file.path(tmp, gsub("_.*?$", ".Rcheck", url$name))
+    check_args <- "--no-multiarch --no-manual --no-codoc"
+    try(check_r_cmd(local, cran = TRUE, check_version = FALSE,
+      force_suggests = FALSE, args = check_args, check_dir = check_dir,
+      quiet = TRUE), silent = TRUE)
+
+    check_path <- file.path(check_dir, gsub("_.*?$", ".Rcheck", url$name))
     results <- parse_check_results(check_path)
     if (length(results) > 0) cat(results, "\n")
     results
   }
-  results <- mclapply(seq_along(pkgs), check, mc.preschedule = FALSE,
+
+  if (getRversion() <= '2.15.2' && threads >= length(pkgs)) {
+    threads <- length(pkgs) - 1
+    message("Reducing number of threads to ", threads,
+      " (number of packages to check minus one) due to a bug in mclapply in",
+      " R <= 2.15.2")
+  }
+
+  results <- mclapply(seq_along(pkgs), check_pkg, mc.preschedule = FALSE,
     mc.cores = threads)
 
   names(results) <- pkgs
-  
+
   n_problems <- sum(vapply(results, length, integer(1)))
   if (n_problems > 0) {
     warning("Found ", n_problems, call. = FALSE)
   }
 
   # Collect the output
-  collect_check_results(tmp)
-  
+  collect_check_results(check_dir)
+
   invisible(results)
-}
-
-available_packages <- memoise(function(repos, type) {
-  suppressWarnings(available.packages(contrib.url(repos, type)))
-})
-
-package_url <- function(package, repos, available = available.packages(contrib.url(repos, "source"))) {
-  
-  ok <- (available[, "Package"] == package)
-  ok <- ok & !is.na(ok)
-  
-  vers <- package_version(available[ok, "Version"])
-  keep <- vers == max(vers)
-  keep[duplicated(keep)] <- FALSE
-  ok[ok][!keep] <- FALSE
-  
-  name <- paste(package, "_", available[ok, "Version"], ".tar.gz", sep = "")
-  url <- file.path(available[ok, "Repository"], name)
-  
-  list(name = name, url = url)
 }
 
 parse_check_results <- function(path) {
   check_path <- file.path(path, "00check.log")
-  
+
   check_log <- paste(readLines(check_path), collapse = "\n")
   pieces <- strsplit(check_log, "\n\\* ")[[1]]
   problems <- grepl("... (WARN|ERROR)", pieces)
@@ -166,11 +162,15 @@ parse_check_results <- function(path) {
 
 # Collects all the results from running check_cran and puts in a
 # directory results/ under the top level tempdir.
-collect_check_results <- function(topdir = tempdir()) {
+collect_check_results <- function(topdir) {
   # Directory for storing results
   rdir <- file.path(topdir, "results")
-  if (!dir.exists(rdir))
+  if (dir.exists(rdir)) {
+    # Remove existing results
+    unlink(dir(normalizePath(rdir), include.dirs = TRUE), recursive = TRUE)
+  } else {
     dir.create(rdir)
+  }
 
   checkdirs <- list.dirs(topdir, recursive=FALSE)
   checkdirs <- checkdirs[grepl("\\.Rcheck$", checkdirs)]
@@ -191,7 +191,7 @@ collect_check_results <- function(topdir = tempdir()) {
   file.copy(installlogs, installlogs_dest, overwrite = TRUE)
 
 
-  checkresults <- lapply(checkdirs, devtools:::parse_check_results)
+  checkresults <- lapply(checkdirs, parse_check_results)
 
   message("Writing warnings and error summary for each package to ", rdir)
   for (i in seq_along(checkresults)) {
@@ -201,9 +201,9 @@ collect_check_results <- function(topdir = tempdir()) {
     if (!is.null(result) && nzchar(result)) {
       err_filename <- file.path(rdir, paste(pkgname, "-error", sep=""))
       err_out <- file(err_filename, "w")
-      on.exit(close(err_out))
 
       cat(pkgname, result, file = err_out)
+      close(err_out)
     }
   }
 

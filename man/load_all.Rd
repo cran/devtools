@@ -3,7 +3,7 @@
 \title{Load complete package.}
 \usage{
   load_all(pkg = ".", reset = FALSE, recompile = FALSE,
-    export_all = TRUE)
+    export_all = TRUE, quiet = FALSE)
 }
 \arguments{
   \item{pkg}{package description, can be path or package
@@ -18,6 +18,9 @@
   \item{export_all}{If \code{TRUE} (the default), export
   all objects.  If \code{FALSE}, export only the objects
   that are listed as exports in the NAMESPACE file.}
+
+  \item{quiet}{if \code{TRUE} suppresses output from this
+  function.}
 }
 \description{
   \code{load_all} loads a package. It roughly simulates
@@ -41,7 +44,8 @@
   a child of the imports environment, which has the name
   attribute \code{imports:pkgname}. It is in turn is a
   child of \code{<namespace:base>}, which is a child of the
-  global environment.
+  global environment. (There is also a copy of the base
+  namespace that is a child of the empty environment.)
 
   The package environment \code{<package:pkgname>} is an
   ancestor of the global environment. Normally when loading
@@ -57,6 +61,15 @@
   behavior when loading an installed package with
   \code{\link{library}}, and can be useful for checking for
   missing exports.
+
+  \code{load_all} also inserts shim functions into the
+  imports environment of the laded package. It presently
+  adds a replacement version of \code{system.file} which
+  returns different paths from \code{base::system.file}.
+  This is needed because installed and uninstalled package
+  sources have different directory structures. Note that
+  this is not a perfect replacement for
+  \code{base::system.file}.
 }
 \examples{
 \dontrun{

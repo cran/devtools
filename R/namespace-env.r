@@ -1,7 +1,7 @@
 #' Return the namespace environment for a package.
 #'
 #' Contains all (exported and non-exported) objects, and is a descendent of
-#' \code{R_GlobalEnv}. The hieararchy is \code{<namespace:pkg>}, 
+#' \code{R_GlobalEnv}. The hieararchy is \code{<namespace:pkg>},
 #' \code{<imports:pkg>}, \code{<namespace:base>}, and then
 #' \code{R_GlobalEnv}.
 #'
@@ -72,6 +72,7 @@ makeNamespace <- function(name, version = NULL, lib = NULL) {
 # Read the NAMESPACE file and set up the imports metdata.
 # (which is stored in .__NAMESPACE__.)
 setup_ns_imports <- function(pkg = ".") {
+  pkg <- as.package(pkg)
   nsInfo <- parse_ns_file(pkg)
   setNamespaceInfo(pkg$package, "imports", nsInfo$imports)
 }
@@ -81,6 +82,7 @@ setup_ns_imports <- function(pkg = ".") {
 # run after all the objects are loaded into the namespace because
 # namespaceExport throw errors if the objects are not present.
 setup_ns_exports <- function(pkg = ".", export_all = FALSE) {
+  pkg <- as.package(pkg)
   nsInfo <- parse_ns_file(pkg)
   nsenv <- ns_env(pkg)
 
@@ -181,7 +183,7 @@ unregister_namespace <- function(name = NULL) {
     stop(name, " is not a registered namespace.")
 
   # Remove the item from the registry
-  rm(name, ns_registry())
+  do.call(rm, args = list(name, envir = ns_registry()))
   invisible()
 }
 

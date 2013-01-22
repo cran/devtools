@@ -2,11 +2,14 @@
 \alias{compile_dll}
 \title{Compile a .dll/.so from source}
 \usage{
-  compile_dll(pkg = ".")
+  compile_dll(pkg = ".", quiet = FALSE)
 }
 \arguments{
   \item{pkg}{package description, can be path or package
   name.  See \code{\link{as.package}} for more information}
+
+  \item{quiet}{if \code{TRUE} suppresses output from this
+  function.}
 }
 \description{
   Support for compiling C, C++, and Fotran code is
@@ -24,7 +27,7 @@
   Invisibly returns the names of the DLL.
 }
 \note{
-  If this is used to compile code that uses Rcpp, you may
+  If this is used to compile code that uses Rcpp, you will
   need to add the following line to your \code{Makevars}
   file so that it knows where to find the Rcpp headers:
   \code{PKG_CPPFLAGS=`$(R_HOME)/bin/Rscript -e
