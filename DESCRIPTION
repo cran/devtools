@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to make developing R code easier
-Version: 1.0
+Version: 1.1
 Authors@R: c( person("Hadley", "Wickham", email =
         "h.wickham@gmail.com", role = c("aut", "cre")),
         person("Winston", "Chang", role = "aut"), person("R Core team",
@@ -26,9 +26,9 @@ Collate: 'bash.r' 'build.r' 'check.r' 'check-cran.r'
         'topic-index.r' 'dev-example.r' 'run-example.r' 'dev-help.r'
         'check_devtools.r' 'rcpp-attributes.r' 'cran.r'
         'load-depends.r' 'shims.r' 'remove-s4-class.r' 'rtools.r'
-Packaged: 2013-01-22 16:23:57 UTC; hadley
+Packaged: 2013-02-08 21:08:43 UTC; hadley
 Author: Hadley Wickham [aut, cre], Winston Chang [aut], R Core team
         [ctb] (Namespace related code extracted out of base R)
 Maintainer: Hadley Wickham <h.wickham@gmail.com>
 Repository: CRAN
-Date/Publication: 2013-01-22 18:42:24
+Date/Publication: 2013-02-09 08:02:07
