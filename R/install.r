@@ -12,24 +12,33 @@
 #'   package after installing.
 #' @param quick if \code{TRUE} skips docs, multiple-architectures,
 #'   demos, and vignettes, to make installation as fast as possible.
+#' @param local if \code{TRUE} does not build the package first, instead
+#'   installing from the local package directory. This may result in build
+#'   artefacts in your package directory, but is considerably faster, and does
+#'   not require a recompile every time you run it.
 #' @param args An optional character vector of additional command line
-#'   arguments to be passed to \code{R CMD install}.
+#'   arguments to bew passed to \code{R CMD install}. This defaults to the
+#'   value of the option \code{"devtools.install.args"}.
 #' @param quiet if \code{TRUE} suppresses output from this function.
 #' @export
 #' @family package installation
 #' @seealso \code{\link{with_debug}} to install packages with debugging flags
 #'   set.
 #' @importFrom utils install.packages
-install <- function(pkg = ".", reload = TRUE, quick = FALSE, args = NULL,
-                    quiet = FALSE) {
+install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
+                    args = getOption("devtools.install.args"), quiet = FALSE) {
   pkg <- as.package(pkg)
 
   if (!quiet) message("Installing ", pkg$package)
   install_deps(pkg)
 
   # Build the package. If quick==TRUE, don't build vignettes
-  built_path <- build(pkg, tempdir(), vignettes = !quick, quiet = quiet)
-  on.exit(unlink(built_path))
+  if (local) {
+    built_path <- pkg$path
+  } else {
+    built_path <- build(pkg, tempdir(), vignettes = !quick, quiet = quiet)
+    on.exit(unlink(built_path))
+  }
 
   opts <- c(
     paste("--library=", shQuote(.libPaths()[1]), sep = ""),
@@ -61,30 +70,5 @@ install_deps <- function(pkg = ".") {
     paste(deps, collapse = ", "))
   install.packages(deps)
   invisible(deps)
-}
-
-#' Temporarily set debugging compilation flags.
-#'
-#' @param code to execute.
-#' @param PKG_CFLAGS flags for compiling C code
-#' @param PKG_CXXFLAGS flags for compiling C++ code
-#' @param PKG_FFLAGS flags for compiling Fortran code.
-#' @param PKG_FCFLAGS flags for Fortran 9x code.
-#' @export
-#' @examples
-#' \dontrun{
-#' install("mypkg")
-#' with_debug(install("mypkg"))
-#' }
-with_debug <- function(code,
-                       PKG_CFLAGS   = "-UNDEBUG -Wall -pedantic -g -O0",
-                       PKG_CXXFLAGS = "-UNDEBUG -Wall -pedantic -g -O0",
-                       PKG_FFLAGS   = "-g -O0",
-                       PKG_FCFLAGS  = "-g -O0") {
-  flags <- c(
-    PKG_CFLAGS = PKG_CFLAGS, PKG_CXXFLAGS = PKG_CXXFLAGS,
-    PKG_FFLAGS = PKG_FFLAGS, PKG_FCFLAGS = PKG_FCFLAGS)
-
-  with_envvar(flags, code)
 }
 

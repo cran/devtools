@@ -9,6 +9,8 @@
   name.  See \code{\link{as.package}} for more information}
 }
 \description{
-  Clean built vignettes.
+  This uses a fairly rudimentary algorithm where any files
+  in \file{inst/doc} with a name that exists in
+  \file{vignettes} are removed.
 }
 

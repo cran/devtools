@@ -18,7 +18,7 @@
   \item{...}{Other arguments passed on to
   \code{\link{install}}.}
 
-  \item{repos}{ character vector, the base URLs of the
+  \item{repos}{ character vector, the base URL(s) of the
   repositories to use, e.g., the URL of a CRAN mirror such
   as \code{"http://cran.us.r-project.org"}.
 
@@ -39,8 +39,9 @@
   are the default, an alternative is \code{"both"} which
   means \sQuote{try binary if available, otherwise try
   source}.  (This will only choose the binary package if
-  its version number is no older than the source version.)
-  }
+  its version number is no older than the source version.
+  In interactive use it will ask before attempting to
+  install source packages.)  }
 }
 \description{
   If you are installing an package that contains compiled

@@ -3,7 +3,9 @@
 \title{Install a local development package.}
 \usage{
   install(pkg = ".", reload = TRUE, quick = FALSE,
-    args = NULL, quiet = FALSE)
+    local = TRUE,
+    args = getOption("devtools.install.args"),
+    quiet = FALSE)
 }
 \arguments{
   \item{pkg}{package description, can be path or package
@@ -16,9 +18,16 @@
   multiple-architectures, demos, and vignettes, to make
   installation as fast as possible.}
 
+  \item{local}{if \code{TRUE} does not build the package
+  first, instead installing from the local package
+  directory. This may result in build artefacts in your
+  package directory, but is considerably faster, and does
+  not require a recompile every time you run it.}
+
   \item{args}{An optional character vector of additional
-  command line arguments to be passed to \code{R CMD
-  install}.}
+  command line arguments to bew passed to \code{R CMD
+  install}. This defaults to the value of the option
+  \code{"devtools.install.args"}.}
 
   \item{quiet}{if \code{TRUE} suppresses output from this
   function.}

@@ -13,16 +13,18 @@ load_code <- function(pkg = ".") {
 
   r_files <- find_code(pkg)
   paths <- changed_files(r_files)
+  if (length(paths) == 0L) return()
 
-  tryCatch(
-    lapply(paths, sys.source, envir = env, chdir = TRUE,
-      keep.source = TRUE),
-    error = function(e) {
-      clear_cache()
-      unload(pkg)
-      stop(e)
-    }
-  )
+  success <- FALSE
+  cleanup <- function() {
+    if (success) return()
+    clear_cache()
+    unload(pkg)
+  }
+  on.exit(cleanup())
+
+  in_dir(file.path(pkg$path, "R"), source_many(paths, env))
+  success <- TRUE
 
   invisible(r_files)
 }
@@ -62,3 +64,5 @@ find_code <- function(pkg = ".") {
   }
   r_files
 }
+
+

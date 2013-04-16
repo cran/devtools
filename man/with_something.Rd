@@ -12,7 +12,7 @@
 \alias{with_something}
 \title{Execute code in temporarily altered environment.}
 \usage{
-  with_envvar(new, code)
+  with_envvar(new, code, action = "replace")
 
   with_env(new, code)
 
@@ -37,6 +37,10 @@
 
   \item{code}{code to execute in that environment}
 
+  \item{action}{(for \code{with_envvar} only): should new
+  values \code{"replace"}, \code{"suffix"}, \code{"prefix"}
+  existing environmental variables with the same name.}
+
   \item{add}{Combine with existing values? Currently for
   \code{\link{with_path}} only. If \code{FALSE} all
   existing paths are ovewritten, which don't you usually
@@ -53,6 +57,10 @@
   \code{with_path}: PATH environment variable \item
   \code{with_par}: graphics parameters }
 }
+\section{Deprecation}{
+  \code{with_env} will be deprecated in devtools 1.2 and
+  removed in devtools 1.3
+}
 \examples{
 getwd()
 in_dir(tempdir(), getwd())
@@ -61,5 +69,9 @@ getwd()
 Sys.getenv("HADLEY")
 with_envvar(c("HADLEY" = 2), Sys.getenv("HADLEY"))
 Sys.getenv("HADLEY")
+
+with_envvar(c("A" = 1),
+  with_envvar(c("A" = 2), action = "suffix", Sys.getenv("A"))
+)
 }
 
