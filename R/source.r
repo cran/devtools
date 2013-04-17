@@ -1,21 +1,33 @@
-#' Sources an R file in a clean environment.
-#'
-#' Opens up a fresh R environment and sources file, ensuring that it works
-#' independently of the current working environment.
-#'
-#' @param path path to R script
-#' @param vanilla if \code{TRUE} tells R not to use any system specific
-#'   settings.
-#' @export
-clean_source <- function(path, vanilla = FALSE) {
-  stopifnot(file.exists(path))
+source_many <- function(files, envir = parent.frame()) {
+  stopifnot(is.character(files))
+  stopifnot(is.environment(envir))
 
-  if (vanilla) {
-    opts <- c("--no-restore", "--no-save")
-  } else {
-    opts <- c("--vanilla")
+  oop <- options(
+    keep.source = TRUE,
+    show.error.locations = TRUE,
+    topLevelEnvironment = as.environment(envir))
+  on.exit(options(oop))
+
+  for (file in files) {
+    source_one(file, envir = envir)
   }
+  invisible()
+}
 
-  opts <- c("--quiet", paste("--file=", shQuote(path), sep = ""))
-  R(opts, dirname(path))
+source_one <- function(file, envir = parent.frame()) {
+  stopifnot(file.exists(file))
+  stopifnot(is.environment(envir))
+
+  lines <- readLines(file, warn = FALSE)
+  srcfile <- srcfilecopy(file, lines, file.info(file)[1, "mtime"],
+    isFile = TRUE)
+  exprs <- parse(text = lines, n = -1)
+
+  n <- length(exprs)
+  if (n == 0L) return(invisible())
+
+  for (i in seq_len(n)) {
+    eval(exprs[i], envir)
+  }
+  invisible()
 }

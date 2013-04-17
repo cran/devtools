@@ -9,14 +9,17 @@
   name.  See \code{\link{as.package}} for more information}
 }
 \description{
-  Sweave and latex package vignettes.  Sweaving and
-  latexing is carried out in a temporary directory so that
-  compilation artefacts don't pollute the source package -
-  only the final pdf is copied to \file{inst/doc}.
+  Builds package vignettes using the same algorithm that
+  \code{R CMD build} does. This means includes non-Sweave
+  vignettes, using make files (if present), and copying
+  over extra files.
 }
 \seealso{
   \code{\link{clean_vignettes}} to remove the pdfs in
   \file{inst/doc} created from vignettes
+
+  \code{\link{clean_vignettes}} to remove build tex/pdf
+  files.
 }
 \keyword{programming}
 
