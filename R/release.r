@@ -16,11 +16,18 @@
 #'   \item Draft an email to the CRAN maintainer.
 #' }
 #'
-#' You should also read the CRAN repository policy at
+#' You also need to read the CRAN repository policy at
 #' \url{http://cran.r-project.org/web/packages/policies.html} and make
-#' sure you're in line with them.  \code{release} tries to automate as much
-#' of them as possible, but they do change and you should be familiar with
-#' them.
+#' sure you're in line with the policies. \code{release} tries to automate as
+#' many of polices as possible, but it's impossible to be completely
+#' comprehensive, and they do change in between releases of devtools.
+#'
+#' @section Guarantee:
+#'
+#' If a devtools bug causes one of the CRAN maintainers to treat you
+#' impolitely, I will personally send you a handwritten apology note.
+#' Please forward me the email and your address, and I'll get a card in
+#' the mail.
 #'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
@@ -87,7 +94,9 @@ release <- function(pkg = ".", check = TRUE) {
     "I have just uploaded a new version of ", pkg$package, " to CRAN.\n",
     "\n",
     "Thanks!\n",
-    "INSERT YOUR NAME", "\n\n\n", sep = "")
+    "\n",
+    getOption("devtools.name"), "\n",
+    sep = "")
   subject <- paste("CRAN submission ", pkg$package, " ", pkg$version, sep = "")
   email("cran@r-project.org", subject, body)
 }

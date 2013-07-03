@@ -11,6 +11,7 @@
 #'   introspection on the code objects to determine how to document them.
 #' @keywords programming
 #' @export
+#' @importFrom digest digest
 document <- function(pkg = ".", clean = FALSE,
   roclets = c("collate", "namespace", "rd"), reload = TRUE) {
 
@@ -19,7 +20,7 @@ document <- function(pkg = ".", clean = FALSE,
   message("Updating ", pkg$package, " documentation")
 
   man_path <- file.path(pkg$path, "man")
-  if (!file.exists(pkg$path)) dir.create(man_path)
+  if (!file.exists(man_path)) dir.create(man_path)
 
   if (clean) {
     roxygen2:::clear_caches()
@@ -52,25 +53,3 @@ document <- function(pkg = ".", clean = FALSE,
   invisible()
 }
 
-#' Check documentation, as \code{R CMD check} does.
-#'
-#' Currently runs these checks: package parseRd, Rd metadata, Rd xrefs, and
-#' Rd contents.
-#'
-#' @param pkg package description, can be path or package name.  See
-#'   \code{\link{as.package}} for more information
-#' @export
-check_doc <- function(pkg = ".") {
-  pkg <- as.package(pkg)
-  old <- options(warn = -1)
-  on.exit(options(old))
-
-  print(tools:::.check_package_parseRd(dir = pkg$path))
-  print(tools:::.check_Rd_metadata(dir = pkg$path))
-  print(tools:::.check_Rd_xrefs(dir = pkg$path))
-  print(tools:::.check_Rd_contents(dir = pkg$path))
-
-  print(tools::checkDocFiles(dir = pkg$path))
-  # print(tools::checkDocStyle(dir = pkg$path))
-  # print(tools::undoc(dir = pkg$path))
-}

@@ -33,6 +33,7 @@ if (!exists("set_rtools_path")) {
 #'   \code{FALSE} with a diagnostic \code{\link{message}}.
 #'   As a side-effect the internal package variable \code{rtools_path} is
 #'   updated to the paths to rtools binaries.
+#' @keywords internal
 #' @export
 find_rtools <- function(debug = FALSE) {
   # Non-windows users don't need rtools
@@ -73,7 +74,7 @@ find_rtools <- function(debug = FALSE) {
     return(invisible(FALSE))
   }
 
-  from_registry <- Find(is_compatible, registry_candidates)
+  from_registry <- Find(is_compatible, registry_candidates, right = TRUE)
   if (is.null(from_registry)) {
     # In registry, but not compatible.
     versions <- vapply(registry_candidates, function(x) x$version, character(1))
@@ -239,7 +240,12 @@ version_info <- list(
   ),
   "3.0" = list(
     version_min = "2.15.2",
-    version_max = "3.0.0",
+    version_max = "3.0.99",
+    path = c("bin", "gcc-4.6.3/bin")
+  ),
+  "3.1" = list(
+    version_min = "3.0.0",
+    version_max = "3.1.99",
     path = c("bin", "gcc-4.6.3/bin")
   )
 )
