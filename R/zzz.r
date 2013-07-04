@@ -12,6 +12,9 @@
 #' \itemize{
 #'   \item \code{devtools.path}: path to use for \code{\link{dev_mode}}
 #'
+#'   \item \code{devtools.name}: your name, used when signing draft
+#'     emails.
+#'
 #'   \item \code{devtools.cleandoc}: a single logical value determining whether
 #'     the contents of the file{man/} directory are deleted by
 #'     \code{\link{check}}
@@ -21,7 +24,7 @@
 #'
 #'   \item \code{devtools.desc.author}: a string providing a default Authors@@R
 #'     string to be used in new \file{DESCRIPTION}s.  Should be a R code, and
-#'     look like \code{"Hadley Wickham <h.wickham@@gmail.com> [aut, ctb]"}. See
+#'     look like \code{"Hadley Wickham <h.wickham@@gmail.com> [aut, cre]"}. See
 #'     \code{\link[utils]{as.person}} for more details.
 #'
 #'   \item \code{devtools.desc.license}: a default license string to use for
@@ -44,8 +47,9 @@ NULL
     devtools.path = "~/R-dev",
     devtools.cleandoc = FALSE,
     devtools.install.args = "",
-    devtools.desc.author = "",
-    devtools.desc.license = "",
+    devtools.name = "getOptions('devtools.name')",
+    devtools.desc.author = "# getOptions('devtools.desc.author')",
+    devtools.desc.license = "# getOptions('devtools.desc.license')",
     devtools.desc.suggests = NULL,
     devtools.desc = NULL,
     github.user = "hadley"

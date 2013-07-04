@@ -13,7 +13,8 @@
 }
 \examples{
 if (has_tests()) {
-devtest("collate-extra")
+devtest("testData")
 }
 }
+\keyword{internal}
 
