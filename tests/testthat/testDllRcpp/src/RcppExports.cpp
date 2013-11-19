@@ -9,8 +9,13 @@ using namespace Rcpp;
 bool rcpp_test_attributes();
 RcppExport SEXP testDllRcpp_rcpp_test_attributes() {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    bool __result = rcpp_test_attributes();
-    return Rcpp::wrap(__result);
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        bool __result = rcpp_test_attributes();
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
 END_RCPP
 }

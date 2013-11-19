@@ -2,14 +2,14 @@
 \alias{install_github}
 \title{Attempts to install a package directly from github.}
 \usage{
-  install_github(repo, username = getOption("github.user"),
-    ref = "master", pull = NULL, subdir = NULL,
-    branch = NULL, auth_user = NULL, password = NULL, ...)
+install_github(repo, username = getOption("github.user"), ref = "master",
+  pull = NULL, subdir = NULL, branch = NULL, auth_user = NULL,
+  password = NULL, ...)
 }
 \arguments{
-  \item{username}{Github username}
-
-  \item{repo}{Repo name}
+  \item{repo,username}{Repo and user name. Alternatively,
+  you can specify repos using the full "username/repo"
+  syntax.}
 
   \item{ref}{Desired git reference. Could be a commit, tag,
   or branch name. Defaults to \code{"master"}.}
@@ -34,12 +34,14 @@
   \code{\link{install}}.}
 }
 \description{
-  This function is vectorised so you can install multiple
-  packages in a single command.
+  This function is vectorised on \code{repo} so you can
+  install multiple packages in a single command.
 }
 \examples{
 \dontrun{
 install_github("roxygen")
+install_github("wch/ggplot2")
+install_github(c("rstudio/httpuv", "rstudio/shiny"))
 }
 }
 \seealso{

@@ -2,9 +2,9 @@
 \alias{check_cran}
 \title{Check a package from CRAN.}
 \usage{
-  check_cran(pkgs, libpath = file.path(tempdir(), "R-lib"),
-    srcpath = libpath, bioconductor = FALSE,
-    type = getOption("pkgType"), threads = 1, ...)
+check_cran(pkgs, libpath = file.path(tempdir(), "R-lib"), srcpath = libpath,
+  bioconductor = FALSE, type = getOption("pkgType"), threads = 1,
+  check_dir = tempfile("check_cran"))
 }
 \arguments{
   \item{pkgs}{Vector of package names - note that unlike
@@ -29,8 +29,8 @@
   \item{threads}{number of concurrent threads to use for
   checking.}
 
-  \item{...}{other parameters passed onto
-  \code{\link{download.packages}}}
+  \item{check_dir}{the directory in which the package is
+  checked}
 }
 \value{
   invisible \code{TRUE} if successful and no ERRORs or
