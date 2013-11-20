@@ -2,14 +2,15 @@
 \alias{source_url}
 \title{Run a script through some protocols such as http, https, ftp, etc.}
 \usage{
-  source_url(url, ..., sha1 = NULL)
+source_url(url, ..., sha1 = NULL)
 }
 \arguments{
   \item{url}{url}
 
   \item{...}{other options passed to \code{\link{source}}}
 
-  \item{sha1}{The SHA-1 hash of the file at the remote URL}
+  \item{sha1}{The (prefix of the) SHA-1 hash of the file at
+  the remote URL.}
 }
 \description{
   Internally, \code{source_url} calls \code{\link{getURL}}
@@ -27,15 +28,23 @@
   displaying the hash of the downloaded file. The purpose
   of this is to improve security when running
   remotely-hosted code; if you have a hash of the file, you
-  can be sure that it has not changed.
+  can be sure that it has not changed. For convenience, it
+  is possible to use a truncated SHA1 hash, down to 6
+  characters, but keep in mind that a truncated hash won't
+  be as secure as the full hash.
 }
 \examples{
 \dontrun{
-source_url("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r")
+
+source_url("https://gist.github.com/hadley/6872663/raw/hi.r")
 
 # With a hash, to make sure the remote file hasn't changed
-source_url("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r",
-  sha1 = "fc6551f13ceddcbe0730ff74c4300f2682c74028")
+source_url("https://gist.github.com/hadley/6872663/raw/hi.r",
+  sha1 = "54f1db27e60bb7e0486d785604909b49e8fef9f9")
+
+# With a truncated hash
+source_url("https://gist.github.com/hadley/6872663/raw/hi.r",
+  sha1 = "54f1db27e60")
 }
 }
 

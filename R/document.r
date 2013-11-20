@@ -23,21 +23,34 @@ document <- function(pkg = ".", clean = FALSE,
   if (!file.exists(man_path)) dir.create(man_path)
 
   if (clean) {
-    roxygen2:::clear_caches()
+    if (packageVersion("roxygen2") < 3) {
+      roxygen2::clear_caches()  
+    }
     file.remove(dir(man_path, full.names = TRUE))
   }
 
   if (reload) {
     load_all(pkg, reset = clean)
   }
+  
+  if (packageVersion("roxygen2") < 3) {
+    document_roxygen2(pkg, roclets)
+  } else {
+    document_roxygen3(pkg, roclets)
+  }
+  
+  clear_topic_index(pkg)
+  invisible()
+}
 
+document_roxygen2 <- function(pkg, roclets, reload = TRUE) {  
   # Integrate source and evaluated code
   env <- ns_env(pkg)
   env_hash <- suppressWarnings(digest(env))
   r_files <- find_code(pkg)
   parsed <- unlist(lapply(r_files, parse.file, env = env,
     env_hash = env_hash), recursive = FALSE)
-
+  
   roclets <- paste(roclets, "_roclet", sep = "")
   for (roclet in roclets) {
     roc <- match.fun(roclet)()
@@ -48,8 +61,10 @@ document <- function(pkg = ".", clean = FALSE,
       })
     )
   }
-
-  clear_topic_index(pkg)
-  invisible()
 }
 
+document_roxygen3 <- function(pkg, roclets, reload = TRUE) {
+  with_envvar(r_env_vars(), with_collate("C", 
+    roxygenise(pkg$path, roclets = roclets, load_code = pkg_env)
+  ))
+}

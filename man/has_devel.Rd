@@ -2,7 +2,7 @@
 \alias{has_devel}
 \title{Check if you have a development environment installed.}
 \usage{
-  has_devel()
+has_devel()
 }
 \value{
   TRUE if your development environment is correctly set up,
@@ -14,5 +14,4 @@
 \examples{
 has_devel()
 }
-\keyword{internal}
 

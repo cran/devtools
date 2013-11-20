@@ -11,21 +11,28 @@
 #' SHA-1 hash is not specified, it will print a message displaying the hash of
 #' the downloaded file. The purpose of this is to improve security when running
 #' remotely-hosted code; if you have a hash of the file, you can be sure that
-#' it has not changed.
+#' it has not changed. For convenience, it is possible to use a truncated SHA1
+#' hash, down to 6 characters, but keep in mind that a truncated hash won't be
+#' as secure as the full hash.
 #'
 #' @param url url
 #' @param ... other options passed to \code{\link{source}}
-#' @param sha1 The SHA-1 hash of the file at the remote URL
+#' @param sha1 The (prefix of the) SHA-1 hash of the file at the remote URL.
 #' @importFrom httr GET stop_for_status text_content
 #' @importFrom digest digest
 #' @export
 #' @examples
 #' \dontrun{
-#' source_url("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r")
+#' 
+#' source_url("https://gist.github.com/hadley/6872663/raw/hi.r")
 #'
 #' # With a hash, to make sure the remote file hasn't changed
-#' source_url("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r",
-#'   sha1 = "fc6551f13ceddcbe0730ff74c4300f2682c74028")
+#' source_url("https://gist.github.com/hadley/6872663/raw/hi.r",
+#'   sha1 = "54f1db27e60bb7e0486d785604909b49e8fef9f9")
+#'
+#' # With a truncated hash
+#' source_url("https://gist.github.com/hadley/6872663/raw/hi.r",
+#'   sha1 = "54f1db27e60")
 #' }
 source_url <- function(url, ..., sha1 = NULL) {
   stopifnot(is.character(url), length(url) == 1)
@@ -42,6 +49,13 @@ source_url <- function(url, ..., sha1 = NULL) {
   if (is.null(sha1)) {
     message("SHA-1 hash of file is ", file_sha1)
   } else {
+    if (nchar(sha1) < 6) {
+      stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
+    }
+
+    # Truncate file_sha1 to length of sha1
+    file_sha1 <- substr(file_sha1, 1, nchar(sha1))
+    
     if (!identical(file_sha1, sha1)) {
       stop("SHA-1 hash of downloaded file (", file_sha1,
         ")\n  does not match expected value (", sha1, ")", call. = FALSE)
@@ -58,41 +72,68 @@ source_url <- function(url, ..., sha1 = NULL) {
 #'   forkable and usable as a git repository.}
 #' \url{https://gist.github.com/}
 #'
-#' A gist can have multiple files.
-#' Gist is based on git, so a gist has commit histories (i.e., revisions).
-#' You can specify a commit by giving a SHA of the commit.
-#'
-#' @param entry either full url (character), gist ID (numeric or character of
+#' @param id either full url (character), gist ID (numeric or character of
 #'   numeric). If a gist ID is specified and the entry has multiple files,
-#'   only the first file in the gist is sourced.
+#'   only the first R file in the gist is sourced.
 #' @param ... other options passed to \code{\link{source}}
-#' @param sha1 The SHA-1 hash of the file at the remote URL. See
-#'   \code{\link{source_url}} for more information on using a SHA-1 hash.
+#' @param sha1 The SHA-1 hash of the file at the remote URL. This is highly
+#'   recommend as it prevents you from accidentally running code that's not
+#'   what you expect. See \code{\link{source_url}} for more information on 
+#'   using a SHA-1 hash.
+#' @param quiet if \code{FALSE}, the default, prints informative messages.
 #' @export
 #' @examples
-#' \dontrun{
-#' source_gist(1654919)
-#' source_gist("1654919")
-#' source_gist("https://gist.github.com/1654919")
-#' source_gist("https://gist.github.com/kohske/1654919")
-#' source_gist("gist.github.com/1654919")
-#' source_gist("https://raw.github.com/gist/1654919/8161f74fb0ec26d1ba9fd54473a96f768ed76f56/test2.r")
+#' # You can run gists given their id
+#' source_gist(6872663)
+#' source_gist("6872663")
+#' 
+#' # Or their html url
+#' source_gist("https://gist.github.com/hadley/6872663")
+#' source_gist("gist.github.com/hadley/6872663")
 #'
-#' # With hash to make sure remote file hasn't changed:
-#' source_gist("https://gist.github.com/1654919",
-#'   sha1 = "aa303f6a9608d7ba2cbee3e28a1191b3caf10b59")
+#' # It's highly recommend that you run source_gist with the optional
+#' # sha1 argument - this will throw an error if the file has changed since
+#' # you first ran it
+#' source_gist(6872663, sha1 = "54f1db27e60")
+#' \dontrun{
+#' # Wrong hash will result in error
+#' source_gist(6872663, sha1 = "54f1db27e61")
 #' }
-source_gist <- function(entry, ..., sha1 = NULL) {
-  # 1654919 or "1654919"
-  if (is.numeric(entry) ||  grepl("^[0-9a-f]+$", entry)) {
-    entry <- paste("https://raw.github.com/gist/", entry, sep = "")
+source_gist <- function(id, ..., sha1 = NULL, quiet = FALSE) {
+  stopifnot(length(id) == 1)
+  
+  url_match <- "((^https://)|^)gist.github.com/([^/]+/)?([0-9a-f]+)$"
+  if (grepl(url_match, id)) {
+    # https://gist.github.com/kohske/1654919, https://gist.github.com/1654919,
+    # or gist.github.com/1654919
+    id <- regmatches(id, regexec(url_match, id))[[1]][5]
+    url <- find_gist(id)
+  } else if (is.numeric(id) || grepl("^[0-9a-f]+$", id)) {
+    # 1654919 or "1654919"
+    url <- find_gist(id)
+  } else {
+    stop("Unknown id: ", id)
   }
-  # https://gist.github.com/kohske/1654919, https://gist.github.com/1654919,
-  # or gist.github.com/1654919
-  else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
-    entry <- paste("https://raw.github.com/gist/",
-      regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
+
+  if (!quiet) message("Sourcing ", url)
+  source_url(url, ..., sha1 = sha1)
+}
+
+#' @importFrom httr GET stop_for_status
+find_gist <- function(id) {
+  url <- sprintf("https://api.github.com/gists/%s", id)
+  req <- GET(url)
+  stop_for_status(req)
+  
+  # Using regular expression to parse JSON is a bit ick, but it avoid an
+  # additional dependency on RJSONIO or similar
+  text <- content(req, "text")
+  url_pos <- regexec('"raw_url": ?"(.*?\\.[rR])"', text)
+  matches <- regmatches(text, url_pos)[[1]]
+  
+  if (length(matches) != 2) {
+    stop("No R files found in gist", call. = FALSE)
   }
-  print(entry)
-  source_url(entry, ..., sha1 = sha1)
+  
+  matches[2]
 }
