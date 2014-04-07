@@ -2,13 +2,13 @@
 
 [![Build Status](https://travis-ci.org/hadley/devtools.png)](https://travis-ci.org/hadley/devtools)
 
-The aim of `devtools` is to make your life as a package developer easier by providing R functions that simplify many common tasks. R packages are actually really simple, and with the right tools it should be easier to use the package structure than not. Package development in R can feel intimidating, but devtools does every thing it can to make it as welcoming as possible. Devtools comes with a small guarantee: if because of a bug in devtools a member of R-core gets angry with you, I will send you a handwritten apology note. Just forward me the email and your address, and I'll get a card in the mail.
+The aim of `devtools` is to make your life as a package developer easier by providing R functions that simplify many common tasks. R packages are actually really simple, and with the right tools it should be easier to use the package structure than not. Package development in R can feel intimidating, but devtools does every thing it can to make it as welcoming as possible. `devtools` comes with a small guarantee: if because of a bug in devtools a member of R-core gets angry with you, I will send you a handwritten apology note. Just forward me the email and your address, and I'll get a card in the mail.
 
-Devtools is opinionated about how to do package development, and requires that you use `roxygen2` for documentation and `testthat` for testing. Not everyone agrees with these opinions, and they are by no means perfect, but they have evolved during the process of writing over 30 R packages. I'm always happy to hear about what doesn't work for you, and any places where devtools gets in your way.Either send an email to the [rdevtools mailing list](http://groups.google.com/group/rdevtools) or file an [issue](http://github.com/hadley/devtools/issues).
+`devtools` is opinionated about how to do package development, and requires that you use `roxygen2` for documentation and `testthat` for testing. Not everyone agrees with these opinions, and they are by no means perfect, but they have evolved during the process of writing over 30 R packages. I'm always happy to hear about what doesn't work for you, and any places where devtools gets in your way. Either send an email to the [rdevtools mailing list](http://groups.google.com/group/rdevtools) or file an [issue](http://github.com/hadley/devtools/issues).
 
 ## Updating to the latest version of devtools
 
-You can track (and contribute to) development of devtools at https://github.com/hadley/devtools. First, install devtools from CRAN, then follow the instructions below depending on platform.
+You can track (and contribute to) development of `devtools` at https://github.com/hadley/devtools. First, install `devtools` from CRAN, then follow the instructions below depending on platform.
 
 On Mac and Linux, installing the latest version of devtools from Github is straightfoward:
 
@@ -31,57 +31,57 @@ unlink("devtools.zip")
 
 ## Package development tools
 
-All `devtools` functions accept a path as an argument, e.g. `load_all("path/to/path/mypkg")`. If you don't specify a path, devtools will look in the current working directory - this is recommend practice.
+All `devtools` functions accept a path as an argument, e.g. `load_all("path/to/path/mypkg")`. If you don't specify a path, `devtools` will look in the current working directory - this is recommend practice.
 
 Frequent development tasks:
 
-* `load_all()` simulates installing and reloading your package, 
-  loading R code in `R/`, compiled shared objects in `src/` and data 
+* `load_all()` simulates installing and reloading your package,
+  loading R code in `R/`, compiled shared objects in `src/` and data
   files in `data/`. During development you usually want to access all functions so `load_all()` ignores the package `NAMESPACE`.
   `load_all()` will automatically create a `DESCRIPTION` if needed.
 
-* `document()` updates documentation, file collation and 
-  `NAMESPACE`. 
+* `document()` updates documentation, file collation and
+  `NAMESPACE`.
 
 * `test()` reloads your code, then runs all `testthat` tests.
 
 Building and installing:
 
-* `install()` reinstalls the package, detaches the currently 
+* `install()` reinstalls the package, detaches the currently
   loaded version then reloads the new version with `library()`. Reloading a package is not guaranteed to work: see the documentation to `unload()` for caveats.
 
-* `build()` builds a package file from package sources. You can 
+* `build()` builds a package file from package sources. You can
   can use it to build a binary version of your package.
 
-* `install_github()` installs an R package from github, 
-  `install_gitorious()` from gitorious, `install_bitbucket()` from 
-  bitbucket, `install_url()` from an arbitrary url and 
-  `install_file()` from a local file on disk. `install_version()` 
+* `install_github()` installs an R package from github,
+  `install_gitorious()` from gitorious, `install_bitbucket()` from
+  bitbucket, `install_url()` from an arbitrary url and
+  `install_file()` from a local file on disk. `install_version()`
   installs a specified version from cran.
 
 Check and release:
 
-* `check()` updates the documentation, then builds and checks 
+* `check()` updates the documentation, then builds and checks
   the package. `build_win()` builds a package using
   [win-builder](http://win-builder.r-project.org/), allowing you to easily check your package on windows.
 
-* `run_examples()` will run all examples to make sure they work. 
+* `run_examples()` will run all examples to make sure they work.
   This is useful because example checking is the last step of `R CMD check`.
 
-* `check_doc()` runs most of the documentation checking components 
+* `check_doc()` runs most of the documentation checking components
   of `R CMD check`
 
-* `release()` makes sure everything is ok with your package 
-  (including asking you a number of questions), then builds and 
-  uploads to CRAN. It also drafts an email to let the CRAN 
+* `release()` makes sure everything is ok with your package
+  (including asking you a number of questions), then builds and
+  uploads to CRAN. It also drafts an email to let the CRAN
   maintainers know that you've uploaded a new package.
 
 Other commands:
 
-* `bash()` opens a bash shell in your package directory so you can 
+* `bash()` opens a bash shell in your package directory so you can
   use git or other command line tools.
 
-* `wd()` changes the working directory to a path relative to the 
+* `wd()` changes the working directory to a path relative to the
   package root.
 
 ## Development mode
@@ -114,7 +114,7 @@ This will set up R to:
 * give minimal output from `traceback()`
 * automatically load `devtools` in interactive sessions
 
-There are also a number of options you might want to set to customise the default behaviour when creating packages and drafting emails:
+There are also a number of options you might want to set (in `.Rprofile`) to customise the default behaviour when creating packages and drafting emails:
 
 * `devtools.name`: your name, used to sign emails
 * `devtools.desc.author`: your R author string, in the form of `"Hadley Wickham <h.wickham@@gmail.com> [aut, cre]"`. Used when creating default `DESCRIPTION` files.

@@ -174,9 +174,9 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
 #'
 #' @details
 #' To set the default author and licenses, set \code{options}
-#' \code{devtool.author} and \code{devtool.license}.  I use
-#' \code{options(devtools.author = '"Hadley Wickham <h.wickham@@gmail.com> [aut,cre]"',
-#'   devtools.license = "GPL-3")}.
+#' \code{devtools.desc.author} and \code{devtools.desc.license}.  I use
+#' \code{options(devtools.desc.author = '"Hadley Wickham <h.wickham@@gmail.com> [aut,cre]"',
+#'   devtools.desc.license = "GPL-3")}.
 #' @param path path to package root directory
 #' @param extra a named list of extra options to add to \file{DESCRIPTION}. 
 #'   Arguments that take a list 
@@ -213,10 +213,10 @@ build_description <- function(name, extra = list()) {
   
   defaults <- compact(list(
     Package = name,
-    Title = "",
-    Description = "",
+    Title = "What the package does (short line)",
     Version = "0.1",
     "Authors@R" = getOption("devtools.desc.author"),
+    Description = "What the package does (paragraph)",
     Depends = paste0("R (>= ", as.character(getRversion()) ,")"),
     License = getOption("devtools.desc.license"),
     Suggests = getOption("devtools.desc.suggests"),

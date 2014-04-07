@@ -130,7 +130,7 @@ scan_path_for_rtools <- function(debug = FALSE) {
   # We have a candidate installPath
   install_path <- dirname(dirname(ls_path))
   install_path2 <- dirname(dirname(dirname(gcc_path)))
-  if (install_path2 != install_path) return(NULL)
+  if (tolower(install_path2) != tolower(install_path)) return(NULL)
 
   version <- installed_version(install_path, debug = debug)
   if (debug) cat("Version:", version, "\n")
@@ -245,7 +245,7 @@ version_info <- list(
   ),
   "3.1" = list(
     version_min = "3.0.0",
-    version_max = "3.1.99",
+    version_max = "3.2.99",
     path = c("bin", "gcc-4.6.3/bin")
   )
 )

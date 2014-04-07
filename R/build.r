@@ -43,11 +43,7 @@ build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
     args <- c(args, "--no-manual", "--no-resave-data")
 
     if (!vignettes) {
-      args <- c(args, "--no-vignettes")
-
-    } else if (!nzchar(Sys.which("pdflatex"))) {
-      message("pdflatex not found. Not building PDF vignettes.")
-      args <- c(args, "--no-vignettes")
+      args <- c(args, "--no-build-vignettes")
     }
 
     cmd <- paste0("CMD build ", shQuote(pkg$path), " ",
@@ -73,25 +69,38 @@ build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
 #'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
+#' @inheritParams build
 #' @param version directory to upload to on the win-builder, controlling
 #'   which version of R is used to build the package. Possible options are
 #'   listed on \url{http://win-builder.r-project.org/}. Defaults to the
 #'   released version of R.
-#' @param quiet if \code{TRUE} suppresses output from this function.
 #' @importFrom RCurl ftpUpload
 #' @export
 #' @family build functions
-build_win <- function(pkg = ".", version = "R-release", quiet = FALSE) {
+build_win <- function(pkg = ".", version = c("R-release", "R-devel"),
+                      args = NULL, quiet = FALSE) {
   pkg <- as.package(pkg)
-  if (!quiet) message("Building windows version of ", pkg$package,
-    " with win-builder.r-project.org.\n")
 
-  built_path <- build(pkg, tempdir(), quiet = quiet)
+  version <- match.arg(version, several.ok = TRUE)
+
+  if (!quiet) {
+    message("Building windows version of ", pkg$package,
+            " for ", paste(version, collapse=", "),
+            " with win-builder.r-project.org.\n")
+  }
+
+  built_path <- build(pkg, tempdir(), args = args, quiet = quiet)
   on.exit(unlink(built_path))
 
-  ftpUpload(built_path, paste("ftp://win-builder.r-project.org/", version,
-    "/", basename(built_path), sep = ""))
+  url <- paste0("ftp://win-builder.r-project.org/", version, "/",
+                basename(built_path))
+  lapply(url, ftpUpload, what = built_path)
 
-  message("Check your email for a link to the built package in 30-60 mins.")
+  if (!quiet) {
+    message("Check your email for a link to the built package",
+            if (length(version) > 1) "s" else "",
+            " in 30-60 mins.")
+  }
+
   invisible()
 }

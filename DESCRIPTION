@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to make developing R code easier
-Version: 1.4.1
+Version: 1.5
 Authors@R: c(
     person("Hadley", "Wickham",
     email = "h.wickham@gmail.com", role = c("aut", "cre")),
@@ -8,13 +8,14 @@ Authors@R: c(
     person("R Core team", role = "ctb",
     comment = "Some namespace and vignette code extracted from base R"))
 Description: Collection of package development tools
-Depends: R (>= 2.15)
-Imports: httr, RCurl, utils, tools, methods, memoise, whisker,
+Depends: R (>= 3.0.2)
+Roxygen: list(wrap = FALSE)
+Imports: httr (>= 0.2), RCurl, utils, tools, methods, memoise, whisker,
         evaluate, digest
-Suggests: testthat (>= 0.7), roxygen2, BiocInstaller, Rcpp (>= 0.10.0),
-        MASS, knitr, rstudio
+Suggests: testthat (>= 0.7), roxygen2 (>= 3.0.0), BiocInstaller, Rcpp
+        (>= 0.10.0), MASS, knitr, rstudioapi
 License: GPL (>= 2)
-Packaged: 2013-11-27 15:02:04 UTC; hadley
+Packaged: 2014-04-07 17:11:45 UTC; hadley
 Author: Hadley Wickham [aut, cre],
   Winston Chang [aut],
   R Core team [ctb] (Some namespace and vignette code extracted from base
@@ -22,4 +23,4 @@ Author: Hadley Wickham [aut, cre],
 Maintainer: Hadley Wickham <h.wickham@gmail.com>
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-11-27 19:34:19
+Date/Publication: 2014-04-07 20:38:41

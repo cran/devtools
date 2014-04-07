@@ -28,8 +28,12 @@ ends_with_newline <- function(path) {
   lastByte == 0x0a
 }
 
-rstudio_has <- function(f = NULL) {
-  if (!("tools:rstudio" %in% search())) return(FALSE)
+render_template <- function(name, data) {
+  path <- system.file("templates", name, package = "devtools")
+  template <- readLines(path)
+  whisker.render(template, data)
+}
 
-  exists(as.character(f), asNamespace("rstudio"))
+is_installed <- function(pkg, version = 0) {
+  system.file(package = pkg) != "" && packageVersion(pkg) > version
 }

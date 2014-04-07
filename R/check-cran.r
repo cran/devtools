@@ -18,6 +18,7 @@
 #' @param bioconductor include bioconductor packages in checking?
 #' @param type binary package type of test
 #' @param threads number of concurrent threads to use for checking.
+#'   It defaults to the option \code{"Ncpus"} or \code{1} if unset.
 #' @param check_dir the directory in which the package is checked
 #' @return invisible \code{TRUE} if successful and no ERRORs or WARNINGS,
 #' @importFrom tools package_dependencies
@@ -32,7 +33,7 @@
 #' }
 check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
   srcpath = libpath, bioconductor = FALSE, type = getOption("pkgType"),
-  threads = 1, check_dir = tempfile("check_cran")) {
+  threads = getOption("Ncpus", 1), check_dir = tempfile("check_cran")) {
   stopifnot(is.character(pkgs))
   if (length(pkgs) == 0) return()
 
@@ -46,8 +47,7 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     omegahat = "http://www.omegahat.org/R"
   )
   if (bioconductor) {
-    require("BiocInstaller")
-    repos <- c(repos, biocinstallRepos())
+    repos <- c(repos, BiocInstaller::biocinstallRepos())
   }
   available_src <- available_packages(repos, "source")
   available_bin <- available_packages(repos, type)
@@ -96,7 +96,8 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     url <- package_url(pkgs[i], repos, available = available_src)
 
     if (length(url$url) == 0) {
-      message("Can't find package source. Skipping...")
+      message("Can't find package source for ", i, ": ", pkgs[i],
+        ". Skipping...")
       return(NULL)
     }
     local <- file.path(srcpath, url$name)
@@ -107,6 +108,7 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     }
 
     message("Checking ", i , ": ", pkgs[i])
+    start_time <- Sys.time()
     check_args <- "--no-multiarch --no-manual --no-codoc"
     try(check_r_cmd(local, cran = TRUE, check_version = FALSE,
       force_suggests = FALSE, args = check_args, check_dir = check_dir,
@@ -115,6 +117,13 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     check_path <- file.path(check_dir, gsub("_.*?$", ".Rcheck", url$name))
     results <- parse_check_results(check_path)
     if (length(results) > 0) cat(results, "\n")
+
+    elapsed_time <- as.numeric(Sys.time() - start_time, units = "secs")
+    message("Finished checking ", i , ": ", pkgs[i], " (",
+      round(elapsed_time, 1), " seconds)")
+    writeLines(sprintf("%d  %s  %.1f", i, pkgs[i], elapsed_time),
+      file.path(check_path, "check-time.txt"))
+
     results
   }
 
@@ -202,7 +211,6 @@ collect_check_results <- function(topdir) {
     }
   }
 
-
   summary_filename <- file.path(rdir, "00check-summary.txt")
   message("Creating summary of check warnings and errors in ", summary_filename)
   summary_out <- file(summary_filename, "w")
@@ -217,5 +225,14 @@ collect_check_results <- function(topdir) {
     pkgname <- names(checkresults[i])
     linetext <- paste(rep("=", 72 - nchar(pkgname)), collapse = "")
     cat(pkgname, linetext, "\n", checkresults[[i]], "\n\n\n", file = summary_out)
+  }
+
+
+  message("Collecting check times in 00check-times.txt")
+  checktimes <- file.path(checkdirs, "check-time.txt")
+  checktimes_dest <- file.path(rdir, "00check-times.txt")
+  for (i in seq_along(checktimes)) {
+    linetext <- readLines(checktimes[i])
+    cat(linetext, sep = "\n", file = checktimes_dest, append = TRUE)
   }
 }
