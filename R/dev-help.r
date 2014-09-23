@@ -35,7 +35,6 @@ dev_help <- function(topic, stage = "render", type = getOption("help_type")) {
 }
 
 
-#' @importFrom tools Rd2txt Rd2HTML
 view_rd <- function(path, package, stage = "render", type = getOption("help_type")) {
   if (is.null(type)) type <- "text"
   type <- match.arg(type, c("text", "html"))
@@ -43,10 +42,10 @@ view_rd <- function(path, package, stage = "render", type = getOption("help_type
   out_path <- paste(tempfile("Rtxt"), type, sep = ".")
 
   if (type == "text") {
-    Rd2txt(path, out = out_path, package = package, stages = stage)
+    tools::Rd2txt(path, out = out_path, package = package, stages = stage)
     file.show(out_path, title = paste(package, basename(path), sep = ":"))
   } else if (type == "html") {
-    Rd2HTML(path, out = out_path, package = package, stages = stage,
+    tools::Rd2HTML(path, out = out_path, package = package, stages = stage,
       no_links = TRUE)
 
     css_path <- file.path(tempdir(), "R.css")
@@ -61,8 +60,9 @@ view_rd <- function(path, package, stage = "render", type = getOption("help_type
 
 #' Drop-in replacements for help and ? functions
 #'
-#' The \code{?} and \code{help} are drop-in replacements for functions of the
-#' same name in the utils package.
+#' The \code{?} and \code{help} functions are replacements for functions of the
+#' same name in the utils package. They are made available when a package is
+#' loaded with \code{\link{load_all}}.
 #'
 #' The \code{?} function is a replacement for \code{\link[utils]{?}} from the
 #' utils package. It will search for help in devtools-loaded packages first,
@@ -81,7 +81,11 @@ view_rd <- function(path, package, stage = "render", type = getOption("help_type
 #' @param e1 First argument to pass along to \code{utils::`?`}.
 #' @param e2 Second argument to pass along to \code{utils::`?`}.
 #' @param ... Additional arguments to pass to \code{\link[utils]{help}}.
-#' @export
+#'
+#' @rdname help
+#' @name help
+#' @usage # help(topic, package = NULL, ...)
+#'
 #' @examples
 #' \dontrun{
 #' # This would load devtools and look at the help for load_all, if currently
@@ -94,59 +98,105 @@ view_rd <- function(path, package, stage = "render", type = getOption("help_type
 #' # To see the help pages for utils::help and utils::`?`:
 #' help("help", "utils")
 #' help("?", "utils")
-help <- function(topic, package = NULL, ...) {
-  # Get string versions of topic and package
-  if (is.name(substitute(topic))) {
-    topic_str <- deparse(substitute(topic))
-  } else {
+#'
+#' \dontrun{
+#' # Examples demonstrating the multiple ways of supplying arguments
+#' # NB: you can't do pkg <- "ggplot2"; help("ggplot2", pkg)
+#' shim_help(lm)
+#' shim_help(lm, stats)
+#' shim_help(lm, 'stats')
+#' shim_help('lm')
+#' shim_help('lm', stats)
+#' shim_help('lm', 'stats')
+#' shim_help(package = stats)
+#' shim_help(package = 'stats')
+#' topic <- "lm"
+#' shim_help(topic)
+#' shim_help(topic, stats)
+#' shim_help(topic, 'stats')
+#' }
+shim_help <- function(topic, package = NULL, ...) {
+  # Reproduce help's NSE for topic - try to eval it and see if it's a string
+  topic_name <- substitute(topic)
+  is_char <- FALSE
+  try(is_char <- is.character(topic) && length(topic) == 1L, silent = TRUE)
+  if (is_char) {
     topic_str <- topic
+    topic_name <- as.name(topic)
+  } else if (missing(topic_name)) {
+    # Leave the vars missing
+  } else if (is.null(topic_name)) {
+    topic_str <- NULL
+    topic_name <- NULL
+  } else {
+    topic_str <- deparse(substitute(topic))
   }
 
-  if (is.name(substitute(package))) {
-    package_str <- deparse(substitute(package))
-  } else if (is.null(substitute(package))) {
+  # help's NSE for package is slightly simpler
+  package_name <- substitute(package)
+  if (is.name(package_name)) {
+    package_str <- as.character(package_name)
+  } else if (is.null(package_name)) {
     package_str <- NULL
   } else {
     package_str <- package
+    package_name <- as.name(package)
   }
 
+  use_dev <- (!is.null(package_str) && package_str %in% dev_packages()) ||
+    (is.null(package_str) && !is.null(find_topic(topic_str)))
+  if (use_dev) {
+    dev_help(topic_str)
+  } else {
+    # This is similar to list(), except that one of the args is a missing var,
+    # it will replace it with an empty symbol instead of trying to evaluate it.
+    as_list <- function(..., .env = parent.frame()) {
+      dots <- match.call(expand.dots = FALSE)$`...`
 
-  # If package is NULL, search for help in devtools-loaded packages, and if that
-  # fails, try utils::help.
-  # If the package was specified, then use dev_help or utils::help as
-  # appropriate.
-  if (is.null(package_str)) {
-    if (!is.null(find_topic(topic_str))) {
-      dev_help(topic_str)
-    } else {
-      call <- as.call(list(utils::help, substitute(topic), substitute(package), ...))
-      return(eval(call))
+      lapply(dots, function(var) {
+        is_missing <- eval(substitute(missing(x), list(x = var)), .env)
+        if (is_missing) {
+          quote(expr=)
+        } else {
+          eval(var, .env)
+        }
+      })
     }
 
-  } else if (package_str %in% dev_packages()) {
-    dev_help(topic_str)
-
-  } else {
-    call <- as.call(list(utils::help, substitute(topic), substitute(package), ...))
-    return(eval(call))
+    call <- substitute(
+      utils::help(topic, package, ...),
+      as_list(topic = topic_name, package = package_name)
+    )
+    eval(call)
   }
 }
 
 
+#' @usage
+#' # ?e2
+#' # e1?e2
+#'
 #' @rdname help
-#' @export
-`?` <- function(e1, e2) {
-  # Get string versions of e1 and e2
-  if (is.name(substitute(e1))) {
-    e1_str <- deparse(substitute(e1))
-  } else {
-    e1_str <- e1
-  }
+#' @name ?
+shim_question <- function(e1, e2) {
+  # Get string version of e1, for find_topic
+  e1_expr <- substitute(e1)
+  if (is.name(e1_expr)) {
+    # Called with a bare symbol, like ?foo
+    e1_str <- deparse(e1_expr)
 
-  if (is.name(substitute(e2))) {
-    e2_str <- deparse(substitute(e2))
+  } else if (is.call(e1_expr)) {
+    if (e1_expr[[1]] == "?") {
+      # Double question mark, like ??foo
+      e1_str <- NULL
+    } else {
+      # Called with function arguments, like ?foo(12)
+      e1_str <- deparse(e1_expr[[1]])
+    }
+
   } else {
-    e2_str <- e2
+    # If we got here, it's probably a string
+    e1_str <- e1
   }
 
   # Search for the topic in devtools-loaded packages.

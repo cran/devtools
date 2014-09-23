@@ -10,7 +10,7 @@
 #'   add additional values.
 #' @param check if \code{TRUE}, will automatically run \code{\link{check}}
 #' @param rstudio Create an Rstudio project file?
-#'   (with \code{\link{add_rstudio_project}})
+#'   (with \code{\link{use_rstudio}})
 #' @seealso Text with \code{\link{package.skeleton}}
 #' @export
 #' @examples
@@ -39,20 +39,16 @@ create <- function(path, description = getOption("devtools.desc"),
 
   dir.create(path)
   dir.create(file.path(path, "R"))
-  dir.create(file.path(path, "man"))
   create_description(path, extra = description)
-  create_package_doc(path, name)
+  create_namespace(path)
 
-  if (rstudio) add_rstudio_project(path)
+  if (rstudio) use_rstudio(path)
 
   if (check) check(path)
   invisible(TRUE)
 }
 
-#' @importFrom whisker whisker.render
-create_package_doc <- function(path, name) {
-  out <- render_template("packagename-package.r", list(name = name))
-
-  target <- file.path(path, "R", paste(name, "-package.r", sep = ""))
-  writeLines(out, target)
+create_namespace <- function(path) {
+  ns_path <- file.path(path, "NAMESPACE")
+  cat('exportPattern("^[^\\\\.]")\n', file = ns_path)
 }

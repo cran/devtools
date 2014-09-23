@@ -1,9 +1,9 @@
 #' Build and check a package, cleaning up automatically on success.
 #'
 #' \code{check} automatically builds and checks a source package, using all
-#' know best practices. Passing \code{R CMD check} is essential if you want to
-#' submit your package to CRAN: you must not have an ERRORs or WARNINGs, and you
-#' want to ensure that there are as few NOTEs as possible.  If you are not
+#' known best practices. Passing \code{R CMD check} is essential if you want to
+#' submit your package to CRAN: you must not have any ERRORs or WARNINGs, and
+#' you want to ensure that there are as few NOTEs as possible.  If you are not
 #' submitting to CRAN, at least ensure that there are no ERRORs: these
 #' typically represent serious problems.
 #'
@@ -14,7 +14,7 @@
 #'
 #' @section Environment variables:
 #'
-#' Devtools does it's best to set up an environment that combines best practices
+#' Devtools does its best to set up an environment that combines best practices
 #' with how check works on CRAN. This includes:
 #'
 #' \itemize{
@@ -44,9 +44,7 @@
 #'   went wrong. If \code{FALSE} the check directory is never removed.
 #' @param cran if \code{TRUE} (the default), check using the same settings as
 #'   CRAN uses.
-#' @param doc_clean If \code{TRUE}, will delete all files in the \code{man}
-#'   directory and regenerate them from scratch with roxygen. The default is
-#'   to use the value of the \code{"devtools.cleandoc"} option.
+#' @param doc_clean Deprecated.
 #' @param check_version if \code{TRUE}, check that the new version is greater
 #'   than the current version on CRAN, by setting the
 #'   \code{_R_CHECK_CRAN_INCOMING_} environment variable to \code{TRUE}.
@@ -60,7 +58,7 @@
 #' @seealso \code{\link{release}} if you want to send the checked package to
 #'   CRAN.
 #' @export
-check <- function(pkg = ".", document = TRUE, doc_clean = getOption("devtools.cleandoc"),
+check <- function(pkg = ".", document = TRUE, doc_clean = NULL,
                   cleanup = TRUE, cran = TRUE, check_version = FALSE,
                   force_suggests = TRUE, args = NULL, build_args = NULL,
                   quiet = FALSE, check_dir = tempdir()) {
@@ -68,7 +66,11 @@ check <- function(pkg = ".", document = TRUE, doc_clean = getOption("devtools.cl
   pkg <- as.package(pkg)
 
   if (document) {
-    document(pkg, clean = doc_clean)
+    if (!missing(doc_clean)) {
+      warning("doc_clean argument deprecated: roxygen2 now cleans up after ",
+        "itself", call. = FALSE)
+    }
+    document(pkg)
   }
 
   old <- set_envvar(compiler_flags(FALSE), "prefix")
@@ -102,7 +104,7 @@ check_r_cmd <- function(built_path = NULL, cran = TRUE, check_version = FALSE,
   if (!nzchar(Sys.which("pdflatex"))) {
     message("pdflatex not found! Not building PDF manual or vignettes.\n",
       "If you are planning to release this package, please run a check with manual and vignettes beforehand.\n")
-    opts <- c(opts, "--no-rebuild-vignettes", "--no-manual")
+    opts <- c(opts, "--no-build-vignettes", "--no-manual")
   }
 
   opts <- paste(paste(opts, collapse = " "), paste(args, collapse = " "))
@@ -146,10 +148,16 @@ cran_env_vars <- function() {
     "_R_CHECK_CODE_ASSIGN_TO_GLOBALENV_" = "TRUE",
     "_R_CHECK_CODE_ATTACH_"              = "TRUE",
     "_R_CHECK_CODE_DATA_INTO_GLOBALENV_" = "TRUE",
+    "_R_CHECK_CODE_USAGE_VIA_NAMESPACES_"= "TRUE",
     "_R_CHECK_DOT_FIRSTLIB_"             = "TRUE",
     "_R_CHECK_DEPRECATED_DEFUNCT_"       = "TRUE",
     "_R_CHECK_REPLACING_IMPORTS_"        = "TRUE",
     "_R_CHECK_SCREEN_DEVICE_"            = "stop",
-    "_R_CHECK_TOPLEVEL_FILES_"           = "TRUE"
+    "_R_CHECK_TOPLEVEL_FILES_"           = "TRUE",
+    # The following are used for CRAN incoming checks according to the R
+    # internals doc, but they're not in the list at the bottom of the Tools
+    # section (have to look at the description of the individual env vars).
+    "_R_CHECK_RD_LINE_WIDTHS_"           = "TRUE",
+    "_R_CHECK_LIMIT_CORES_"              = "TRUE"
   )
 }

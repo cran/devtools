@@ -1,16 +1,34 @@
 # Insert shim objects into a package's imports environment
 #
 # @param pkg A path or package object
-insert_shims <- function(pkg = ".") {
+insert_imports_shims <- function(pkg = ".") {
   pkg <- as.package(pkg)
-  assign("system.file", system.file, pos = imports_env(pkg))
+
+  imp_env <- imports_env(pkg)
+  imp_env$system.file <- shim_system.file
+  imp_env$library.dynam.unload <- shim_library.dynam.unload
 }
 
+# Create a new environment as the parent of global, with devtools versions of
+# help, ?, and system.file.
+insert_global_shims <- function() {
+  # If shims already present, just return
+  if ("devtools_shims" %in% search()) return()
+
+  e <- new.env()
+
+  e$help <- shim_help
+  e$`?` <- shim_question
+  e$system.file <- shim_system.file
+
+  attach(e, name = "devtools_shims", warn.conflicts = FALSE)
+}
 
 #' Replacement version of system.file
 #'
 #' This function is meant to intercept calls to \code{\link[base]{system.file}},
-#' so that it behaves well with packages loaded by devtools.
+#' so that it behaves well with packages loaded by devtools. It is made
+#' available when a package is loaded with \code{\link{load_all}}.
 #'
 #' When \code{system.file} is called from the R console (the global
 #' envrironment), this function detects if the target package was loaded with
@@ -24,9 +42,13 @@ insert_shims <- function(pkg = ".") {
 #' function were not inserted into the imports environment, then the package
 #' would end up calling \code{base::system.file} instead.
 #' @inheritParams base::system.file
-#' @export
-system.file <- function(..., package = "base", lib.loc = NULL,
-                        mustWork = FALSE) {
+#'
+#' @usage # system.file(..., package = "base", lib.loc = NULL, mustWork = FALSE)
+#' @rdname system.file
+#' @name system.file
+#' @usage system.file(..., package = "base", lib.loc = NULL, mustWork = FALSE)
+shim_system.file <- function(..., package = "base", lib.loc = NULL,
+                             mustWork = FALSE) {
 
   # If package wasn't loaded with devtools, pass through to base::system.file.
   # If package was loaded with devtools (the package loaded with load_all)
@@ -71,4 +93,23 @@ system.file <- function(..., package = "base", lib.loc = NULL,
     # be installed. To fully duplicate R's package-building and installation
     # behavior would be complicated, so we'll just use this simple method.
   }
+}
+
+shim_library.dynam.unload <- function(chname, libpath,
+                                      verbose = getOption("verbose"),
+                                      file.ext = .Platform$dynlib.ext) {
+
+  # If package was loaded by devtools, we need to unload the dll ourselves
+  # because libpath works differently from installed packages.
+  if (!is.null(dev_meta(chname))) {
+    try({
+      pkg <- as.package(libpath)
+      unload_dll(pkg)
+    })
+    return()
+  }
+
+  # Should only reach this in the rare case that the devtools-loaded package is
+  # trying to unload a different package's DLL.
+  base::library.dynam.unload(chname, libpath, verbose, file.ext)
 }

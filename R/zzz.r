@@ -1,8 +1,3 @@
-.onAttach <- function(...) {
-  find_rtools()
-  invisible()
-}
-
 #' Package development tools for R.
 #'
 #' @section Package options:
@@ -14,10 +9,6 @@
 #'
 #'   \item \code{devtools.name}: your name, used when signing draft
 #'     emails.
-#'
-#'   \item \code{devtools.cleandoc}: a single logical value determining whether
-#'     the contents of the file{man/} directory are deleted by
-#'     \code{\link{check}}
 #'
 #'   \item \code{devtools.install.args}: a string giving extra arguments passed
 #'     to \code{R CMD install} by \code{\link{install}}.
@@ -45,17 +36,17 @@ NULL
   op <- options()
   op.devtools <- list(
     devtools.path = "~/R-dev",
-    devtools.cleandoc = FALSE,
     devtools.install.args = "",
     devtools.name = "Your name goes here",
     devtools.desc.author = '"First Last <first.last@example.com> [aut, cre]"',
     devtools.desc.license = "What license is it under?",
     devtools.desc.suggests = NULL,
-    devtools.desc = list(),
-    github.user = "hadley"
+    devtools.desc = list()
   )
   toset <- !(names(op.devtools) %in% names(op))
   if(any(toset)) options(op.devtools[toset])
+
+  find_rtools()
 
   invisible()
 }

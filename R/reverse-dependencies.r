@@ -1,13 +1,12 @@
 #' Reverse dependency tools.
 #'
-#' Tools to check and notify maintainers of all all CRAN and bioconductor
+#' Tools to check and notify maintainers of all CRAN and bioconductor
 #' packages that depend on the specified package.
 #'
 #' @param pkg package name
 #' @param ignore A character vector of package names to ignore. These packages
 #'   will not appear in returned vector.
 #' @inheritParams tools::dependsOnPkgs
-#' @importFrom tools dependsOnPkgs
 #' @export
 #' @examples
 #' \dontrun{
@@ -17,7 +16,7 @@
 #'}
 revdep <- function(pkg = NULL, dependencies = c("Depends", "Imports",
                    "Suggests", "LinkingTo"), recursive = FALSE, ignore = NULL) {
-  deps <- dependsOnPkgs(pkg, dependencies, recursive, installed = packages())
+  deps <- tools::dependsOnPkgs(pkg, dependencies, recursive, installed = packages())
   deps <- setdiff(deps, ignore)
   sort(deps)
 }
@@ -33,12 +32,14 @@ revdep_maintainers <- function(pkg = ".") {
 #' @export
 revdep_check <- function(pkg = NULL, recursive = FALSE, ignore = NULL, ...) {
   pkgs <- revdep(pkg, recursive = recursive, ignore = ignore)
-  check_cran(pkgs, ...)
+  res <- check_cran(pkgs, revdep_pkg = pkg, ...)
+
+  res$revdep_package <- pkg
+  res
 }
 
 
-#' @importFrom memoise memoise
-cran_packages <- memoise(function() {
+cran_packages <- memoise::memoise(function() {
   local <- file.path(tempdir(), "packages.rds")
   download.file("http://cran.R-project.org/web/packages/packages.rds", local,
     mode = "wb", quiet = TRUE)
@@ -48,8 +49,7 @@ cran_packages <- memoise(function() {
   cp
 })
 
-#' @importFrom memoise memoise
-bioc_packages <- memoise(function() {
+bioc_packages <- memoise::memoise(function() {
   con <- url("http://bioconductor.org/packages/release/bioc/VIEWS")
   on.exit(close(con))
   bioc <- read.dcf(con)

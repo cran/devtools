@@ -138,8 +138,8 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
   # Load dependencies
   load_depends(pkg)
   load_imports(pkg)
-  # Add shim objects
-  insert_shims(pkg)
+  # Add shim objects to imports environment
+  insert_imports_shims(pkg)
 
   out$data <- load_data(pkg)
   out$code <- load_code(pkg)
@@ -166,6 +166,9 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
   run_pkg_hook(pkg, "attach")
   run_user_hook(pkg, "attach")
 
+  # Replace help and ? in utils package environment
+  insert_global_shims()
+
   invisible(out)
 }
 
@@ -178,11 +181,10 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
 #' \code{options(devtools.desc.author = '"Hadley Wickham <h.wickham@@gmail.com> [aut,cre]"',
 #'   devtools.desc.license = "GPL-3")}.
 #' @param path path to package root directory
-#' @param extra a named list of extra options to add to \file{DESCRIPTION}. 
-#'   Arguments that take a list 
+#' @param extra a named list of extra options to add to \file{DESCRIPTION}.
+#'   Arguments that take a list
 #' @param quiet if \code{TRUE}, suppresses output from this function.
 #' @export
-#' @importFrom whisker whisker.render
 create_description <- function(path, extra = getOption("devtools.desc"),
                                quiet = FALSE) {
   path <- check_dir(path)
@@ -197,36 +199,35 @@ create_description <- function(path, extra = getOption("devtools.desc"),
   }
 
   desc <- build_description(basename(normalizePath(path)), extra)
-  lines <- paste0(names(desc), ": ", unlist(desc))
-  
+
   if (!quiet) {
-    message("No DESCRIPTION found. Creating with values:\n\n" ,
-      paste(lines, collapse = "\n"))
+    message("No DESCRIPTION found. Creating with values:\n\n")
+    write_dcf("", desc)
   }
 
-  writeLines(lines, desc_path)
+  write_dcf(desc_path, desc)
 
   TRUE
 }
 
 build_description <- function(name, extra = list()) {
-  
+
   defaults <- compact(list(
     Package = name,
-    Title = "What the package does (short line)",
+    Title = "What the package does (one line)",
     Version = "0.1",
     "Authors@R" = getOption("devtools.desc.author"),
-    Description = "What the package does (paragraph)",
+    Description = "What the package does (one paragraph)",
     Depends = paste0("R (>= ", as.character(getRversion()) ,")"),
     License = getOption("devtools.desc.license"),
     Suggests = getOption("devtools.desc.suggests"),
     LazyData = "true"
   ))
-  
+
   # Override defaults with user supplied options
   desc <- modifyList(defaults, extra)
   # Collapse all vector arguments to single strings
   desc <- lapply(desc, function(x) paste(x, collapse = ", "))
-  
+
   desc
 }

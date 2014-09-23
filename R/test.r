@@ -1,8 +1,10 @@
 #' Execute all \pkg{test_that} tests in a package.
 #'
-#' Tests are assumed to be located in a \code{inst/tests/} directory.
+#' Tests are assumed to be located in either the \code{inst/tests/} or
+#' \code{tests/testthat} directory (the latter is recommended).
 #' See \code{\link[testthat]{test_dir}} for the naming convention of test
-#' scripts within that directory.
+#' scripts within one of those directories and
+#' \code{\link[testthat]{test_check}} for the folder structure conventions.
 #'
 #' If no testing infrastructure is present, you'll be asked if you want
 #' devtools to create it for you (in interactive sessions only). See
@@ -13,7 +15,7 @@
 #' @inheritParams testthat::test_dir
 #' @inheritParams run_examples
 #' @export
-test <- function(pkg = ".", filter = NULL, fresh = FALSE) {
+test <- function(pkg = ".", filter = NULL) {
   check_testthat()
   pkg <- as.package(pkg)
 
@@ -28,28 +30,19 @@ test <- function(pkg = ".", filter = NULL, fresh = FALSE) {
   test_path <- find_test_dir(pkg$path)
   test_files <- dir(test_path, "^test.*\\.[rR]$")
   if (length(test_files) == 0) {
-    message("No tests found: no files matching pattern '^test.*\\.[rR]$'",
-      "found in ", test_path)
+    message("No tests: no files in ", test_path, " match '^test.*\\.[rR]$'")
     return(invisible())
   }
 
   message("Testing ", pkg$package)
-  if (fresh) {
-    to_run <- bquote({
-      require("devtools", quiet = TRUE)
-      require("testthat", quiet = TRUE)
+  # Need to attach testthat so that (e.g.) context() is available
+  library(testthat, quietly = TRUE)
 
-      load_all(.(pkg$path), quiet = TRUE)
-      test_dir(.(test_path), filter = .(filter))
-    })
-    eval_clean(to_run)
-  } else {
-    # Run tests in a child of the namespace environment, like
-    # testthat::test_package
-    load_all(pkg)
-    env <- new.env(parent = ns_env(pkg))
-    with_envvar(r_env_vars(), test_dir(test_path, filter = filter, env = env))
-  }
+  # Run tests in a child of the namespace environment, like
+  # testthat::test_package
+  ns_env <- load_all(pkg, quiet = TRUE)$env
+  env <- new.env(parent = ns_env)
+  with_envvar(r_env_vars(), testthat::test_dir(test_path, filter = filter, env = env))
 }
 
 find_test_dir <- function(path) {
@@ -94,58 +87,9 @@ uses_testthat <- function(pkg = ".") {
   any(dir.exists(paths))
 }
 
-#' Add test skeleton.
-#'
-#' Add testing infrastructure to a package that does not already have it.
-#' This will create \file{tests/testthat.R}, \file{tests/testthat/} and
-#' add \pkg{testthat} to the suggested packages. This is called
-#' automatically from \code{\link{test}} if needed.
-#'
-#' @param pkg package description, can be path or package name. See
-#'   \code{\link{as.package}} for more information.
-#' @export
-add_test_infrastructure <- function(pkg = ".") {
-  pkg <- as.package(pkg)
-
-  check_testthat()
-  if (uses_testthat(pkg)) {
-    stop("Package already has testing infrastructure", call. = FALSE)
-  }
-
-  # Create tests/testthat and install file for R CMD CHECK
-  dir.create(file.path(pkg$path, "tests", "testthat"),
-    showWarnings = FALSE, recursive = TRUE)
-  writeLines(render_template("testthat.R", list(name = pkg$package)),
-    file.path(pkg$path, "tests", "testthat.R"))
-
-  add_suggested_package(file.path(pkg$path, "DESCRIPTION"), "testthat")
-
-  invisible(TRUE)
-}
 
 check_testthat <- function() {
-  if (!require("testthat")) {
+  if (!requireNamespace("testthat", quietly = TRUE)) {
     stop("Please install testthat", call. = FALSE)
   }
-}
-
-add_suggested_package <- function(path, name) {
-  desc <- as.list(read.dcf(path)[1, ])
-  suggests <- desc$Suggests
-  if (is.null(suggests)) {
-    suggests <- name
-    changed <- TRUE
-  } else {
-    if (!grepl(name, suggests)) {
-      suggests <- paste0(suggests, ",\n  ", name)
-      changed <- TRUE
-    } else {
-      changed <- FALSE
-    }
-  }
-  if (changed) {
-    desc$Suggests <- suggests
-    write.dcf(desc, path, keep.white = names(desc))
-  }
-  invisible(changed)
 }
