@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to make developing R code easier
-Version: 1.6
+Version: 1.6.1
 Authors@R: as.person(c(
     "Hadley Wickham <hadley@rstudio.com> [aut, cre]",
     "Winston Chang [aut]",
@@ -14,7 +14,7 @@ Imports: httr (>= 0.4), RCurl, utils, tools, methods, memoise, whisker,
 Suggests: testthat (>= 0.7), roxygen2 (>= 4.0.2), BiocInstaller, Rcpp
         (>= 0.10.0), MASS, rmarkdown, knitr
 License: GPL (>= 2)
-Packaged: 2014-09-22 16:53:05 UTC; hadley
+Packaged: 2014-10-07 18:36:53 UTC; hadley
 Author: Hadley Wickham [aut, cre],
   Winston Chang [aut],
   RStudio [cph],
@@ -23,4 +23,4 @@ Author: Hadley Wickham [aut, cre],
 Maintainer: Hadley Wickham <hadley@rstudio.com>
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2014-09-23 05:49:39
+Date/Publication: 2014-10-07 22:06:39

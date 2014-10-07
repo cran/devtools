@@ -1,4 +1,4 @@
-726a323d263619c23dbf00b987e17d7b *DESCRIPTION
+71c70bd8d495824ba63ff139683ce266 *DESCRIPTION
 0f7fa31f295b18a0f764e1dafd4f3f73 *NAMESPACE
 b5e3ff51d6e59da56c17768d8c68d103 *R/R.r
 a27758c3f1a25b41bdeb7d7ccb5f6028 *R/bash.r
@@ -7,7 +7,7 @@ a322699a492625bd0126b30c098d76f6 *R/build.r
 30d30bfe920d8423e6d94855dc88bd81 *R/check-cran.r
 fcb98bd9f69c86c6bd6d57a3a1952bd1 *R/check-devtools.r
 369989239ca62b4ed7125111391f297f *R/check-doc.r
-4cc11ca289e11e7a3cf7601e712edf5a *R/check.r
+76a66f43cc49a54d2a524e51923e5c33 *R/check.r
 5f1a531c16341ebaf92723656c9d7c63 *R/clean.r
 a361d44b8612bd6cfe85b4e3732d2e53 *R/compile-dll.r
 818b25e7e6f5bde4abe4140d4d8aef30 *R/cran.r
@@ -25,7 +25,7 @@ ef7fdb2196f7c4a8d8309dd82cff20e8 *R/github.R
 47e4c4eb23310f6d76d0ca8d769d15e1 *R/has-devel.r
 4e5fc50cfdc279ab70244882a3a525bf *R/has-tests.r
 58b9518f1d6e8b9086bfe2146e6f50a2 *R/imports-env.r
-0cbab0d19bd83c0c4f2398dac0992c31 *R/infrastructure.R
+20c2eed982b9c84002956b74fd319b1d *R/infrastructure.R
 134e0376f9cb38d09922b4c1e63c9f91 *R/inst.r
 ea454fb0fe7fe168ca24c76fb0346829 *R/install-bitbucket.r
 ee2f0211c8466f2a196751655002e0e0 *R/install-git.r
@@ -71,11 +71,12 @@ d0761bc17210200a3843d4036ee8f9ac *R/unload.r
 500c67591d2fcc55a3dd59eb73a4ad67 *R/vignette-r.r
 bd6aa5b26e7b1a6178d59f1ec2206e54 *R/vignettes.r
 78e6a47190fdb758c534a2ad90b86050 *R/wd.r
-a1a4340184e89aec39c25af954757b04 *R/with-debug.r
+02e5a0e92e4cdf405b69c7c521fc5226 *R/with-debug.r
 bc9a52278601d1bca30dbb1efcee90bc *R/with.r
 8aef3c02473af21bc90a6cc8845bcb41 *R/zzz.r
-50ce8e9d263000498b73aaf7a1c78845 *README.md
+cbce8c5e1b768ebeb2f906d36b632528 *README.md
 9bfbcb6421618728d2a470a386d2b868 *inst/templates/packagename-package.r
+a22ea92b08e06a4bbbb38cfd5693e080 *inst/templates/template.Rproj
 b112494cb8925006b418b0d4634063be *inst/templates/testthat.R
 94f768a36689a304a9ddde4612cc21c4 *inst/templates/travis.yml
 0e9f9aa5287017ff25a6ad6575afbc66 *man/as.package.Rd
@@ -84,7 +85,7 @@ b112494cb8925006b418b0d4634063be *inst/templates/testthat.R
 ee8c7a7e4117b1bc58cbf547f7b7bec0 *man/build_github_devtools.Rd
 abb03b90df543bcd1ebffb6e1645c40a *man/build_vignettes.Rd
 e70d0abd66ceca9e2ff4c456e0ba652a *man/build_win.Rd
-d8e888032c6715b5962489b4d21763ad *man/check.Rd
+b1383847813e1f505c62bbaf54c767cd *man/check.Rd
 5c7f7360298a278b9521985da64d5280 *man/check_cran.Rd
 8cea84ee5734b7eddfd3e31e99438263 *man/check_dep_version.Rd
 196bef62208653957a3f5ab3ddda980b *man/check_doc.Rd
