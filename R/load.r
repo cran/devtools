@@ -142,6 +142,8 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
   insert_imports_shims(pkg)
 
   out$data <- load_data(pkg)
+
+  roxygen2::update_collate(pkg$path)
   out$code <- load_code(pkg)
   register_s3(pkg)
   out$dll <- load_dll(pkg)
@@ -185,7 +187,7 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
 #'   Arguments that take a list
 #' @param quiet if \code{TRUE}, suppresses output from this function.
 #' @export
-create_description <- function(path, extra = getOption("devtools.desc"),
+create_description <- function(path = ".", extra = getOption("devtools.desc"),
                                quiet = FALSE) {
   path <- check_dir(path)
   desc_path <- file.path(path, "DESCRIPTION")
@@ -198,7 +200,7 @@ create_description <- function(path, extra = getOption("devtools.desc"),
       call. = FALSE)
   }
 
-  desc <- build_description(basename(normalizePath(path)), extra)
+  desc <- build_description(extract_package_name(path), extra)
 
   if (!quiet) {
     message("No DESCRIPTION found. Creating with values:\n\n")
@@ -211,11 +213,12 @@ create_description <- function(path, extra = getOption("devtools.desc"),
 }
 
 build_description <- function(name, extra = list()) {
+  check_package_name(name)
 
   defaults <- compact(list(
     Package = name,
-    Title = "What the package does (one line)",
-    Version = "0.1",
+    Title = "What the Package Does (one line, title case)",
+    Version = "0.0.0.9000",
     "Authors@R" = getOption("devtools.desc.author"),
     Description = "What the package does (one paragraph)",
     Depends = paste0("R (>= ", as.character(getRversion()) ,")"),
