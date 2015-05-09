@@ -1,6 +1,5 @@
 #' Add useful infrastructure to a package.
 #'
-#'
 #' @param pkg package description, can be path or package name. See
 #'   \code{\link{as.package}} for more information.
 #' @name infrastructure
@@ -37,6 +36,33 @@ use_testthat <- function(pkg = ".") {
 #' @export
 add_test_infrastructure <- use_testthat
 
+#' @section \code{use_test}:
+#' Add a test file, also add testing infrastructure if necessary.
+#' This will create \file{tests/testthat/test-<name>.R} with a user-specified
+#' name for the test.  Will fail if the file exists.
+#' @rdname infrastructure
+#' @aliases add_test_infrastructure
+#' @export
+use_test <- function(name, pkg = ".") {
+  pkg <- as.package(pkg)
+
+  check_testthat()
+  if (!uses_testthat(pkg)) {
+    use_testthat(pkg)
+  }
+
+  path <- sprintf("tests/testthat/test-%s.R", name)
+  if (file.exists(file.path(pkg$path, path))) {
+    stop("File ", path, " exists", call. = FALSE)
+  }
+
+  writeLines(
+    render_template("test-example.R", list(test_name = name)),
+    file.path(pkg$path, path))
+
+  message("Test file created in ", path)
+}
+
 #' @section \code{use_rstudio}:
 #' Does not modify \code{.Rbuildignore} as RStudio will do that when
 #' opened for the first time.
@@ -56,6 +82,7 @@ use_rstudio <- function(pkg = ".") {
   file.copy(template_path, path)
 
   add_git_ignore(pkg, c(".Rproj.user", ".Rhistory", ".RData"))
+  add_build_ignore(pkg, c("^.*\\.Rproj$", "^\\.Rproj\\.user$"), escape = FALSE)
 
   invisible(TRUE)
 }
@@ -64,7 +91,7 @@ use_rstudio <- function(pkg = ".") {
 add_rstudio_project <- use_rstudio
 
 
-#' @section \code{use_knitr}:
+#' @section \code{use_vignette}:
 #' Adds needed packages to \code{DESCRIPTION}, and creates draft vignette
 #' in \code{vignettes/}. It adds \code{inst/doc} to \code{.gitignore}
 #' so you don't accidentally check in the built vignettes.
@@ -125,12 +152,12 @@ use_travis <- function(pkg = ".") {
     stop(".travis.yml already exists", call. = FALSE)
   }
 
-  gh <- github_info(pkg)
+  gh <- github_info(pkg$path)
   message("Adding .travis.yml to ", pkg$package, ". Next: \n",
     " * Turn on travis for this repo at https://travis-ci.org/profile\n",
     " * Add a travis shield to your README.md:\n",
     "[![Travis-CI Build Status]",
-       "(https://travis-ci.org/", gh$username, "/", gh$repo, ".png?branch=master)]",
+       "(https://travis-ci.org/", gh$username, "/", gh$repo, ".svg?branch=master)]",
        "(https://travis-ci.org/", gh$username, "/", gh$repo, ")"
   )
 
@@ -138,6 +165,40 @@ use_travis <- function(pkg = ".") {
   file.copy(template_path, path)
 
   add_build_ignore(pkg, ".travis.yml")
+
+  invisible(TRUE)
+}
+
+#' @rdname infrastructure
+#' @section \code{use_coveralls}:
+#' Add coveralls to basic travis template to a package.
+#' @export
+use_coveralls <- function(pkg = ".") {
+  pkg <- as.package(pkg)
+
+  path <- file.path(pkg$path, ".travis.yml")
+  if (!file.exists(path)) {
+    stop(".travis.yml does not exist, please run `use_travis()` to create it", call. = FALSE)
+  }
+
+  travis_content <- readLines(file.path(pkg$path, ".travis.yml"))
+
+  if (any(grepl("coveralls()", travis_content))) {
+    stop("coveralls information already added to .travis.yml", call. = FALSE)
+  }
+
+  gh <- github_info(pkg$path)
+  message("Adding coveralls information into .travis.yml for ", pkg$package, ". Next: \n",
+    " * Turn on coveralls for this repo at https://coveralls.io/repos/new\n",
+    " * Add a coveralls shield to your README.md:\n",
+    "[![Coverage Status]",
+      "(https://img.shields.io/coveralls/", gh$username, "/", gh$repo, ".svg)]",
+      "(https://coveralls.io/r/", gh$username, "/", gh$repo, "?branch=master)\n",
+    " * Add the following to .travis.yml:\n",
+    "r_github_packages:\n",
+    "  - jimhester/covr\n",
+    "after_success:\n",
+    "  - Rscript -e 'library(covr);coveralls()'")
 
   invisible(TRUE)
 }
@@ -158,7 +219,7 @@ use_appveyor <- function(pkg = ".") {
     stop("appveyor.yml already exists", call. = FALSE)
   }
 
-  gh <- github_info(pkg)
+  gh <- github_info(pkg$path)
   message("Adding appveyor.yml to ", pkg$package, ". Next: \n",
           " * Turn on AppVeyor for this repo at https://ci.appveyor.com/projects\n",
           " * Add an AppVeyor shield to your README.md:\n",
@@ -183,7 +244,7 @@ use_package_doc <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
   path <- file.path("R", paste(pkg$package, "-package.r", sep = ""))
-  if (file.exists(path)) {
+  if (file.exists(file.path(pkg$path, path))) {
     stop(path, " already exists", call. = FALSE)
   }
 
@@ -393,31 +454,6 @@ use_build_ignore <- function(files, escape = TRUE, pkg = ".") {
   invisible(TRUE)
 }
 
-#' Add a git hook.
-#'
-#' @param hook Hook name. One of "pre-commit", "prepare-commit-msg",
-#'   "commit-msg", "post-commit", "applypatch-msg", "pre-applypatch",
-#'   "post-applypatch", "pre-rebase", "post-rewrite", "post-checkout",
-#'   "post-merge", "pre-push", "pre-auto-gc".
-#' @param script Text of script to run
-#' @param pkg package description, can be path or package name.  See
-#'   \code{\link{as.package}} for more information
-#' @export
-#' @family infrastructure
-#' @keywords internal
-use_git_hook <- function(hook, script, pkg = ".") {
-  pkg <- as.package(pkg)
-
-  hook_dir <- file.path(pkg$path, ".git", "hooks")
-  if (!file.exists(hook_dir)) {
-    stop("This project doesn't use git", call. = FALSE)
-  }
-
-  hook_path <- file.path(hook_dir, hook)
-  writeLines(script, hook_path)
-  Sys.chmod(hook_path, "0744")
-}
-
 #' Use README.Rmd
 #'
 #' This creates `README.Rmd` from template and adds to \code{.Rbuildignore}.
@@ -447,7 +483,7 @@ use_readme_rmd <- function(pkg = ".") {
     rule()
   }
   use_build_ignore("README.Rmd", pkg = pkg)
-  use_build_ignore("^README-*\\.png$", escape = FALSE, pkg = pkg)
+  use_build_ignore("^README-.*\\.png$", escape = FALSE, pkg = pkg)
 
   if (uses_git(pkg) && file.exists(pkg$path, ".git", "hooks", "pre-commit")) {
     message("Adding pre-commit hook")
@@ -470,11 +506,11 @@ use_revdep <- function(pkg = ".") {
   dir.create(file.path(pkg$path, "revdep"), showWarnings = FALSE)
   use_build_ignore("revdep", pkg = pkg)
 
-  message("Add revdep subdirectories to .gitigore")
+  message("Add revdep subdirectories to .gitignore")
   path <- file.path(pkg$path, "revdep", ".gitignore")
   union_write(path, "**/")
 
-  if (!file.exists("revdep/check.R")) {
+  if (!file.exists(file.path(pkg$path, "revdep/check.R"))) {
     message("Adding revdep/check.R template")
     writeLines(render_template("revdep.R", list(name = pkg$package)),
       file.path(pkg$path, "revdep", "check.R"))
@@ -500,17 +536,33 @@ use_cran_comments <- function(pkg = ".") {
   invisible()
 }
 
-add_build_ignore <- function(pkg = ".", files, escape = TRUE) {
-  use_build_ignore(files, escape = escape, pkg = pkg)
-}
-
-add_git_ignore <- function(pkg = ".", ignores) {
+#' @rdname infrastructure
+#' @section \code{use_code_of_conduct}:
+#' Add a code of conduct to from \url{http://contributor-covenant.org}.
+#'
+#' @export
+#' @aliases add_travis
+use_code_of_conduct <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
-  path <- file.path(pkg$path, ".gitignore")
-  union_write(path, ignores)
+  comments <- file.path(pkg$path, "CONDUCT.md")
+  if (file.exists(comments))
+    stop("CONDUCT.md already exists", call. = FALSE)
 
-  invisible(TRUE)
+  message("* Creating CONDUCT.md")
+  writeLines(render_template("CONDUCT.md", list()), comments)
+
+  message("* Adding CONDUCT.md to .Rbuildignore")
+  use_build_ignore("CONDUCT.md")
+
+  message("* Don't forget to describe the code of conduct in your README.md:")
+  message("Please note that this project is released with a ",
+    "[Contributor Code of Conduct](CONDUCT.md). ", "By participating in this ",
+    "project you agree to abide by its terms.")
+}
+
+add_build_ignore <- function(pkg = ".", files, escape = TRUE) {
+  use_build_ignore(files, escape = escape, pkg = pkg)
 }
 
 union_write <- function(path, new_lines) {
@@ -524,3 +576,16 @@ union_write <- function(path, new_lines) {
   writeLines(all, path)
 }
 
+
+#' @rdname infrastructure
+#' @section \code{use_cran_badge}:
+#' Add a badge to show CRAN status and version number on the README
+#' @export
+use_cran_badge <- function(pkg = ".") {
+  pkg <- as.package(pkg)
+  message(
+    " * Add a CRAN status shield by adding the following line to your README:\n",
+    "[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/", pkg$package, ")](http://cran.r-project.org/web/packages/", pkg$package, ")"
+  )
+  invisible(TRUE)
+}

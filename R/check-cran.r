@@ -23,7 +23,7 @@
 #' @param revdep_pkg Optional name of a package for which this check is
 #'   checking the reverse dependencies of. This is normally passed in from
 #'   \code{\link{revdep_check}}, and is used only for logging.
-#' @return invisible \code{TRUE} if successful and no ERRORs or WARNINGS.
+#' @return Returns (invisibly) the directory where check results are stored.
 #' @keywords internal
 #' @export
 check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
@@ -43,15 +43,6 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
   old <- options(warn = 1)
   on.exit(options(old), add = TRUE)
 
-  rule("Installing dependencies")
-  message("Determining available packages") # --------------------------------
-  repos <- c(CRAN = "http://cran.rstudio.com/")
-  if (bioconductor) {
-    repos <- c(repos, BiocInstaller::biocinstallRepos())
-  }
-  available_src <- available_packages(repos, "source")
-  available_bin <- available_packages(repos, type)
-
   # Create and use temporary library
   if (!file.exists(libpath)) dir.create(libpath)
   libpath <- normalizePath(libpath)
@@ -60,41 +51,18 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
   libpaths_orig <- set_libpaths(libpath)
   on.exit(.libPaths(libpaths_orig), add = TRUE)
 
-  # Update/install dependencies ------------------------------------------------
-  # Find all dependencies of reverse dependencies: need suggested packages for
-  # the packages we're checking, but only Depends and Imports for their
-  # dependencies.
-  find_deps <- function(pkgs, ...) {
-    all <- tools::package_dependencies(pkgs, db = available_bin, ...)
-    unique(unlist(all))
+  rule("Installing dependencies") # --------------------------------------------
+  repos <- c(CRAN = "http://cran.rstudio.com/")
+  if (bioconductor) {
+    repos <- c(repos, BiocInstaller::biocinstallRepos())
   }
-  deps <- find_deps(pkgs, "most")
-  deps <- c(deps, find_deps(deps, c("Depends", "Imports"), recursive = TRUE))
+  available_src <- available_packages(repos, "source")
 
-  # Install if out of date or not already installed
-  old <- old.packages(repos = repos, type = type,
-    available = available_bin)[, "Package"]
-  inst <- installed.packages()[, "Package"]
-  to_install <- sort(union(
-    intersect(deps, old),
-    setdiff(deps, inst)
-  ))
+  message("Determining available packages")
+  deps <- package_deps(pkgs, repos = repos, type = type)
+  update(deps, Ncpus = threads)
 
-  known <- intersect(to_install, rownames(available_bin))
-  unknown <- setdiff(to_install, rownames(available_bin))
-
-  if (length(known) > 0) {
-    message("Installing ", length(known), " missing/outdated dependencies")
-    lapply(known, function(pkg) {
-      message("Installing ", pkg)
-      utils::install.packages(pkg, quiet = TRUE, repos = repos,
-        dependencies = FALSE)
-    })
-  }
-  if (length(unknown) > 0) {
-    message("Skipping packages that lack binary version for this platform: \n",
-      paste(unknown, collapse = ", "))
-  }
+  rule("Checking packages") # --------------------------------------------------
 
   # Download and check each package, parsing output as we go.
   check_pkg <- function(i) {
@@ -133,7 +101,6 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     NULL
   }
 
-  rule("Checking packages")
   if (identical(as.integer(threads), 1L)) {
     lapply(seq_along(pkgs), check_pkg)
   } else {
@@ -141,5 +108,5 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
       mc.cores = threads)
   }
 
-  check_dir
+  invisible(check_dir)
 }

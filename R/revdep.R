@@ -112,6 +112,11 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   pkg <- as.package(pkg)
   rule("Reverse dependency checks for ", pkg$package, pad = "=")
 
+  if (!file.exists(libpath))
+    dir.create(libpath)
+  if (!file.exists(srcpath))
+    dir.create(srcpath)
+
   message("Installing ", pkg$package)
   with_libpaths(libpath, install(pkg, reload = FALSE, quiet = TRUE))
   on.exit(remove.packages(pkg$package, libpath), add = TRUE)
@@ -119,7 +124,7 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   message("Finding reverse dependencies")
   pkgs <- revdep(pkg$package, recursive = recursive, ignore = ignore,
     bioconductor = bioconductor, dependencies = dependencies)
-  res <- check_cran(pkgs, revdep_pkg = pkg$package, libpath = libpath,
+  check_cran(pkgs, revdep_pkg = pkg$package, libpath = libpath,
     srcpath = srcpath, bioconductor = bioconductor, type = type,
     threads = threads, check_dir = check_dir)
 

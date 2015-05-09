@@ -39,11 +39,23 @@
 #'   release it.
 #' @export
 release <- function(pkg = ".", check = TRUE) {
+  dr_d <- dr_devtools()
+  if (!dr_d)
+    print(dr_d)
+
   pkg <- as.package(pkg)
 
   # Figure out if this is a new package
   cran_version <- cran_pkg_version(pkg$package)
   new_pkg <- is.null(cran_version)
+
+  if (uses_git(pkg$path)) {
+    if (git_uncommitted(pkg$path))
+      warning("Uncommited changes in git.", immediate. = TRUE, call. = FALSE)
+
+    if (git_sync_status(pkg$path))
+      warning("Git not synched with remote.", immediate. = TRUE, call. = FALSE)
+  }
 
   if (check) {
     check(pkg, cran = TRUE, check_version = TRUE, manual = TRUE)
@@ -53,6 +65,10 @@ release <- function(pkg = ".", check = TRUE) {
       return(invisible())
 
   } else {
+    release_checks(pkg)
+    if (yesno("Does R CMD check pass with no ERRORs or WARNINGs?"))
+      return(invisible())
+
     # Even if we don't run the full checks, at least check that the package
     # version is sufficient for submission to CRAN.
 
@@ -76,6 +92,13 @@ release <- function(pkg = ".", check = TRUE) {
 
   if (yesno("Have you checked on win-builder (with build_win())?"))
     return(invisible())
+
+  if (!new_pkg) {
+    cran_url <- paste0("http://cran.rstudio.com/web/checks/check_results_",
+      pkg$package, ".html")
+    if (yesno("Have you fixed all existing problems at \n", cran_url, " ?"))
+      return(invisible())
+  }
 
   if (file.exists("NEWS")) {
     try(print(show_news(pkg)))
@@ -109,10 +132,12 @@ release <- function(pkg = ".", check = TRUE) {
   if (yesno("Is your email address ", maintainer(pkg)$email, "?"))
     return(invisible())
 
+  built_path <- build_cran(pkg)
+
   if (yesno("Ready to submit?"))
     return(invisible())
 
-  submit_cran(pkg)
+  upload_cran(pkg, built_path)
 
   if (file.exists(file.path(pkg$path, ".git"))) {
     message("Don't forget to tag the release when the package is accepted!")
@@ -243,13 +268,22 @@ cran_submission_url <- "http://xmpalantir.wu.ac.at/cransubmit/index2.php"
 #' @export
 #' @keywords internal
 submit_cran <- function(pkg = ".") {
+  built_path <- build_cran(pkg)
+  upload_cran(pkg, built_path)
+}
+
+build_cran <- function(pkg) {
+  message("Building")
+  built_path <- build(pkg, tempdir(), manual = TRUE)
+  message("File size: ",
+          format(as.object_size(file.info(built_path)$size), units = "auto"))
+  built_path
+}
+
+upload_cran <- function(pkg, built_path) {
   pkg <- as.package(pkg)
   maint <- maintainer(pkg)
   comments <- cran_comments(pkg)
-
-  message("Building")
-  built_path <- build(pkg, tempdir(), manual = TRUE)
-  message("File size: ", file.info(built_path)$size, " bytes")
 
   # Initial upload ---------
   message("Uploading package & comments")
@@ -287,3 +321,5 @@ submit_cran <- function(pkg = ".") {
 
   invisible(TRUE)
 }
+
+as.object_size <- function(x) structure(x, class = "object_size")

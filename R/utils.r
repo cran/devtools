@@ -2,7 +2,7 @@
 # whether each exists and is a directory.
 dir.exists <- function(x) {
   res <- file.exists(x) & file.info(x)$isdir
-  setNames(res, x)
+  stats::setNames(res, x)
 }
 
 compact <- function(x) {
@@ -51,6 +51,11 @@ read_dcf <- function(path) {
 }
 
 write_dcf <- function(path, desc) {
+  desc <- unlist(desc)
+  # Add back in continuation characters
+  desc <- gsub("\n[ \t]*\n", "\n .\n ", desc, perl = TRUE, useBytes = TRUE)
+  desc <- gsub("\n \\.([^\n])", "\n  .\\1", desc, perl = TRUE, useBytes = TRUE)
+
   text <- paste0(names(desc), ": ", desc, collapse = "\n")
 
   if (substr(text, nchar(text), 1) != "\n") {
@@ -74,6 +79,12 @@ download <- function(path, url, ...) {
   httr::stop_for_status(request)
   writeBin(httr::content(request, "raw"), path)
   path
+}
+
+download_text <- function(url, ...) {
+  request <- httr::GET(url, ...)
+  httr::stop_for_status(request)
+  httr::content(request, "text")
 }
 
 last <- function(x) x[length(x)]

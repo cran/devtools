@@ -61,7 +61,7 @@ mock_github_GET <- function(path) {
 }
 
 test_that("GitHub references are resolved correctly", {
-  default_params <- as.list(setNames(nm=c("repo", "username")))
+  default_params <- as.list(stats::setNames(nm=c("repo", "username")))
   with_mock("github_GET", mock_github_GET, {
     expect_equal(github_resolve_ref(NULL, list())$ref, "master")
     expect_equal(github_resolve_ref("some-ref", list())$ref, "some-ref")
@@ -69,4 +69,10 @@ test_that("GitHub references are resolved correctly", {
     expect_equal(github_resolve_ref(github_pull(123), default_params)$ref, "some-pull-request")
     expect_equal(github_resolve_ref(github_release(), default_params)$ref, "some-release")
   })
+})
+
+test_that("Github repos with submodules are identified correctly", {
+  expect_equal(github_has_remotes(github_remote("hadley/devtools")), FALSE)
+  ## a r package repo known to use submodules
+  expect_equal(github_has_remotes(github_remote("armstrtw/rzmq")), TRUE)
 })
