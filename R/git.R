@@ -3,22 +3,21 @@ uses_git <- function(path = ".") {
 }
 
 git_sha1 <- function(n = 10, path = ".") {
-  r <- git2r::repository(path)
-  sha <- git2r::commits(r)[[1]]@sha # sha of most recent commit
+  r <- git2r::repository(path, discover = TRUE)
+  sha <- git2r::commits(r, n = 1)[[1]]@sha # sha of most recent commit
   substr(sha, 1, n)
 }
 
 git_uncommitted <- function(path = ".") {
-  r <- git2r::repository(path)
-  st <- vapply(git2r::status(r, verbose = FALSE), length, integer(1))
+  r <- git2r::repository(path, discover = TRUE)
+  st <- vapply(git2r::status(r), length, integer(1))
   any(st != 0)
 }
 
-#' @importMethodsFrom git2r head
 git_sync_status <- function(path = ".") {
-  r <- git2r::repository(path)
+  r <- git2r::repository(path, discover = TRUE)
 
-  upstream <- git2r::branch_get_upstream(head(r))
+  upstream <- git2r::branch_get_upstream(git2r::head(r))
   # fetch(r, branch_remote_name(upstream))
 
   c1 <- git2r::commits(r)[[1]]
@@ -64,18 +63,39 @@ git_path <- function(git_binary_name = NULL) {
 
 # GitHub ------------------------------------------------------------------
 
-github_info <- function(path = ".") {
+uses_github <- function(path = ".") {
   if (!uses_git(path))
+    return(FALSE)
+
+  r <- git2r::repository(path, discover = TRUE)
+  r_remote_urls <- git2r::remote_url(r)
+
+  any(grepl("github", r_remote_urls))
+}
+
+github_info <- function(path = ".", remote_name = NULL) {
+  if (!uses_github(path))
     return(github_dummy)
 
-  r <- git2r::repository(path)
-  if (!("origin" %in% git2r::remotes(r)))
-    return(github_dummy)
+  r <- git2r::repository(path, discover = TRUE)
+  r_remote_urls <- grep("github", remote_urls(r), value = TRUE)
 
-  github_remote_parse(git2r::remote_url(r, "origin"))
+  if (!is.null(remote_name) && !remote_name %in% names(r_remote_urls))
+    stop("no github-related remote named ", remote_name, " found")
+
+  remote_name <- c(remote_name, "origin", names(r_remote_urls))
+  x <- r_remote_urls[remote_name]
+  x <- x[!is.na(x)][1]
+
+  github_remote_parse(x)
 }
 
 github_dummy <- list(username = "<USERNAME>", repo = "<REPO>")
+
+remote_urls <- function(r) {
+  remotes <- git2r::remotes(r)
+  stats::setNames(git2r::remote_url(r, remotes), remotes)
+}
 
 github_remote_parse <- function(x) {
   if (length(x) == 0) return(github_dummy)
@@ -88,7 +108,7 @@ github_remote_parse <- function(x) {
     # git@github.com:hadley/devtools.git
     re <- "github.com:(.*?)/(.*)\\.git"
   } else {
-    stop("Unknown github repo format", call. = FALSE)
+    stop("Unknown GitHub repo format", call. = FALSE)
   }
 
   m <- regexec(re, x)

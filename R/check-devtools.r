@@ -29,7 +29,7 @@ check_dev_versions <- function(pkg = ".") {
   lengths <- vapply(parsed, length, integer(1))
   last_ver <- vapply(parsed, function(x) x[[length(x)]], integer(1))
 
-  is_dev <- lengths == 4 && last_ver >= 9000
+  is_dev <- lengths == 4 & last_ver >= 9000
   if (!any(is_dev)) {
     message("OK")
     return(invisible(TRUE))
@@ -38,7 +38,7 @@ check_dev_versions <- function(pkg = ".") {
   message(
     "WARNING",
     "\n  Depends on devel versions of: ",
-    "\n    ", paste0(deps$name[is_dev], collapse = ", "),
+    "\n    ", paste0(deps$package[is_dev], collapse = ", "),
     "\n  Release these packages to CRAN and bump version number.")
 
   return(invisible(FALSE))
@@ -56,7 +56,7 @@ check_version <- function(pkg = ".") {
   }
   message(
     "WARNING",
-    "\n  Version number should have exactly three components"
+    "\n  Version (", pkg$version, ") should have exactly three components"
   )
 
   return(invisible(FALSE))

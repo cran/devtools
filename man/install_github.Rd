@@ -2,7 +2,7 @@
 % Please edit documentation in R/install-github.r
 \name{install_github}
 \alias{install_github}
-\title{Attempts to install a package directly from github.}
+\title{Attempts to install a package directly from GitHub.}
 \usage{
 install_github(repo, username = NULL, ref = "master", subdir = NULL,
   auth_token = github_pat(), host = "api.github.com", ...)
@@ -28,7 +28,7 @@ supply to this argument. This is safer than using a password because
 you can easily delete a PAT without affecting any others. Defaults to
 the \code{GITHUB_PAT} environment variable.}
 
-\item{host}{Github API host to use. Override with your github enterprise
+\item{host}{GitHub API host to use. Override with your GitHub enterprise
 hostname, for example, \code{"github.hostname.com/api/v3"}.}
 
 \item{...}{Other arguments passed on to \code{\link{install}}.}
@@ -69,9 +69,8 @@ install_github("hadley/private", auth_token = "abc")
 \code{\link{github_pull}}
 
 Other package installation: \code{\link{install_bitbucket}};
-  \code{\link{install_gitorious}};
   \code{\link{install_git}}; \code{\link{install_svn}};
   \code{\link{install_url}}; \code{\link{install_version}};
-  \code{\link{install}}
+  \code{\link{install}}; \code{\link{uninstall}}
 }
 

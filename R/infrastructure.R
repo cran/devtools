@@ -103,6 +103,7 @@ use_vignette <- function(name, pkg = ".") {
   pkg <- as.package(pkg)
 
   add_desc_package(pkg, "Suggests", "knitr")
+  add_desc_package(pkg, "Suggests", "rmarkdown")
   add_desc_package(pkg, "VignetteBuilder", "knitr")
   dir.create(file.path(pkg$path, "vignettes"), showWarnings = FALSE)
 
@@ -169,11 +170,21 @@ use_travis <- function(pkg = ".") {
   invisible(TRUE)
 }
 
-#' @rdname infrastructure
+#' @rdname devtools-deprecated
 #' @section \code{use_coveralls}:
 #' Add coveralls to basic travis template to a package.
 #' @export
 use_coveralls <- function(pkg = ".") {
+  .Deprecated("use_coverage(type = \"coveralls\")")
+  use_coverage(pkg, type = "coveralls")
+}
+
+#' @rdname infrastructure
+#' @param type CI tool to use. Currently supports codecov and coverall.
+#' @section \code{use_coverage}:
+#' Add test code coverage to basic travis template to a package.
+#' @export
+use_coverage <- function(pkg = ".", type = c("codecov", "coveralls")) {
   pkg <- as.package(pkg)
 
   path <- file.path(pkg$path, ".travis.yml")
@@ -183,22 +194,44 @@ use_coveralls <- function(pkg = ".") {
 
   travis_content <- readLines(file.path(pkg$path, ".travis.yml"))
 
-  if (any(grepl("coveralls()", travis_content))) {
-    stop("coveralls information already added to .travis.yml", call. = FALSE)
-  }
+  type <- match.arg(type)
 
-  gh <- github_info(pkg$path)
-  message("Adding coveralls information into .travis.yml for ", pkg$package, ". Next: \n",
-    " * Turn on coveralls for this repo at https://coveralls.io/repos/new\n",
-    " * Add a coveralls shield to your README.md:\n",
-    "[![Coverage Status]",
-      "(https://img.shields.io/coveralls/", gh$username, "/", gh$repo, ".svg)]",
-      "(https://coveralls.io/r/", gh$username, "/", gh$repo, "?branch=master)\n",
-    " * Add the following to .travis.yml:\n",
-    "r_github_packages:\n",
-    "  - jimhester/covr\n",
-    "after_success:\n",
-    "  - Rscript -e 'library(covr);coveralls()'")
+  switch(type,
+    codecov = {
+      if (any(grepl("codecov", travis_content))) {
+        stop("codecov information already added to .travis.yml", call. = FALSE)
+      }
+
+      gh <- github_info(pkg$path)
+      message("Adding codecov information into .travis.yml for ", pkg$package, ". Next: \n",
+        "[![Coverage Status]",
+        "(https://img.shields.io/codecov/c/github/", gh$username, "/", gh$repo, "/master.svg)]",
+        "(https://codecov.io/github/", gh$username, "/", gh$repo, "?branch=master)\n",
+        " * Add the following to .travis.yml:\n",
+        "r_packages:\n",
+        "  - covr\n",
+        "after_success:\n",
+        "  - Rscript -e 'covr::codecov()'")
+    },
+
+    coveralls = {
+      if (any(grepl("coveralls", travis_content))) {
+        stop("coveralls information already added to .travis.yml", call. = FALSE)
+      }
+
+      gh <- github_info(pkg$path)
+      message("Adding coveralls information into .travis.yml for ", pkg$package, ". Next: \n",
+        " * Turn on coveralls for this repo at https://coveralls.io/repos/new\n",
+        " * Add a coveralls shield to your README.md:\n",
+        "[![Coverage Status]",
+        "(https://img.shields.io/coveralls/", gh$username, "/", gh$repo, ".svg)]",
+        "(https://coveralls.io/r/", gh$username, "/", gh$repo, "?branch=master)\n",
+        " * Add the following to .travis.yml:\n",
+        "r_github_packages:\n",
+        "  - jimhester/covr\n",
+        "after_success:\n",
+        "  - Rscript -e 'covr::coveralls()'")
+    })
 
   invisible(TRUE)
 }
@@ -224,7 +257,7 @@ use_appveyor <- function(pkg = ".") {
           " * Turn on AppVeyor for this repo at https://ci.appveyor.com/projects\n",
           " * Add an AppVeyor shield to your README.md:\n",
           "[![AppVeyor Build Status]",
-          "(https://ci.appveyor.com/api/projects/status/github/", gh$username, "/", gh$repo, "?branch=master)]",
+          "(https://ci.appveyor.com/api/projects/status/github/", gh$username, "/", gh$repo, "?branch=master&svg=true)]",
           "(https://ci.appveyor.com/project/", gh$username, "/", gh$repo, ")"
   )
 
@@ -392,8 +425,9 @@ use_data <- function(..., pkg = ".", internal = FALSE, overwrite = FALSE,
     }
     message("Saving ", paste(objs, collapse = ", "), " to ",
       paste0("data/", basename(paths), collapse = ", "))
+    envir <- parent.frame()
     save_one <- function(name, path) {
-      save(list = name, file = path, envir = parent.frame(), compress = compress)
+      save(list = name, file = path, envir = envir, compress = compress)
     }
     Map(save_one, objs, paths)
 
@@ -485,7 +519,7 @@ use_readme_rmd <- function(pkg = ".") {
   use_build_ignore("README.Rmd", pkg = pkg)
   use_build_ignore("^README-.*\\.png$", escape = FALSE, pkg = pkg)
 
-  if (uses_git(pkg) && file.exists(pkg$path, ".git", "hooks", "pre-commit")) {
+  if (uses_git(pkg$path) && file.exists(pkg$path, ".git", "hooks", "pre-commit")) {
     message("Adding pre-commit hook")
     use_git_hook("pre-commit", render_template("readme-rmd-pre-commit.sh"),
       pkg = pkg)
@@ -585,7 +619,7 @@ use_cran_badge <- function(pkg = ".") {
   pkg <- as.package(pkg)
   message(
     " * Add a CRAN status shield by adding the following line to your README:\n",
-    "[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/", pkg$package, ")](http://cran.r-project.org/web/packages/", pkg$package, ")"
+    "[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/", pkg$package, ")](http://cran.r-project.org/package=", pkg$package, ")"
   )
   invisible(TRUE)
 }

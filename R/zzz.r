@@ -1,3 +1,8 @@
+#' @importFrom utils available.packages contrib.url install.packages
+#'   installed.packages menu modifyList packageDescription
+#'   packageVersion remove.packages
+NULL
+
 #' Package development tools for R.
 #'
 #' @section Package options:
@@ -30,6 +35,14 @@
 #' }
 #' @docType package
 #' @name devtools
+NULL
+
+#' Deprecated Functions
+#'
+#' These functions are Deprecated in this release of devtools, they will be
+#' marked as Defunct and removed in a future version.
+#' @name devtools-deprecated
+#' @keywords internal
 NULL
 
 .onLoad <- function(libname, pkgname) {

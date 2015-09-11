@@ -12,7 +12,7 @@ package_deps(pkg, dependencies = NA, repos = getOption("repos"),
 dev_package_deps(pkg = ".", dependencies = NA, repos = getOption("repos"),
   type = getOption("pkgType"))
 
-\method{update}{package_deps}(object, ..., quiet = FALSE)
+\method{update}{package_deps}(object, ..., quiet = FALSE, upgrade = TRUE)
 }
 \arguments{
 \item{pkg}{A character vector of package names. If missing, defaults to
@@ -35,7 +35,9 @@ installation.}
 
 \item{object,...}{Arguments ot}
 
-\item{quiet}{If \code{TRUE}, supress output}
+\item{quiet}{If \code{TRUE}, suppress output}
+
+\item{upgrade}{If \code{TRUE}, also upgrade any of out date dependencies.}
 }
 \value{
 A data frame with additional.

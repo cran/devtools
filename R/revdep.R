@@ -19,7 +19,7 @@
 #'   to follow.
 #' @param bioconductor If \code{TRUE} also look for dependencies amongst
 #'   bioconductor packages.
-#' @param recursive If \code{TRUE} look for full set of recusive dependencies.
+#' @param recursive If \code{TRUE} look for full set of recursive dependencies.
 #' @inheritParams tools::dependsOnPkgs
 #' @seealso \code{\link{revdep_check}()} to run R CMD check on all reverse
 #'   dependencies.
@@ -70,7 +70,7 @@ print.maintainers <- function(x, ...) {
 #' @section Check process:
 #' \enumerate{
 #' \item Install \code{pkg} (in special library, see below).
-#' \item Find all CRAN packges that dependent on \code{pkg}.
+#' \item Find all CRAN packages that depend on \code{pkg}.
 #' \item Install those packages, along with their dependencies.
 #' \item Run \code{R CMD check} on each package.
 #' \item Uninstall \code{pkg} (so other reverse dependency checks don't
@@ -78,12 +78,12 @@ print.maintainers <- function(x, ...) {
 #' }
 #'
 #' @section Package library:
-#' By default \code{revdep_check} uses temporary library to store any packages
+#' By default \code{revdep_check} uses a temporary library to store any packages
 #' that are required by the packages being tested. This ensures that they don't
 #' interfere with your default library, but means that if you restart R
 #' between checks, you'll need to reinstall all the packages. If you're
 #' doing reverse dependency checks frequently, I recommend that you create
-#' a directory for these packages and set \code{option(devtools.libpath)}.
+#' a directory for these packages and set \code{options(devtools.revdep.libpath)}.
 #'
 #' @inheritParams revdep
 #' @param pkg Path to package. Defaults to current directory.
@@ -121,6 +121,12 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   with_libpaths(libpath, install(pkg, reload = FALSE, quiet = TRUE))
   on.exit(remove.packages(pkg$package, libpath), add = TRUE)
 
+  old <- set_envvar(c(
+    NOT_CRAN = "false",
+    RGL_USE_NULL = "true"
+  ))
+  on.exit(set_envvar(old), add = TRUE)
+
   message("Finding reverse dependencies")
   pkgs <- revdep(pkg$package, recursive = recursive, ignore = ignore,
     bioconductor = bioconductor, dependencies = dependencies)
@@ -133,7 +139,7 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
 
 cran_packages <- memoise::memoise(function() {
   local <- file.path(tempdir(), "packages.rds")
-  download.file("http://cran.R-project.org/web/packages/packages.rds", local,
+  utils::download.file("http://cran.R-project.org/web/packages/packages.rds", local,
     mode = "wb", quiet = TRUE)
   on.exit(unlink(local))
   cp <- readRDS(local)

@@ -33,10 +33,10 @@
 #' )
 NULL
 
-with_something <- function(set) {
+with_something <- function(set, reset = set) {
   function(new, code) {
     old <- set(new)
-    on.exit(set(old))
+    on.exit(reset(old))
     force(code)
   }
 }
@@ -128,9 +128,13 @@ set_libpaths <- function(paths) {
   invisible(old)
 }
 
+reset_libpaths <- function(paths) {
+  .libPaths(paths)
+}
+
 #' @rdname with_something
 #' @export
-with_libpaths <- with_something(set_libpaths)
+with_libpaths <- with_something(set_libpaths, reset_libpaths)
 
 # lib ------------------------------------------------------------------------
 
@@ -144,7 +148,7 @@ set_lib <- function(paths) {
 
 #' @rdname with_something
 #' @export
-with_lib <- with_something(set_lib)
+with_lib <- with_something(set_lib, reset_libpaths)
 
 # options --------------------------------------------------------------------
 
@@ -160,7 +164,7 @@ with_options <- with_something(set_options)
 
 #' @rdname with_something
 #' @export
-with_par <- with_something(par)
+with_par <- with_something(graphics::par)
 
 # path -----------------------------------------------------------------------
 
@@ -174,4 +178,54 @@ with_path <- function(new, code, add = TRUE) {
   old <- set_path(new)
   on.exit(set_path(old))
   force(code)
+}
+
+set_makevars <- function(variables,
+                         old_path = file.path("~", ".R", "Makevars"),
+                         new_path = tempfile()) {
+  if (length(variables) == 0) {
+    return()
+  }
+  stopifnot(is.named(variables))
+
+  old <- NULL
+  if (file.exists(old_path)) {
+    lines <- readLines(old_path)
+    old <- lines
+    for (var in names(variables)) {
+      loc <- grep(paste(c("^[[:space:]]*", var, "[[:space:]]*", "="), collapse = ""), lines)
+      if (length(loc) == 0) {
+        lines <- append(lines, paste(sep = "=", var, variables[var]))
+      } else if(length(loc) == 1) {
+        lines[loc] <- paste(sep = "=", var, variables[var])
+      } else {
+        stop("Multiple results for ", var, " found, something is wrong.", .call = FALSE)
+      }
+    }
+  } else {
+    lines <- paste(names(variables), variables, sep = "=")
+  }
+
+  if (!identical(old, lines)) {
+    writeLines(con = new_path, lines)
+  }
+
+  old
+}
+
+#' @rdname with_something
+#' @param path location of existing makevars to modify.
+#' @details If no existing makevars file exists or the fields in \code{new} do
+#' not exist in the existing \code{Makevars} file then the fields are added to
+#' the new file.  Existing fields which are not included in \code{new} are
+#' appended unchanged.  Fields which exist in \code{Makevars} and in \code{new}
+#' are modified to use the value in \code{new}.
+#' @export
+with_makevars <- function(new, code, path = file.path("~", ".R", "Makevars")) {
+  makevars_file <- tempfile()
+  on.exit(unlink(makevars_file), add = TRUE)
+  with_envvar(c(R_MAKEVARS_USER = makevars_file), {
+      set_makevars(new, path, makevars_file)
+      force(code)
+  })
 }

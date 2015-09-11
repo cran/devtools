@@ -17,7 +17,7 @@ precedence.}
 \item{username}{User name. Deprecated: please include username in the
 \code{repo}}
 
-\item{ref}{Desired git reference; culd be a commit, tag, or branch name.
+\item{ref}{Desired git reference; could be a commit, tag, or branch name.
 Defaults to master.}
 
 \item{subdir}{subdirectory within repo that contains the R package.}
@@ -45,9 +45,8 @@ Bitbucket API docs:
   \url{https://confluence.atlassian.com/display/BITBUCKET/Use+the+Bitbucket+REST+APIs}
 
 Other package installation: \code{\link{install_github}};
-  \code{\link{install_gitorious}};
   \code{\link{install_git}}; \code{\link{install_svn}};
   \code{\link{install_url}}; \code{\link{install_version}};
-  \code{\link{install}}
+  \code{\link{install}}; \code{\link{uninstall}}
 }
 

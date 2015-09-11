@@ -6,7 +6,7 @@
 \usage{
 install(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
   args = getOption("devtools.install.args"), quiet = FALSE,
-  dependencies = NA, build_vignettes = FALSE,
+  dependencies = NA, upgrade_dependencies = TRUE, build_vignettes = FALSE,
   keep_source = getOption("keep.source.pkgs"), threads = getOption("Ncpus",
   1), ...)
 }
@@ -36,10 +36,13 @@ value of the option \code{"devtools.install.args"}.}
 packages which this \code{pkg} depends on/links to/suggests. See
 argument \code{dependencies} of \code{\link{install.packages}}.}
 
+\item{upgrade_dependencies}{If \code{TRUE}, the default, will also update
+any out of date dependencies.}
+
 \item{build_vignettes}{if \code{TRUE}, will build vignettes. Normally it is
 \code{build} that's responsible for creating vignettes; this argument makes
 sure vignettes are built even if a build never happens (i.e. because
-\code{local = TRUE}.}
+\code{local = TRUE}).}
 
 \item{keep_source}{If \code{TRUE} will keep the srcrefs from an installed
 package. This is useful for debugging (especially inside of RStudio).
@@ -75,9 +78,8 @@ To install a package in a non-default library, use \code{\link{with_libpaths}}.
   set.
 
 Other package installation: \code{\link{install_bitbucket}};
-  \code{\link{install_github}};
-  \code{\link{install_gitorious}};
-  \code{\link{install_git}}; \code{\link{install_svn}};
-  \code{\link{install_url}}; \code{\link{install_version}}
+  \code{\link{install_github}}; \code{\link{install_git}};
+  \code{\link{install_svn}}; \code{\link{install_url}};
+  \code{\link{install_version}}; \code{\link{uninstall}}
 }
 

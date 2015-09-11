@@ -15,7 +15,8 @@
 #'   "Suggests". \code{NA} is shorthand for "Depends", "Imports" and "LinkingTo"
 #'   and is the default. \code{FALSE} is shorthand for no dependencies (i.e.
 #'   just check this package, not its dependencies).
-#' @param quiet If \code{TRUE}, supress output
+#' @param quiet If \code{TRUE}, suppress output
+#' @param upgrade If \code{TRUE}, also upgrade any of out date dependencies.
 #' @param repos A character vector giving repositories to use.
 #' @param type Type of package to \code{update}.  If "both", will switch
 #'   automatically to "binary" to avoid interactive prompts during package
@@ -75,12 +76,22 @@ dev_package_deps <- function(pkg = ".", dependencies = NA,
                              repos = getOption("repos"),
                              type = getOption("pkgType")) {
   pkg <- as.package(pkg)
+  install_dev_remotes(pkg)
 
   dependencies <- tolower(standardise_dep(dependencies))
   dependencies <- intersect(dependencies, names(pkg))
 
   parsed <- lapply(pkg[tolower(dependencies)], parse_deps)
   deps <- unlist(lapply(parsed, `[[`, "name"), use.names = FALSE)
+
+  if (is_bioconductor(pkg)) {
+    bioc_repos <- BiocInstaller::biocinstallRepos()
+
+    missing_repos <- setdiff(names(bioc_repos), names(repos))
+
+    if (length(missing_repos) > 0)
+      repos[missing_repos] <- bioc_repos[missing_repos]
+  }
 
   package_deps(deps, repos = repos, type = type)
 }
@@ -106,6 +117,57 @@ compare_versions <- function(a, b) {
 
   vapply(seq_along(a), function(i) compare_var(a[[i]], b[[i]]), integer(1))
 }
+
+install_dev_remotes <- function(pkg, ...) {
+  pkg <- as.package(pkg)
+
+  if (!has_dev_remotes(pkg)) {
+    return()
+  }
+
+  types <- dev_remote_type(pkg[["remotes"]])
+
+  lapply(types, function(type) type$fun(type$repository, ...))
+}
+
+# Parse the remotes field split into pieces and get install_ functions for each
+# remote type
+dev_remote_type <- function(remotes = "") {
+
+  if (!nchar(remotes)) {
+    return()
+  }
+
+  dev_packages <- trim_ws(unlist(strsplit(remotes, ",[[:space:]]*")))
+
+  parse_one <- function(x) {
+    pieces <- strsplit(x, "::", fixed = TRUE)[[1]]
+
+    if (length(pieces) == 1) {
+      type <- "github"
+      repo <- pieces
+    } else if (length(pieces) == 2) {
+      type <- pieces[1]
+      repo <- pieces[2]
+    } else {
+      stop("Malformed remote specification '", x, "'", call. = FALSE)
+    }
+    tryCatch(fun <- match.fun(paste0("install_", tolower(type))),
+      error = function(e) {
+        stop("Malformed remote specification '", x, "'", call. = FALSE)
+      })
+    list(repository = repo, type = type, fun = fun)
+  }
+
+  lapply(dev_packages, parse_one)
+}
+
+has_dev_remotes <- function(pkg) {
+  pkg <- as.package(pkg)
+
+  !is.null(pkg[["remotes"]])
+}
+
 
 #' @export
 print.package_deps <- function(x, show_ok = FALSE, ...) {
@@ -136,7 +198,8 @@ print.package_deps <- function(x, show_ok = FALSE, ...) {
 
 #' @export
 #' @rdname package_deps
-update.package_deps <- function(object, ..., quiet = FALSE) {
+#' @importFrom stats update
+update.package_deps <- function(object, ..., quiet = FALSE, upgrade = TRUE) {
   ahead <- object$package[object$diff == 2L]
   if (length(ahead) > 0 && !quiet) {
     message("Skipping ", length(ahead), " packages not available: ",
@@ -149,9 +212,15 @@ update.package_deps <- function(object, ..., quiet = FALSE) {
       paste(missing, collapse = ", "))
   }
 
-  behind <- object$package[object$diff < 0L]
-  if (length(behind) > 0L)
-    install_packages(behind, attr(object, "repos"), attr(object, "type"), ...)
+  if (upgrade) {
+    behind <- object$package[object$diff < 0L]
+  } else {
+    behind <- object$package[is.na(object$available)]
+  }
+  if (length(behind) > 0L) {
+    install_packages(behind, repos = attr(object, "repos"),
+      type = attr(object, "type"), ...)
+  }
 
 }
 
@@ -169,7 +238,8 @@ install_packages <- function(pkgs, repos = getOption("repos"),
     dependencies = dependencies, quiet = quiet)
 }
 
-find_deps <- function(pkgs, available = available.packages(), top_dep = TRUE, rec_dep = NA) {
+find_deps <- function(pkgs, available = available.packages(), top_dep = TRUE,
+                      rec_dep = NA, include_pkgs = TRUE) {
   if (length(pkgs) == 0 || identical(top_dep, FALSE))
     return(character())
 
@@ -182,11 +252,12 @@ find_deps <- function(pkgs, available = available.packages(), top_dep = TRUE, re
   if (length(rec_dep) != 0 && length(top_flat) > 0) {
     rec <- tools::package_dependencies(top_flat, db = available, which = rec_dep,
       recursive = TRUE)
+    rec_flat <- unlist(rec, use.names = FALSE)
   } else {
-    rec <- character()
+    rec_flat <- character()
   }
 
-  unique(unlist(c(pkgs, top, rec), use.names = FALSE))
+  unique(c(if (include_pkgs) pkgs, top_flat, rec_flat))
 }
 
 

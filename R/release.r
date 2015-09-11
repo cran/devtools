@@ -20,7 +20,7 @@
 #' of additional questions to ask.
 #'
 #' You also need to read the CRAN repository policy at
-#' \url{http://cran.r-project.org/web/packages/policies.html} and make
+#' \url{https://cran.r-project.org/web/packages/policies.html} and make
 #' sure you're in line with the policies. \code{release} tries to automate as
 #' many of polices as possible, but it's impossible to be completely
 #' comprehensive, and they do change in between releases of devtools.
@@ -55,6 +55,11 @@ release <- function(pkg = ".", check = TRUE) {
 
     if (git_sync_status(pkg$path))
       warning("Git not synched with remote.", immediate. = TRUE, call. = FALSE)
+  }
+
+  if (has_dev_remotes(pkg)) {
+    warning("Package ", pkg$package, "has a 'Remotes:' entry.  This should be
+      removed before CRAN submission.", immediate. = TRUE, call. = FALSE)
   }
 
   if (check) {
@@ -115,7 +120,7 @@ release <- function(pkg = ".", check = TRUE) {
   deps <- if (new_pkg) 0 else length(revdep(pkg$package))
   if (deps > 0) {
     msg <- paste0("Have you checked the ", deps ," packages that depend on ",
-      "this package (with check_cran())?")
+      "this package (with revdep_check())?")
 
     if (yesno(msg))
       return(invisible())
@@ -178,14 +183,14 @@ yesno <- function(...) {
 email <- function(address, subject, body) {
   url <- paste(
     "mailto:",
-    URLencode(address),
-    "?subject=", URLencode(subject),
-    "&body=", URLencode(body),
+    utils::URLencode(address),
+    "?subject=", utils::URLencode(subject),
+    "&body=", utils::URLencode(body),
     sep = ""
   )
 
   tryCatch({
-    browseURL(url, browser = email_browser())},
+    utils::browseURL(url, browser = email_browser())},
     error = function(e) {
       message("Sending failed with error: ", e$message)
       cat("To: ", address, "\n", sep = "")
@@ -218,7 +223,7 @@ maintainer <- function(pkg = ".") {
   if (!is.null(authors)) {
     people <- eval(parse(text = authors))
     if (is.character(people)) {
-      maintainer <- as.person(people)
+      maintainer <- utils::as.person(people)
     } else {
       maintainer <- Find(function(x) "cre" %in% x$role, people)
     }
@@ -227,7 +232,7 @@ maintainer <- function(pkg = ".") {
     if (is.null(maintainer)) {
       stop("No maintainer defined in package.", call. = FALSE)
     }
-    maintainer <- as.person(maintainer)
+    maintainer <- utils::as.person(maintainer)
   }
 
   list(
@@ -260,7 +265,7 @@ cran_submission_url <- "http://xmpalantir.wu.ac.at/cransubmit/index2.php"
 #' will receive an email asking you to confirm submission - this is used
 #' to check that the package is submitted by the maintainer.
 #'
-#' It's recommend that you use \code{\link{release}()} rather than this
+#' It's recommended that you use \code{\link{release}()} rather than this
 #' function as it performs more checks prior to submission.
 #'
 #' @param pkg package description, can be path or package name.  See
