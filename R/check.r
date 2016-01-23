@@ -71,23 +71,23 @@ check <- function(pkg = ".", document = TRUE, cleanup = TRUE, cran = TRUE,
   }
 
   show_env_vars(compiler_flags(FALSE))
-  old <- set_envvar(compiler_flags(FALSE), "prefix")
-  on.exit(set_envvar(old))
+  withr::with_envvar(compiler_flags(FALSE), {
 
-  rule("Building ", pkg$package)
-  built_path <- build(pkg, tempdir(), quiet = quiet, args = build_args, ...)
-  on.exit(unlink(built_path), add = TRUE)
+    rule("Building ", pkg$package)
+    built_path <- build(pkg, tempdir(), quiet = quiet, args = build_args, ...)
+    on.exit(unlink(built_path), add = TRUE)
 
-  r_cmd_check_path <- check_r_cmd(pkg$package, built_path, cran, check_version,
-    force_suggests, args, quiet = quiet, check_dir = check_dir)
+    r_cmd_check_path <- check_r_cmd(pkg$package, built_path, cran, check_version,
+      force_suggests, args, quiet = quiet, check_dir = check_dir)
 
-  if (cleanup) {
-    unlink(r_cmd_check_path, recursive = TRUE)
-  } else {
-    if (!quiet) message("R CMD check results in ", r_cmd_check_path)
-  }
+    if (cleanup) {
+      unlink(r_cmd_check_path, recursive = TRUE)
+    } else {
+      if (!quiet) message("R CMD check results in ", r_cmd_check_path)
+    }
 
-  invisible(TRUE)
+    invisible(TRUE)
+  }, "prefix")
 }
 
 
@@ -101,13 +101,13 @@ check_r_cmd <- function(name, built_path = NULL, cran = TRUE,
   pkgname <- gsub("_.*?$", "", basename(built_path))
 
   opts <- "--timings"
-  if (!nzchar(Sys.which("pdflatex"))) {
+  if (!has_latex()) {
     message("pdflatex not found! Not building PDF manual or vignettes.\n",
       "If you are planning to release this package, please run a check with manual and vignettes beforehand.\n")
     opts <- c(opts, "--no-build-vignettes", "--no-manual")
   }
   if (cran) {
-    opts <- c("--as-cran", opts)
+    opts <- c("--as-cran", "--run-donttest", opts)
   }
 
   env_vars <- check_env_vars(cran, check_version, force_suggests)

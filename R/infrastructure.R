@@ -17,9 +17,10 @@ NULL
 use_testthat <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
-  check_testthat()
+  check_suggested("testthat")
   if (uses_testthat(pkg)) {
-    stop("Package already has testing infrastructure", call. = FALSE)
+    message("* testthat is already initialized")
+    return(invisible(TRUE))
   }
 
   # Create tests/testthat and install file for R CMD CHECK
@@ -46,7 +47,7 @@ add_test_infrastructure <- use_testthat
 use_test <- function(name, pkg = ".") {
   pkg <- as.package(pkg)
 
-  check_testthat()
+  check_suggested("testthat")
   if (!uses_testthat(pkg)) {
     use_testthat(pkg)
   }
@@ -74,8 +75,10 @@ use_rstudio <- function(pkg = ".") {
 
   path <- file.path(pkg$path, paste0(pkg$package, ".Rproj"))
   if (file.exists(path)) {
-    stop(pkg$package, ".Rproj already exists", call. = FALSE)
+    message("* RStudio infrastructure already initialized")
+    return(invisible(TRUE))
   }
+
   message("Adding RStudio project file to ", pkg$package)
 
   template_path <- system.file("templates/template.Rproj", package = "devtools")
@@ -101,6 +104,7 @@ add_rstudio_project <- use_rstudio
 #' @rdname infrastructure
 use_vignette <- function(name, pkg = ".") {
   pkg <- as.package(pkg)
+  check_suggested("rmarkdown")
 
   add_desc_package(pkg, "Suggests", "knitr")
   add_desc_package(pkg, "Suggests", "rmarkdown")
@@ -122,6 +126,7 @@ use_vignette <- function(name, pkg = ".") {
 #' @rdname infrastructure
 use_rcpp <- function(pkg = ".") {
   pkg <- as.package(pkg)
+  check_suggested("Rcpp")
 
   message("Adding Rcpp to LinkingTo and Imports")
   add_desc_package(pkg, "LinkingTo", "Rcpp")
@@ -175,7 +180,7 @@ use_travis <- function(pkg = ".") {
 #' Add coveralls to basic travis template to a package.
 #' @export
 use_coveralls <- function(pkg = ".") {
-  .Deprecated("use_coverage(type = \"coveralls\")")
+  .Deprecated("use_coverage(type = \"coveralls\")", package = "devtools")
   use_coverage(pkg, type = "coveralls")
 }
 
@@ -398,41 +403,66 @@ use_data <- function(..., pkg = ".", internal = FALSE, overwrite = FALSE,
                      compress = "bzip2") {
   pkg <- as.package(pkg)
 
-  to_save <- dots(...)
-  is_name <- vapply(to_save, is.symbol, logical(1))
+  objs <- get_objs_from_dots(dots(...))
+
+  if (internal) {
+    dir_name <- file.path(pkg$path, "R")
+    paths <- file.path(dir_name, "sysdata.rda")
+    objs <- list(objs)
+  } else {
+    dir_name <- file.path(pkg$path, "data")
+    paths <- file.path(dir_name, paste0(objs, ".rda"))
+  }
+
+  check_data_paths(paths, overwrite)
+
+  message("Saving ", paste(unlist(objs), collapse = ", "),
+          " as ", paste(basename(paths), collapse = ", "),
+          " to ", dir_name)
+  envir <- parent.frame()
+  mapply(save, list = objs, file = paths,
+         MoreArgs = list(envir = envir, compress = compress))
+
+  invisible()
+}
+
+get_objs_from_dots <- function(.dots) {
+  if (length(.dots) == 0L) {
+    stop("Nothing to save", call. = FALSE)
+  }
+
+  is_name <- vapply(.dots, is.symbol, logical(1))
   if (any(!is_name)) {
     stop("Can only save existing named objects", call. = FALSE)
   }
-  objs <- vapply(to_save, as.character, character(1))
 
-  if (internal) {
-    data_path <- file.path(pkg$path, "R", "sysdata.rda")
-    if (file.exists(data_path) && !overwrite) {
-      stop("R/sysdata.rda exists. Use overwrite = TRUE to overwrite",
-        call. = FALSE)
-    }
-
-    message("Saving ", paste(objs, collapse = ", "), " to R/sysdata.rda")
-    save(..., file = data_path, envir = parent.frame(), compress = compress)
-  } else {
-    data_path <- file.path(pkg$path, "data")
-    if (!file.exists(data_path)) dir.create(data_path)
-
-    paths <- file.path(pkg$path, "data", paste0(objs, ".rda"))
-    if (any(file.exists(paths)) && !overwrite) {
-      stop(paste(basename(paths), collapse = ", "), " already exist. ",
-        "Use overwrite = TRUE to overwrite", call. = FALSE)
-    }
-    message("Saving ", paste(objs, collapse = ", "), " to ",
-      paste0("data/", basename(paths), collapse = ", "))
-    envir <- parent.frame()
-    save_one <- function(name, path) {
-      save(list = name, file = path, envir = envir, compress = compress)
-    }
-    Map(save_one, objs, paths)
-
+  objs <- vapply(.dots, as.character, character(1))
+  duplicated_objs <- which(stats::setNames(duplicated(objs), objs))
+  if (length(duplicated_objs) > 0L) {
+    objs <- unique(objs)
+    warning("Saving duplicates only once: ",
+            paste(names(duplicated_objs), collapse = ", "),
+            call. = FALSE)
   }
-  invisible()
+  objs
+}
+
+check_data_paths <- function(paths, overwrite) {
+  data_path <- dirname(paths[[1]])
+  if (!file.exists(data_path)) dir.create(data_path)
+
+  if (!overwrite) {
+    paths_exist <- which(stats::setNames(file.exists(paths), paths))
+
+    if (length(paths_exist) > 0L) {
+      paths_exist <- unique(names(paths_exist))
+      existing_names <- basename(paths_exist)
+      stop(paste(existing_names, collapse = ", "), " already exists in ",
+           dirname(paths_exist[[1L]]),
+           ". ",
+           "Use overwrite = TRUE to overwrite", call. = FALSE)
+    }
+  }
 }
 
 #' Use \code{data-raw} to compute package datasets.
@@ -528,6 +558,30 @@ use_readme_rmd <- function(pkg = ".") {
   invisible(TRUE)
 }
 
+#' Use NEWS.md
+#'
+#' This creates \code{NEWS.md} from a template.
+#'
+#' @param pkg package description, can be path or package name.  See
+#'   \code{\link{as.package}} for more information
+#' @export
+#' @family infrastructure
+use_news_md <- function(pkg = ".") {
+  pkg <- as.package(pkg)
+
+  news_path <- file.path(pkg$path, "NEWS.md")
+  template <- render_template("NEWS.md", pkg)
+
+  if (!file.exists(news_path)) {
+    message("Creating NEWS.md")
+    writeLines(template, news_path)
+  } else {
+    stop("NEWS.md already exists", call. = FALSE)
+  }
+
+  invisible(TRUE)
+}
+
 #' @rdname infrastructure
 #' @section \code{use_revdep}:
 #' Add \code{revdep} directory and basic check template.
@@ -566,7 +620,11 @@ use_cran_comments <- function(pkg = ".") {
     stop("cran-comments.md already exists", call. = FALSE)
 
   message("Adding cran-comments.md template")
-  writeLines(render_template("cran-comments.md", list()), comments)
+  data <- list(
+    rversion = paste0(version$major, ".", version$minor)
+  )
+
+  writeLines(render_template("cran-comments.md", data), comments)
   invisible()
 }
 
@@ -622,4 +680,37 @@ use_cran_badge <- function(pkg = ".") {
     "[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/", pkg$package, ")](http://cran.r-project.org/package=", pkg$package, ")"
   )
   invisible(TRUE)
+}
+
+#' @rdname infrastructure
+#' @section \code{use_mit_license}:
+#' Adds the necessary infrastructure to declare your package as
+#' distributed under the MIT license.
+#' @param copyright_holder The copyright holder for this package. Defaults to
+#'   \code{getOption("devtools.name")}.
+#' @export
+use_mit_license <- function(pkg = ".", copyright_holder = getOption("devtools.name", "<Author>")) {
+  pkg <- as.package(pkg)
+
+  # Update the DESCRIPTION
+  descPath <- file.path(pkg$path, "DESCRIPTION")
+  DESCRIPTION <- read_dcf(descPath)
+  DESCRIPTION$License <- "MIT + file LICENSE"
+  write_dcf(descPath, DESCRIPTION)
+
+  # Update the license
+  licensePath <- file.path(pkg$path, "LICENSE")
+  if (file.exists(licensePath))
+    if (!file.remove(licensePath))
+      stop("Failed to remove license file '", licensePath, "'", call. = FALSE)
+
+  # Write the MIT template
+  template <- c(
+    paste("YEAR:", format(Sys.Date(), "%Y")),
+    paste("COPYRIGHT HOLDER:", copyright_holder)
+  )
+
+  writeLines(template, con = licensePath)
+  message("* Added infrastructure for MIT license")
+  licensePath
 }

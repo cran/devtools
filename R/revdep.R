@@ -88,8 +88,8 @@ print.maintainers <- function(x, ...) {
 #' @inheritParams revdep
 #' @param pkg Path to package. Defaults to current directory.
 #' @inheritParams check_cran
-#' @seealso \code{\link{revdep_maintainers}()} to run R CMD check on all reverse
-#'   dependencies.
+#' @seealso \code{\link{revdep_maintainers}()} to get a list of all revdep
+#'   maintainers.
 #' @export
 #' @return An invisible list of results. But you'll probably want to look
 #'   at the check results on disk, which are saved in \code{check_dir}.
@@ -117,24 +117,24 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   if (!file.exists(srcpath))
     dir.create(srcpath)
 
-  message("Installing ", pkg$package)
-  with_libpaths(libpath, install(pkg, reload = FALSE, quiet = TRUE))
+  message("Installing ", pkg$package, " in version ", pkg$version, " from ", pkg$path)
+  withr::with_libpaths(libpath, install(pkg, reload = FALSE, quiet = TRUE))
   on.exit(remove.packages(pkg$package, libpath), add = TRUE)
 
-  old <- set_envvar(c(
+  old <- withr::with_envvar(c(
     NOT_CRAN = "false",
     RGL_USE_NULL = "true"
-  ))
-  on.exit(set_envvar(old), add = TRUE)
+  ), {
 
-  message("Finding reverse dependencies")
-  pkgs <- revdep(pkg$package, recursive = recursive, ignore = ignore,
-    bioconductor = bioconductor, dependencies = dependencies)
-  check_cran(pkgs, revdep_pkg = pkg$package, libpath = libpath,
-    srcpath = srcpath, bioconductor = bioconductor, type = type,
-    threads = threads, check_dir = check_dir)
+    message("Finding reverse dependencies")
+    pkgs <- revdep(pkg$package, recursive = recursive, ignore = ignore,
+      bioconductor = bioconductor, dependencies = dependencies)
+    check_cran(pkgs, revdep_pkg = pkg$package, libpath = libpath,
+      srcpath = srcpath, bioconductor = bioconductor, type = type,
+      threads = threads, check_dir = check_dir)
 
-  list(check_dir = check_dir, libpath = libpath, pkg = pkg, deps = pkgs)
+    list(check_dir = check_dir, libpath = libpath, pkg = pkg, deps = pkgs)
+  })
 }
 
 cran_packages <- memoise::memoise(function() {
@@ -147,12 +147,13 @@ cran_packages <- memoise::memoise(function() {
   cp
 })
 
-bioc_packages <- memoise::memoise(function() {
-  con <- url("http://bioconductor.org/packages/release/bioc/VIEWS")
-  on.exit(close(con))
-  bioc <- read.dcf(con)
-  rownames(bioc) <- bioc[, 1]
-  bioc
+bioc_packages <- memoise::memoise(
+  function(views = paste(BiocInstaller::biocinstallRepos()[["BioCsoft"]], "VIEWS", sep = "/")) {
+    con <- url(views)
+    on.exit(close(con))
+    bioc <- read.dcf(con)
+    rownames(bioc) <- bioc[, 1]
+    bioc
 })
 
 packages <- function() {
@@ -161,4 +162,3 @@ packages <- function() {
   cols <- intersect(colnames(cran), colnames(bioc))
   rbind(cran[, cols], bioc[, cols])
 }
-

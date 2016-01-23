@@ -18,7 +18,7 @@
 #' @inheritParams run_examples
 #' @export
 test <- function(pkg = ".", filter = NULL, ...) {
-  check_testthat()
+  check_suggested("testthat")
   pkg <- as.package(pkg)
 
   if (!uses_testthat(pkg) && interactive()) {
@@ -38,9 +38,11 @@ test <- function(pkg = ".", filter = NULL, ...) {
 
   # Need to attach testthat so that (e.g.) context() is available
   # Update package dependency to avoid explicit require() call (#798)
-  pkg$depends <- paste0("testthat, ", pkg$depends)
-  if (grepl("^testthat, *$", pkg$depends))
-    pkg$depends <- "testthat"
+  if (pkg$package != "testthat") {
+    pkg$depends <- paste0("testthat, ", pkg$depends)
+    if (grepl("^testthat, *$", pkg$depends))
+      pkg$depends <- "testthat"
+  }
 
   # Run tests in a child of the namespace environment, like
   # testthat::test_package
@@ -51,7 +53,7 @@ test <- function(pkg = ".", filter = NULL, ...) {
   Sys.sleep(0.05); utils::flush.console() # Avoid misordered output in RStudio
 
   env <- new.env(parent = ns_env)
-  with_envvar(r_env_vars(), testthat::test_dir(test_path, filter = filter, env = env, ...))
+  withr::with_envvar(r_env_vars(), testthat::test_dir(test_path, filter = filter, env = env, ...))
 }
 
 find_test_dir <- function(path) {
@@ -97,11 +99,4 @@ uses_testthat <- function(pkg = ".") {
   )
 
   any(dir.exists(paths))
-}
-
-
-check_testthat <- function() {
-  if (!requireNamespace("testthat", quietly = TRUE)) {
-    stop("Please install testthat", call. = FALSE)
-  }
 }
