@@ -17,6 +17,9 @@
 #'     and connects the generated DLL into R. See \code{\link{compile_dll}}
 #'     for more details.
 #'
+#'   \item If you use \pkg{testthat}, will load all test helpers so you
+#'     can access them interactively.
+#'
 #'   \item Runs \code{.onAttach()}, \code{.onLoad()} and \code{.onUnload()}
 #'     functions at the correct times.
 #' }
@@ -167,6 +170,11 @@ load_all <- function(pkg = ".", reset = TRUE, recompile = FALSE,
   # Copy over objects from the namespace environment
   export_ns(pkg)
 
+  # Source test helpers into package environment
+  if (uses_testthat(pkg)) {
+    testthat::source_test_helpers(find_test_dir(pkg$path), env = pkg_env(pkg))
+  }
+
   # Run hooks
   run_pkg_hook(pkg, "attach")
   run_user_hook(pkg, "attach")
@@ -227,6 +235,7 @@ build_description <- function(name, extra = list()) {
     Depends = paste0("R (>= ", as.character(getRversion()) ,")"),
     License = getOption("devtools.desc.license"),
     Suggests = getOption("devtools.desc.suggests"),
+    Encoding = "UTF-8",
     LazyData = "true"
   ))
 

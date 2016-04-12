@@ -20,18 +20,16 @@
 #' @param threads Number of concurrent threads to use for checking.
 #'   It defaults to the option \code{"Ncpus"} or \code{1} if unset.
 #' @param check_dir Directory to store results.
-#' @param revdep_pkg Optional name of a package for which this check is
-#'   checking the reverse dependencies of. This is normally passed in from
-#'   \code{\link{revdep_check}}, and is used only for logging.
 #' @return Returns (invisibly) the directory where check results are stored.
 #' @keywords internal
+#' @inheritParams check
 #' @export
 check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
                        srcpath = libpath, bioconductor = FALSE,
                        type = getOption("pkgType"),
                        threads = getOption("Ncpus", 1),
                        check_dir = tempfile("check_cran"),
-                       revdep_pkg = NULL) {
+                       env_vars = NULL) {
 
   stopifnot(is.character(pkgs))
   if (length(pkgs) == 0) return()
@@ -47,7 +45,7 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
   if (!file.exists(libpath)) dir.create(libpath)
   libpath <- normalizePath(libpath)
 
-  # Add the temoporary library and remove on exit
+  # Add the temporary library and remove on exit
   libpaths_orig <- withr::with_libpaths(libpath, {
 
     rule("Installing dependencies") # --------------------------------------------
@@ -60,7 +58,7 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
 
     message("Determining available packages") # ----------------------------------
     deps <- package_deps(pkgs, repos = repos, type = type, dependencies = TRUE)
-    update(deps, Ncpus = threads)
+    update(deps, Ncpus = threads, quiet = TRUE)
 
     message("Downloading source packages for checking") #-------------------------
     urls <- lapply(pkgs, package_url, repos = repos, available = available_src)
@@ -82,22 +80,21 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
     }
 
     rule("Checking packages") # --------------------------------------------------
+    check_start <- Sys.time()
+    pkg_names <- format(pkgs)
     check_pkg <- function(i) {
-      message("Checking ", pkgs[i])
-
       start_time <- Sys.time()
-      check_out <- tryCatch({
-        check_r_cmd(pkgs[i], local_urls[i],
-          args = "--no-multiarch --no-manual --no-codoc",
-          check_dir = check_dir,
-          quiet = TRUE
-        )
-      }, error = function(e) {
-        message(pkgs[i], " failed : ", check_dir, "/", pkgs[i],
-          ".Rcheck/00check.log")
-        NULL
-      })
+      res <- check_built(
+        local_urls[i],
+        args = "--no-multiarch --no-manual --no-codoc",
+        env_vars = env_vars,
+        check_dir = check_dir,
+        quiet = TRUE
+      )
       end_time <- Sys.time()
+
+      message("Checked ", pkg_names[i], ": ", summarise_check_results(res, colour = TRUE))
+      status_update(i, length(pkgs), check_start)
 
       elapsed_time <- as.numeric(end_time - start_time, units = "secs")
       writeLines(
@@ -108,6 +105,9 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
       NULL
     }
 
+    if (length(pkgs) == 0)
+      return()
+
     if (identical(as.integer(threads), 1L)) {
       lapply(seq_along(pkgs), check_pkg)
     } else {
@@ -117,4 +117,22 @@ check_cran <- function(pkgs, libpath = file.path(tempdir(), "R-lib"),
 
     invisible(check_dir)
   })
+}
+
+status_update <- function(i, n, start_time) {
+  if (i %% 10 != 0)
+    return()
+
+  hm <- function(x) {
+    sprintf("%02i:%02i", x %/% 3600, x %% 3600 %/% 60)
+  }
+
+  elapsed <- as.numeric(Sys.time() - start_time, units = "secs")
+  estimated <- elapsed / i * (n - i)
+
+  msg <- sprintf(
+    "Checked %i/%i. Elapsed %s. Remaining ~%s",
+    i, n, hm(elapsed), hm(estimated)
+  )
+  message(msg)
 }

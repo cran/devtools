@@ -153,3 +153,10 @@ is_bioconductor <- function(x) {
 trim_ws <- function(x) {
   gsub("^[[:space:]]+|[[:space:]]+$", "", x)
 }
+
+is_dir <- function(x) file.info(x)$isdir
+
+indent <- function(x, spaces = 4) {
+  ind <- paste(rep(" ", spaces), collapse = "")
+  paste0(ind, gsub("\n", paste0("\n", ind), x, fixed = TRUE))
+}

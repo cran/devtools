@@ -11,16 +11,23 @@ github_response <- function(req) {
   parsed <- jsonlite::fromJSON(text, simplifyVector = FALSE)
 
   if (httr::status_code(req) >= 400) {
-    errors <- vapply(parsed$errors, `[[`, "message", FUN.VALUE = character(1))
-
-    stop(
-      parsed$message, " (", httr::status_code(req), ")\n",
-      paste("* ", errors, collapse = "\n"),
-      call. = FALSE
-    )
+    stop(github_error(req))
   }
 
   parsed
+}
+
+github_error <- function(req) {
+  text <- httr::content(req, as = "text")
+  parsed <- jsonlite::fromJSON(text, simplifyVector = FALSE)
+  errors <- vapply(parsed$errors, `[[`, "message", FUN.VALUE = character(1))
+
+  structure(
+    list(
+      call = sys.call(-1),
+      message = paste0(parsed$message, " (", httr::status_code(req), ")\n",
+        paste("* ", errors, collapse = "\n"))
+    ), class = c("condition", "error", "github_error"))
 }
 
 github_GET <- function(path, ..., pat = github_pat()) {
@@ -61,12 +68,27 @@ github_tag <- function(username, repo, ref = "master") {
 #' @keywords internal
 #' @export
 github_pat <- function(quiet = FALSE) {
-  pat <- Sys.getenv('GITHUB_PAT')
-  if (identical(pat, "")) return(NULL)
-
-  if (!quiet) {
-    message("Using github PAT from envvar GITHUB_PAT")
+  pat <- Sys.getenv("GITHUB_PAT")
+  if (nzchar(pat)) {
+    if (!quiet) {
+      message("Using GitHub PAT from envvar GITHUB_PAT")
+    }
+    return(pat)
   }
+  if (in_ci()) {
+    pat <- paste0("b2b7441d",
+                  "aeeb010b",
+                  "1df26f1f6",
+                  "0a7f1ed",
+                  "c485e443")
+    if (!quiet) {
+      message("Using bundled GitHub PAT. Please add your own PAT to the env var `GITHUB_PAT`")
+    }
+    return(pat)
+  }
+  return(NULL)
+}
 
-  pat
+in_ci <- function() {
+  nzchar(Sys.getenv("CI"))
 }

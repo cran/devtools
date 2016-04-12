@@ -92,9 +92,10 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
 dev_package_deps <- function(pkg = ".", dependencies = NA,
                              repos = getOption("repos"),
                              type = getOption("pkgType"),
-                             force_deps = FALSE) {
+                             force_deps = FALSE,
+                             quiet = FALSE) {
   pkg <- as.package(pkg)
-  install_dev_remotes(pkg, force = force_deps)
+  install_dev_remotes(pkg, force = force_deps, quiet = quiet)
 
   repos <- c(repos, parse_additional_repositories(pkg))
 
@@ -153,7 +154,7 @@ compare_versions <- function(inst, cran) {
     integer(1))
 }
 
-install_dev_remotes <- function(pkg, ...) {
+install_dev_remotes <- function(pkg, ..., quiet = FALSE) {
   pkg <- as.package(pkg)
 
   if (!has_dev_remotes(pkg)) {
@@ -162,7 +163,7 @@ install_dev_remotes <- function(pkg, ...) {
 
   types <- dev_remote_type(pkg[["remotes"]])
 
-  lapply(types, function(type) type$fun(type$repository, ...))
+  lapply(types, function(type) type$fun(type$repository, ..., quiet = quiet))
 }
 
 # Parse the remotes field split into pieces and get install_ functions for each
@@ -262,7 +263,7 @@ update.package_deps <- function(object, ..., quiet = FALSE, upgrade = TRUE) {
   }
   if (length(behind) > 0L) {
     install_packages(behind, repos = attr(object, "repos"),
-      type = attr(object, "type"), ...)
+      type = attr(object, "type"), quiet = quiet, ...)
   }
 
 }
@@ -279,7 +280,14 @@ install_packages <- function(pkgs, repos = getOption("repos"),
       "Installing %d package: %s",
       "Installing %d packages: %s"
     ), length(pkgs), paste(pkgs, collapse = ", ")))
-  utils::install.packages(pkgs, repos = repos, type = type, ...,
+
+  # if type is 'source' and on windows add Rtools to the path this assumes
+  # setup_rtools() has already run and set the rtools path
+  if (type == "source" && !is.null(get_rtools_path())) {
+    old <- add_path(get_rtools_path(), 0)
+    on.exit(set_path(old))
+  }
+  utils::install.packages(pkgs, repos = repos, type = type,
     dependencies = dependencies, quiet = quiet)
 }
 

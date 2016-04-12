@@ -16,7 +16,7 @@
 #' @param binary Produce a binary (\code{--binary}) or source (
 #'   \code{--no-manual --no-resave-data}) version of the package.
 #' @param vignettes,manual For source packages: if \code{FALSE}, don't build PDF
-#'   vignettes (\code{--no-vignettes}) or manual (\code{--no-manual}).
+#'   vignettes (\code{--no-build-vignettes}) or manual (\code{--no-manual}).
 #' @param args An optional character vector of additional command
 #'   line arguments to be passed to \code{R CMD build} if \code{binary = FALSE},
 #'   or \code{R CMD install} if \code{binary = TRUE}.
@@ -49,6 +49,10 @@ build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
   } else {
     args <- c(args, "--no-resave-data")
 
+    if (manual && !has_latex(verbose = TRUE)) {
+      manual <- FALSE
+    }
+
     if (!manual) {
       args <- c(args, "--no-manual")
     }
@@ -63,13 +67,9 @@ build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
     ext <- ".tar.gz"
   }
 
-  # Create temporary library to ensure that default library doesn't get
+  # Run in temporary library to ensure that default library doesn't get
   # contaminated
-  temp_lib <- tempfile()
-  dir.create(temp_lib)
-  on.exit(unlink(temp_lib, recursive = TRUE), add = TRUE)
-
-  withr::with_libpaths(c(temp_lib, .libPaths()), R(cmd, path, quiet = quiet))
+  withr::with_temp_libpaths(R(cmd, path, quiet = quiet))
   targz <- paste0(pkg$package, "_", pkg$version, ext)
 
   file.path(path, targz)
@@ -90,21 +90,24 @@ build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
 #' @inheritParams build
 #' @param version directory to upload to on the win-builder, controlling
 #'   which version of R is used to build the package. Possible options are
-#'   listed on \url{http://win-builder.r-project.org/}. Defaults to the
-#'   released version of R.
+#'   listed on \url{http://win-builder.r-project.org/}. Defaults to R-devel.
 #' @export
 #' @family build functions
 build_win <- function(pkg = ".", version = c("R-release", "R-devel"),
                       args = NULL, quiet = FALSE) {
   pkg <- as.package(pkg)
 
-  version <- match.arg(version, several.ok = TRUE)
+  if (missing(version)) {
+    version <- "R-devel"
+  } else {
+    version <- match.arg(version, several.ok = TRUE)
+  }
 
   if (!quiet) {
     message("Building windows version of ", pkg$package,
-            " for ", paste(version, collapse=", "),
+            " for ", paste(version, collapse = ", "),
             " with win-builder.r-project.org.\n")
-    if (interactive() && yesno("E-mail will be delivered to ", maintainer(pkg)$email, ".")) {
+    if (interactive() && yesno("Email results to ", maintainer(pkg)$email, "?")) {
       return(invisible())
     }
   }

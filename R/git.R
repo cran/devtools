@@ -4,7 +4,7 @@ uses_git <- function(path = ".") {
 
 git_sha1 <- function(n = 10, path = ".") {
   r <- git2r::repository(path, discover = TRUE)
-  sha <- git2r::commits(r, n = 1)[[1]]@sha # sha of most recent commit
+  sha <- git2r::branch_target(git2r::head(r)) # sha of most recent commit
   substr(sha, 1, n)
 }
 
@@ -17,14 +17,19 @@ git_uncommitted <- function(path = ".") {
 git_sync_status <- function(path = ".") {
   r <- git2r::repository(path, discover = TRUE)
 
-  upstream <- git2r::branch_get_upstream(git2r::head(r))
+  r_head <- git2r::head(r)
+  if (!methods::is(r_head, "git_branch")) {
+    return(invisible(FALSE))
+  }
+
+  upstream <- git2r::branch_get_upstream(r_head)
   # fetch(r, branch_remote_name(upstream))
 
   if (is.null(upstream)) {
     return(invisible(FALSE))
   }
 
-  c1 <- git2r::commits(r)[[1]]
+  c1 <- git2r::lookup(r, git2r::branch_target(r_head))
   c2 <- git2r::lookup(r, git2r::branch_target(upstream))
   ab <- git2r::ahead_behind(c1, c2)
 
@@ -117,7 +122,11 @@ github_remote_parse <- function(x) {
 
   m <- regexec(re, x)
   match <- regmatches(x, m)[[1]]
-  list(username = match[2], repo = match[3])
+  list(
+    username = match[2],
+    repo = match[3],
+    fullname = paste0(match[2], "/", match[3])
+  )
 }
 
 # Extract the commit hash from a git archive. Git archives include the SHA1
