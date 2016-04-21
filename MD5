@@ -1,7 +1,7 @@
-49c06c7e79539b854c637c399ae34b38 *DESCRIPTION
-a072c4e022c74556240c5b06c555a344 *NAMESPACE
-9ff1948a49992c7187038a777321ba14 *NEWS.md
-4800343e3c2d366023a06d78fd215de1 *R/R.r
+be4cc70952b4068442bd0cdcdb8212eb *DESCRIPTION
+e9d24cf63adb47b0ccd925d835854036 *NAMESPACE
+0291d086bf4c9a64fb4b8205d5ed6caf *NEWS.md
+14cf2c4dc87aa504825852bef6105765 *R/R.r
 4cae753257b3807c1b41086da55eeb2b *R/bash.r
 1c20a025a7354b123c365d39c68f46a5 *R/build-dependencies.R
 3da59558f8f2ce125f4e7bf9a26ea1ed *R/build-github-devtools.r
@@ -41,7 +41,7 @@ b9a6e2a000c337e2f29c83d7b91907b9 *R/install-min.r
 2935fe09c7348e0dc66235a35d7203d4 *R/install-remote.R
 7d975796f570650a271eff9666af931d *R/install-svn.r
 3cb3b158100f3e6b70adf0a3345cf0da *R/install-url.r
-c4843f5d2b6803179acf00de61c1c8d8 *R/install-version.r
+27152b386c38ece59f314464738b6426 *R/install-version.r
 cb840ba0229b0f38aedfe026ba0e0935 *R/install.r
 c5ffe043e3d2291573fdc51e68600c4c *R/lint.r
 edfb4d03b3afe630c97160c3e39b604d *R/load-code.r
@@ -62,7 +62,7 @@ b267a126e1a4d1ad95cd68abcb6a89b4 *R/reload.r
 5345f647052e5bd55c4c143db31ef542 *R/revdep-email.R
 4090f75dd0bf408c975ce7db9ba2c640 *R/revdep-summarise.R
 c2e0e37d9968049987ab8c3320872a9c *R/revdep.R
-3c2bae62ca6e90406c15211c0e3a6025 *R/rtools.r
+ef62a0d228566d43833942f87bb2c3f9 *R/rtools.r
 4f89537e6deaa8aa4498c5bb6656102c *R/run-example.r
 eb40678099eaedea5997b74be8e1e8d2 *R/run-examples.r
 203af4e1879833c284f5ff4505290fb3 *R/run-loadhooks.r
@@ -72,7 +72,7 @@ eb40678099eaedea5997b74be8e1e8d2 *R/run-examples.r
 8aea9796d525fd50c4f5d070da12ab5a *R/show-news.r
 80280ec376c42db51ba51ec7fa2d6231 *R/source.r
 52f7977fdaa853dd70f455a9f2c6000b *R/spell-check.R
-88692f78d088197d423b6543c25d9d78 *R/system.r
+c05ba0d5cb106105ba690b8217f7fec0 *R/system.r
 f3fa96d9c785baa74d72014e29f90b84 *R/test.r
 e3c9324d5802a76e6aca87b089052958 *R/topic-index.r
 be25ef26721fc32a511af54ea9447f2a *R/uninstall.r
@@ -88,7 +88,7 @@ c550c703e86c71f195564636c2e61dda *R/vignettes.r
 799bc1bfb9e5505bf52208ca5b77e94f *README.md
 e7aa88972c84ced4f187cf5679d3aa5f *build/vignette.rds
 cf11526cac3a05a976d74c925d12c152 *inst/doc/dependencies.Rmd
-0680e0f90064c8e1b996581d9de21770 *inst/doc/dependencies.html
+657e563817d6b212876e1f09bffa4a9c *inst/doc/dependencies.html
 f87ef290340322089c32b4e573d8f1e8 *inst/templates/CONDUCT.md
 fccaad4db171eb4173c05286ad2b4b91 *inst/templates/NEWS.md
 5459f687c745887de16eee67e4dad683 *inst/templates/README.Rmd
@@ -186,7 +186,8 @@ f74b3cd05e652323db1b3ba5d7a766cf *man/source_gist.Rd
 9cf932768b09dab0eaa9b63e6e413268 *man/spell_check.Rd
 b464bdc2fcae984e0dd24fb9ed2783c0 *man/submit_cran.Rd
 f69c67403ecfafb4fbe138c1129dd8b0 *man/system.file.Rd
-5ec36911d908e7afbbda21aab0c94fad *man/system_check.Rd
+87e696d7c3b342fa74464f37b2cb095b *man/system_check.Rd
+6967a8b394f70bad9a5a64762fb369f3 *man/system_output.Rd
 5850548a87b8b8003ca5d3b32cc788a6 *man/test.Rd
 66702d10f023e514cb9746823e3e767f *man/uninstall.Rd
 bdea9d7b12f4e77418b5178b4e2748ff *man/unload.Rd
@@ -206,6 +207,7 @@ b4e9acf98791def40e32fe32bb1a1822 *man/use_package.Rd
 ea2aeba2987a3f85abc9def319a8cbfe *src/devtools.c
 76f69abebd89cf31cb608ef2fa85b773 *tests/has-devel.R
 b67bfa8b084622fe9bbef3986b82acbb *tests/test-that.R
+604e31b0e928d069d21ea4a8be3919cb *tests/testthat/archive.rds
 2913f95b2e0f8b0c189759c4a228f46c *tests/testthat/check-results-note.log
 f87ef290340322089c32b4e573d8f1e8 *tests/testthat/infrastructure/CONDUCT.md
 c2bbe97850e8fc4c8e3ec08bebb11316 *tests/testthat/infrastructure/DESCRIPTION
@@ -229,6 +231,16 @@ fc3e744bf34ee2fc62b3700bb66c1563 *tests/testthat/rtools-2.15/Rtools.txt
 371bec6ffc0072b07210fcc00608b85a *tests/testthat/rtools-2.15/VERSION.txt
 d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-2.15/bin/ls.exe
 d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-2.15/gcc-4.6.3/bin/gcc.exe
+45317c5b2548b241603e3e4d6fbd1323 *tests/testthat/rtools-gcc493-winbuilder/Rtools.txt
+520f27a9bdb7a57489fdb55231a5ef8f *tests/testthat/rtools-gcc493-winbuilder/VERSION.txt
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493-winbuilder/bin/ls.exe
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493-winbuilder/mingw_32/bin/gcc.exe
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493-winbuilder/mingw_64/bin/gcc.exe
+45317c5b2548b241603e3e4d6fbd1323 *tests/testthat/rtools-gcc493/Rtools.txt
+520f27a9bdb7a57489fdb55231a5ef8f *tests/testthat/rtools-gcc493/VERSION.txt
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493/bin/ls.exe
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493/mingw_32/bin/gcc.exe
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-gcc493/mingw_64/bin/gcc.exe
 d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-manual/bin/ls.exe
 d41d8cd98f00b204e9800998ecf8427e *tests/testthat/rtools-manual/gcc-4.6.3/bin/gcc.exe
 fc3e744bf34ee2fc62b3700bb66c1563 *tests/testthat/rtools-no-gcc/Rtools.txt
@@ -250,12 +262,12 @@ c271667c19e72f6f1657d5f3467a749d *tests/testthat/test-depend.r
 236ef0f93a6e5d49d43a9fae2060d092 *tests/testthat/test-description.r
 377a330ec5e7bc1c31af4a7b65ae9310 *tests/testthat/test-dll.r
 59484d4dd0acd3e7c07f413a3db996f9 *tests/testthat/test-getrootdir.R
-91cfcf7956a6bb230daa4be00d5f7750 *tests/testthat/test-github-connections.R
+5fd66f9982c49b7d191a4c89d950ab5c *tests/testthat/test-github-connections.R
 a72634d2871ac6e40614cdf00db37aab *tests/testthat/test-github.r
 25b335f5213575b5fa9c041d6c942fca *tests/testthat/test-help.r
 07e0667d971338700300e1c6b6ecaa24 *tests/testthat/test-imports.r
-8ef9154d369903721e8460c01fd222d9 *tests/testthat/test-infrastructure.r
-a2924ea7a418fa8ac937434e78b11b3e *tests/testthat/test-install-version.R
+5152b253f60ac9d8f8b144914c04897d *tests/testthat/test-infrastructure.r
+6587344b5b1496caf74a12a99e12a0a4 *tests/testthat/test-install-version.R
 9030c2ae8076751fe1203f0735056c03 *tests/testthat/test-load-collate.r
 fb9ff788bb966363a891efd5e1fd8a71 *tests/testthat/test-load-hooks.r
 b1c2c455a4a52b6154e269028109c5f4 *tests/testthat/test-load.r
@@ -264,7 +276,7 @@ d055c102b85df2323db756da99ccb500 *tests/testthat/test-namespace.r
 6cdab9a20cd71f3236eab7b8e53df009 *tests/testthat/test-package.R
 be90acf78df61b9705703f6e3c59987e *tests/testthat/test-remote-metadata.R
 79c549b28266744cd078d6eca2f8a47c *tests/testthat/test-remotes.r
-210a495c48efcf316a6cf8da9b4f80c8 *tests/testthat/test-rtools.r
+592fc4fd84e7364bf6b08bcb9b9fd4a4 *tests/testthat/test-rtools.r
 a976185403ee3c36774d70397aabf18c *tests/testthat/test-s4-export.r
 9a1c23da0f0015f81f0ddeade1bb58d8 *tests/testthat/test-s4-sort.r
 978fcafea7e4cda9580cedcebd614e82 *tests/testthat/test-s4-unload.r

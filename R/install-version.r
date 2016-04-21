@@ -35,7 +35,7 @@ install_version <- function(package, version = NULL, repos = getOption("repos"),
   } else {
     package.path <- paste(package, "/", package, "_", version, ".tar.gz",
       sep = "")
-    if (!(package.path %in% row.names(info))) {
+    if (!(package.path %in% info$path)) {
       stop(sprintf("version '%s' is invalid for package '%s'", version,
         package))
     }
@@ -45,24 +45,27 @@ install_version <- function(package, version = NULL, repos = getOption("repos"),
   install_url(url, ...)
 }
 
+read_archive <- function(repo) {
+  tryCatch({
+    con <- gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
+    on.exit(close(con))
+    readRDS(con)
+  },
+  warning = function(e) { list() },
+  error = function(e) { list() })
+}
+
 package_find_repo <- function(package, repos) {
   archive_info <- function(repo) {
     if (length(repos) > 1)
       message("Trying ", repo)
 
-    archive <-
-      tryCatch({
-        con <- gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
-        on.exit(close(con))
-        readRDS(con)
-      },
-      warning = function(e) list(),
-      error = function(e) list())
+    archive <- read_archive(repo)
 
     info <- archive[[package]]
-    info$path <- rownames(info)
     if (!is.null(info)) {
       info$repo <- repo
+      info$path <- rownames(info)
       info
     }
   }
