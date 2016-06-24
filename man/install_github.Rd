@@ -5,7 +5,7 @@
 \title{Attempts to install a package directly from GitHub.}
 \usage{
 install_github(repo, username = NULL, ref = "master", subdir = NULL,
-  auth_token = github_pat(quiet), host = "api.github.com", force = FALSE,
+  auth_token = github_pat(quiet), host = "https://api.github.com",
   quiet = FALSE, ...)
 }
 \arguments{
@@ -31,9 +31,6 @@ the \code{GITHUB_PAT} environment variable.}
 
 \item{host}{GitHub API host to use. Override with your GitHub enterprise
 hostname, for example, \code{"github.hostname.com/api/v3"}.}
-
-\item{force}{Force installation even if the git SHA1 has not changed since
-the previous install.}
 
 \item{quiet}{if \code{TRUE} suppresses output from this function.}
 
@@ -74,9 +71,11 @@ install_github("hadley/private", auth_token = "abc")
 \seealso{
 \code{\link{github_pull}}
 
-Other package installation: \code{\link{install_bitbucket}},
-  \code{\link{install_git}}, \code{\link{install_svn}},
-  \code{\link{install_url}}, \code{\link{install_version}},
-  \code{\link{install}}, \code{\link{uninstall}}
+Other package installation: \code{\link{install_bioc}},
+  \code{\link{install_bitbucket}},
+  \code{\link{install_cran}}, \code{\link{install_git}},
+  \code{\link{install_svn}}, \code{\link{install_url}},
+  \code{\link{install_version}}, \code{\link{install}},
+  \code{\link{uninstall}}
 }
 

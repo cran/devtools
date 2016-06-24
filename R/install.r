@@ -56,7 +56,8 @@
 #' @family package installation
 #' @seealso \code{\link{with_debug}} to install packages with debugging flags
 #'   set.
-install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
+install <-
+  function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
                     args = getOption("devtools.install.args"), quiet = FALSE,
                     dependencies = NA, upgrade_dependencies = TRUE,
                     build_vignettes = FALSE,
@@ -76,15 +77,39 @@ install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
     eapply(ns_env(pkg), force, all.names = TRUE)
   }
 
+  root_install <- is.null(installing$packages)
+  if (root_install) {
+    on.exit(installing$packages <- NULL)
+  }
+
+  if (pkg$package %in% installing$packages) {
+    if (!quiet) {
+      message("Skipping ", pkg$package, ", it is already being installed.")
+    }
+    return(invisible(FALSE))
+  }
+
+  installing$packages <- c(installing$packages, pkg$package)
   if (!quiet) {
     message("Installing ", pkg$package)
   }
 
   # If building vignettes, make sure we have all suggested packages too.
   if (build_vignettes && missing(dependencies)) {
-    dependencies <- TRUE
+    dependencies <- standardise_dep(TRUE)
+  } else {
+    dependencies <- standardise_dep(dependencies)
   }
-  install_deps(pkg, dependencies = dependencies, upgrade = upgrade_dependencies,
+
+  initial_deps <- dependencies[dependencies != "Suggests"]
+  final_deps <- dependencies[dependencies == "Suggests"]
+
+  # cache the Remote: dependencies here so we don't have to query them each
+  # time we call install_deps
+  installing$remote_deps <- remote_deps(pkg)
+  on.exit(installing$remote_deps <- NULL, add = TRUE)
+
+  install_deps(pkg, dependencies = initial_deps, upgrade = upgrade_dependencies,
     threads = threads, force_deps = force_deps, quiet = quiet, ...)
 
   # Build the package. Only build locally if it doesn't have vignettes
@@ -93,7 +118,7 @@ install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
     built_path <- pkg$path
   } else {
     built_path <- build(pkg, tempdir(), vignettes = build_vignettes, quiet = quiet)
-    on.exit(unlink(built_path))
+    on.exit(unlink(built_path), add = TRUE)
   }
 
   opts <- c(
@@ -110,6 +135,9 @@ install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
   R(paste("CMD INSTALL ", shQuote(built_path), " ", opts, sep = ""),
     quiet = quiet)
 
+  install_deps(pkg, dependencies = final_deps, upgrade = upgrade_dependencies,
+    threads = threads, force_deps = force_deps, quiet = quiet, ...)
+
   if (length(metadata) > 0) {
     add_metadata(inst(pkg$package), metadata)
   }
@@ -120,7 +148,17 @@ install <- function(pkg = ".", reload = TRUE, quick = FALSE, local = TRUE,
   invisible(TRUE)
 }
 
+# A environment to hold which packages are being installed so packages with
+# circular dependencies can be skipped the second time.
+installing <- new.env(parent = emptyenv())
+
 #' Install package dependencies if needed.
+#'
+#' \code{install_deps} is used by \code{install_*} to make sure you have
+#' all the dependencies for a package. \code{install_dev_deps()} is useful
+#' if you have a source version of the package and want to be able to
+#' develop with it: it installs all dependencies of the package, and it
+#' also installs roxygen2.
 #'
 #' @inheritParams install
 #' @inheritParams package_deps
@@ -138,6 +176,15 @@ install_deps <- function(pkg = ".", dependencies = NA,
                          force_deps = FALSE) {
 
   pkg <- dev_package_deps(pkg, repos = repos, dependencies = dependencies,
-    type = type, force_deps = force_deps, quiet = quiet)
+    type = type)
   update(pkg, ..., Ncpus = threads, quiet = quiet, upgrade = upgrade)
+  invisible()
+}
+
+#' @rdname install_deps
+#' @export
+install_dev_deps <- function(pkg = ".", ...) {
+  update_packages("roxygen2")
+  install_deps(pkg, ..., dependencies = TRUE, upgrade = FALSE,
+    bioc_packages = TRUE)
 }

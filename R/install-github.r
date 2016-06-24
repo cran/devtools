@@ -20,8 +20,6 @@
 #'   the \code{GITHUB_PAT} environment variable.
 #' @param host GitHub API host to use. Override with your GitHub enterprise
 #'   hostname, for example, \code{"github.hostname.com/api/v3"}.
-#' @param force Force installation even if the git SHA1 has not changed since
-#'   the previous install.
 #' @param quiet if \code{TRUE} suppresses output from this function.
 #' @param ... Other arguments passed on to \code{\link{install}}.
 #' @details
@@ -56,23 +54,18 @@
 install_github <- function(repo, username = NULL,
                            ref = "master", subdir = NULL,
                            auth_token = github_pat(quiet),
-                           host = "api.github.com",
-                           force = FALSE, quiet = FALSE,
+                           host = "https://api.github.com", quiet = FALSE,
                            ...) {
 
   remotes <- lapply(repo, github_remote, username = username, ref = ref,
     subdir = subdir, auth_token = auth_token, host = host)
-
-  if (!isTRUE(force)) {
-    remotes <- Filter(function(x) different_sha(x, quiet = quiet), remotes)
-  }
 
   install_remotes(remotes, quiet = quiet, ...)
 }
 
 github_remote <- function(repo, username = NULL, ref = NULL, subdir = NULL,
                        auth_token = github_pat(), sha = NULL,
-                       host = "api.github.com") {
+                       host = "https://api.github.com") {
 
   meta <- parse_git_repo(repo)
   meta <- github_resolve_ref(meta$ref %||% ref, meta)
@@ -98,7 +91,12 @@ github_remote <- function(repo, username = NULL, ref = NULL, subdir = NULL,
 #' @export
 remote_download.github_remote <- function(x, quiet = FALSE) {
   dest <- tempfile(fileext = paste0(".zip"))
-  src_root <- paste0("https://", x$host, "/repos/", x$username, "/", x$repo)
+
+  if (missing_protocol <- !grepl("^[^:]+?://", x$host)) {
+    x$host <- paste0("https://", x$host)
+  }
+
+  src_root <- paste0(x$host, "/repos/", x$username, "/", x$repo)
   src <- paste0(src_root, "/zipball/", x$ref)
 
   if (!quiet) {
@@ -124,7 +122,7 @@ remote_download.github_remote <- function(x, quiet = FALSE) {
 }
 
 github_has_remotes <- function(x, auth = NULL) {
-  src_root <- paste0("https://", x$host, "/repos/", x$username, "/", x$repo)
+  src_root <- paste0(x$host, "/repos/", x$username, "/", x$repo)
   src_submodules <- paste0(src_root, "/contents/.gitmodules?ref=", x$ref)
   response <- httr::HEAD(src_submodules, , auth)
   identical(httr::status_code(response), 200L)
@@ -133,10 +131,7 @@ github_has_remotes <- function(x, auth = NULL) {
 #' @export
 remote_metadata.github_remote <- function(x, bundle = NULL, source = NULL) {
   # Determine sha as efficiently as possible
-  if (!is.null(x$sha)) {
-    # Might be cached already (because re-installing)
-    sha <- x$sha
-  } else if (!is.null(bundle)) {
+  if (!is.null(bundle)) {
     # Might be able to get from zip archive
     sha <- git_extract_sha1(bundle)
   } else {
@@ -262,7 +257,7 @@ remote_package_name.github_remote <- function(remote, url = "https://github.com"
   req <- httr::GET(url, path = path, httr::write_disk(path = tmp))
 
   if (httr::status_code(req) >= 400) {
-    return(NA)
+    return(NA_character_)
   }
 
   read_dcf(tmp)$Package
@@ -270,9 +265,13 @@ remote_package_name.github_remote <- function(remote, url = "https://github.com"
 
 #' @export
 remote_sha.github_remote <- function(remote, url = "https://github.com", ...) {
-  if (!is.null(remote$sha)) {
+  # If the remote ref is the same as the sha it is a pinned commit so just
+  # return that.
+  if (!is.null(remote$ref) && !is.null(remote$sha) &&
+    grepl(paste0("^", remote$ref), remote$sha)) {
     return(remote$sha)
   }
+
   tryCatch({
     res <- git2r::remote_ls(
       paste0(url, "/", remote$username, "/", remote$repo, ".git"),
@@ -281,11 +280,16 @@ remote_sha.github_remote <- function(remote, url = "https://github.com", ...) {
     found <- grep(pattern = paste0("/", remote$ref), x = names(res))
 
     if (length(found) == 0) {
-      return(NA)
+      return(NA_character_)
     }
 
     unname(res[found[1]])
-  }, error = function(e) NA)
+  }, error = function(e) NA_character_)
+}
+
+#' @export
+format.github_remote <- function(x, ...) {
+  "GitHub"
 }
 
 download_github <- function(path, url, ...) {

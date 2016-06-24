@@ -60,9 +60,9 @@ check_suggested <- function(pkg, version = NULL, compare = NA) {
     compare <- dep$compare
   }
 
-  if (!check_dep_version(pkg, version, compare)) {
+  if (!is_installed(pkg) || !check_dep_version(pkg, version, compare)) {
     msg <- paste0(sQuote(pkg),
-      if (version == 0) "" else paste0(" >= ", version),
+      if (is.na(version)) "" else paste0(" >= ", version),
       " must be installed for this functionality.")
 
     if (interactive()) {
@@ -105,6 +105,12 @@ write_dcf <- function(path, desc) {
   starts_with_whitespace <- grepl("^\\s", desc, perl = TRUE, useBytes = TRUE)
   delimiters <- ifelse(starts_with_whitespace, ":", ": ")
   text <- paste0(names(desc), delimiters, desc, collapse = "\n")
+
+  # If the description file has a declared encoding, set it so nchar() works
+  # properly.
+  if ("Encoding" %in% names(desc)) {
+    Encoding(text) <- desc[["Encoding"]]
+  }
 
   if (substr(text, nchar(text), 1) != "\n") {
     text <- paste0(text, "\n")
@@ -159,4 +165,74 @@ is_dir <- function(x) file.info(x)$isdir
 indent <- function(x, spaces = 4) {
   ind <- paste(rep(" ", spaces), collapse = "")
   paste0(ind, gsub("\n", paste0("\n", ind), x, fixed = TRUE))
+}
+
+is_windows <- isTRUE(.Platform$OS.type == "windows")
+
+all_named <- function (x) {
+  if (length(x) == 0) return(TRUE)
+  !is.null(names(x)) && all(names(x) != "")
+}
+
+make_function <- function (args, body, env = parent.frame()) {
+  args <- as.pairlist(args)
+  stopifnot(all_named(args), is.language(body))
+  eval(call("function", args, body), env)
+}
+
+comp_lang <- function(x, y, idx = seq_along(y)) {
+  if (is.symbol(x) || is.symbol(y)) {
+    return(identical(x, y))
+  }
+
+  if (length(x) < length(idx)) return(FALSE)
+
+  identical(x[idx], y[idx])
+}
+
+extract_lang <- function(x, f, ...) {
+  recurse <- function(y) {
+    unlist(compact(lapply(y, extract_lang, f = f, ...)), recursive = FALSE)
+  }
+
+  # if x matches predicate return it
+  if (isTRUE(f(x, ...))) {
+    return(x)
+  }
+
+  if (is.call(x)) {
+    res <- recurse(x)[[1]]
+    if (top_level_call <- identical(sys.call()[[1]], as.symbol("extract_lang"))
+        && is.null(res)) {
+      warning("Devtools is incompatible with the current version of R. `load_all()` may function incorrectly.")
+    }
+    return(res)
+  }
+
+  NULL
+}
+
+modify_lang <- function(x, f, ...) {
+  recurse <- function(x) {
+    lapply(x, modify_lang, f = f, ...)
+  }
+
+  x <- f(x, ...)
+
+  if (is.call(x)) {
+    as.call(recurse(x))
+  } else if (is.function(x)) {
+     formals(x) <- modify_lang(formals(x), f, ...)
+     body(x) <- modify_lang(body(x), f, ...)
+  } else {
+    x
+  }
+}
+
+strip_internal_calls <- function(x, package) {
+  if (is.call(x) && identical(x[[1L]], as.name(":::")) && identical(x[[2L]], as.name(package))) {
+    x[[3L]]
+  } else {
+    x
+  }
 }

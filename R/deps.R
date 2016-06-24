@@ -23,8 +23,6 @@
 #'   installation.
 #'
 #' @param object A \code{package_deps} object.
-#' @param force_deps whether to force installation of dependencies even if their
-#'   SHA1 reference hasn't changed from the currently installed version.
 #' @param ... Additional arguments passed to \code{install_packages}.
 #'
 #' @return
@@ -56,7 +54,7 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
   if (length(repos) == 0)
     repos <- character()
 
-  repos[repos == "@CRAN@"] <- "http://cran.rstudio.com"
+  repos[repos == "@CRAN@"] <- cran_mirror()
   cran <- available_packages(repos, type)
 
   if (missing(pkg)) {
@@ -69,11 +67,16 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
   base <- unname(inst[inst[, "Priority"] %in% c("base", "recommended"), "Package"])
   deps <- setdiff(deps, base)
 
-  inst_ver <- unname(inst[, "Version"][match(deps, rownames(inst))])
-  cran_ver <- unname(cran[, "Version"][match(deps, rownames(cran))])
-  diff <- compare_versions(inst_ver, cran_ver)
+  # get remote types
+  remote <- structure(lapply(deps, package2remote, repos = repos, type = type), class = "remotes")
 
-  structure(
+  inst_ver <- vapply(deps, local_sha, character(1))
+  cran_ver <- vapply(remote, remote_sha, character(1))
+
+  cran_remote <- vapply(remote, inherits, logical(1), "cran_remote")
+  diff <- compare_versions(inst_ver, cran_ver, cran_remote)
+
+  res <- structure(
     data.frame(
       package = deps,
       installed = inst_ver,
@@ -81,21 +84,19 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
       diff = diff,
       stringsAsFactors = FALSE
     ),
-    class = c("package_deps", "data.frame"),
-    repos = repos,
-    type = type
+    class = c("package_deps", "data.frame")
   )
+  res$remote <- remote
+
+  res
 }
 
 #' @export
 #' @rdname package_deps
 dev_package_deps <- function(pkg = ".", dependencies = NA,
                              repos = getOption("repos"),
-                             type = getOption("pkgType"),
-                             force_deps = FALSE,
-                             quiet = FALSE) {
+                             type = getOption("pkgType")) {
   pkg <- as.package(pkg)
-  install_dev_remotes(pkg, force = force_deps, quiet = quiet)
 
   repos <- c(repos, parse_additional_repositories(pkg))
 
@@ -115,7 +116,26 @@ dev_package_deps <- function(pkg = ".", dependencies = NA,
       repos[missing_repos] <- bioc_repos[missing_repos]
   }
 
-  package_deps(deps, repos = repos, type = type)
+  res <- filter_duplicate_deps(
+    package_deps(deps, repos = repos, type = type),
+
+    # We set this cache in install() so we can run install_deps() twice without
+    # having to re-query the remotes
+    installing$remote_deps %||% remote_deps(pkg))
+
+  # Only keep dependencies we actually want to use
+  res[res$package %in% deps, ]
+}
+
+filter_duplicate_deps <- function(cran_deps, remote_deps, dependencies) {
+  deps <- rbind(cran_deps, remote_deps)
+
+  # Only keep the remotes that are specified in the cran_deps
+  # Keep only the Non-CRAN remotes if there are duplicates as we want to install
+  # the development version rather than the CRAN version. The remotes will
+  # always be specified after the CRAN dependencies, so using fromLast will
+  # filter out the CRAN dependencies.
+  deps[!duplicated(deps$package, fromLast = TRUE), ]
 }
 
 ## -2 = not installed, but available on CRAN
@@ -130,10 +150,17 @@ CURRENT <- 0L
 AHEAD <- 1L
 UNAVAILABLE <- 2L
 
-compare_versions <- function(inst, cran) {
-  stopifnot(length(inst) == length(cran))
+compare_versions <- function(inst, remote, is_cran) {
+  stopifnot(length(inst) == length(remote) && length(inst) == length(is_cran))
 
-  compare_var <- function(i, c) {
+  compare_var <- function(i, c, cran) {
+    if (!cran) {
+      if (identical(i, c)) {
+        return(CURRENT)
+      } else {
+        return(BEHIND)
+      }
+    }
     if (is.na(c)) return(UNAVAILABLE)           # not on CRAN
     if (is.na(i)) return(UNINSTALLED)           # not installed, but on CRAN
 
@@ -150,56 +177,61 @@ compare_versions <- function(inst, cran) {
   }
 
   vapply(seq_along(inst),
-    function(i) compare_var(inst[[i]], cran[[i]]),
+    function(i) compare_var(inst[[i]], remote[[i]], is_cran[[i]]),
     integer(1))
 }
 
-install_dev_remotes <- function(pkg, ..., quiet = FALSE) {
+parse_one_remote <- function(x) {
+  pieces <- strsplit(x, "::", fixed = TRUE)[[1]]
+
+  if (length(pieces) == 1) {
+    type <- "github"
+    repo <- pieces
+  } else if (length(pieces) == 2) {
+    type <- pieces[1]
+    repo <- pieces[2]
+  } else {
+    stop("Malformed remote specification '", x, "'", call. = FALSE)
+  }
+  fun <- tryCatch(get(paste0(tolower(type), "_remote"),
+      envir = asNamespace("devtools"), mode = "function", inherits = FALSE),
+    error = function(e) stop("Unknown remote type: ", type, call. = FALSE))
+
+  fun(repo)
+}
+
+split_remotes <- function(x) {
+  trim_ws(unlist(strsplit(x, ",[[:space:]]*")))
+}
+
+remote_deps <- function(pkg) {
   pkg <- as.package(pkg)
 
   if (!has_dev_remotes(pkg)) {
-    return()
-  }
-
-  types <- dev_remote_type(pkg[["remotes"]])
-
-  lapply(types, function(type) type$fun(type$repository, ..., quiet = quiet))
-}
-
-# Parse the remotes field split into pieces and get install_ functions for each
-# remote type
-dev_remote_type <- function(remotes = "") {
-
-  if (!nchar(remotes)) {
     return(NULL)
   }
 
-  dev_packages <- trim_ws(unlist(strsplit(remotes, ",[[:space:]]*")))
+  dev_packages <- split_remotes(pkg[["remotes"]])
+  remote <- lapply(dev_packages, parse_one_remote)
 
-  parse_one <- function(x) {
-    pieces <- strsplit(x, "::", fixed = TRUE)[[1]]
+  package <- vapply(remote, remote_package_name, character(1))
+  installed <- vapply(package, local_sha, character(1))
+  available <- vapply(remote, remote_sha, character(1))
+  diff <- installed == available
+  diff <- ifelse(!is.na(diff) & diff, CURRENT, BEHIND)
 
-    if (length(pieces) == 1) {
-      type <- "github"
-      repo <- pieces
-    } else if (length(pieces) == 2) {
-      type <- pieces[1]
-      repo <- pieces[2]
-    } else {
-      stop("Malformed remote specification '", x, "'", call. = FALSE)
-    }
-    tryCatch(
-      fun <- get(x = paste0("install_", tolower(type)),
-        envir = asNamespace("devtools"),
-        mode = "function",
-        inherits = FALSE),
-      error = function(e) {
-        stop("Unknown remote type: ", type, call. = FALSE)
-      })
-    list(repository = repo, type = type, fun = fun)
-  }
+  res <- structure(
+    data.frame(
+      package = package,
+      installed = installed,
+      available = available,
+      diff = diff,
+      stringsAsFactors = FALSE
+      ),
+    class = c("package_deps", "data.frame"))
+  res$remote <- structure(remote, class = "remotes")
 
-  lapply(dev_packages, parse_one)
+  res
 }
 
 has_dev_remotes <- function(pkg) {
@@ -240,32 +272,38 @@ print.package_deps <- function(x, show_ok = FALSE, ...) {
 #' @rdname package_deps
 #' @importFrom stats update
 update.package_deps <- function(object, ..., quiet = FALSE, upgrade = TRUE) {
-  unavailable <- object$package[object$diff == UNAVAILABLE]
-  if (length(unavailable) > 0 && !quiet) {
-    message(sprintf(ngettext(length(unavailable),
-      "Skipping %d unavailable package: %s",
-      "Skipping %d unavailable packages: %s"
-    ), length(unavailable), paste(unavailable, collapse = ", ")))
+  non_cran <- !vapply(object$remote, inherits, logical(1), "cran_remote")
+  unavailable <- object$diff == UNAVAILABLE & non_cran
+  if (any(unavailable)) {
+    if (upgrade) {
+      install_remotes(object$remote[unavailable], ..., quiet = quiet)
+    } else if (!quiet) {
+      message(sprintf(ngettext(sum(unavailable),
+            "Skipping %d unavailable package: %s",
+            "Skipping %d unavailable packages: %s"
+            ), sum(unavailable), paste(object$package[unavailable], collapse = ", ")))
+    }
   }
 
-  ahead <- object$package[object$diff == AHEAD]
-  if (length(ahead) > 0 && !quiet) {
-    message(sprintf(ngettext(length(ahead),
-      "Skipping %d package ahead of CRAN: %s",
-      "Skipping %d packages ahead of CRAN: %s"
-    ), length(ahead), paste(ahead, collapse = ", ")))
+  ahead <- object$diff == AHEAD & non_cran
+  if (any(ahead)) {
+    if (upgrade) {
+      install_remotes(object$remote[ahead], ..., quiet = quiet)
+    } else if (!quiet) {
+      message(sprintf(ngettext(sum(ahead),
+            "Skipping %d package ahead of CRAN: %s",
+            "Skipping %d packages ahead of CRAN: %s"
+            ), sum(ahead), paste(object$package[ahead], collapse = ", ")))
+    }
   }
 
   if (upgrade) {
-    behind <- object$package[object$diff < CURRENT]
+    behind <- object$diff < CURRENT
   } else {
-    behind <- object$package[is.na(object$installed)]
-  }
-  if (length(behind) > 0L) {
-    install_packages(behind, repos = attr(object, "repos"),
-      type = attr(object, "type"), quiet = quiet, ...)
+    behind <- is.na(object$installed)
   }
 
+  install_remotes(object$remote[behind], ..., quiet = quiet)
 }
 
 install_packages <- function(pkgs, repos = getOption("repos"),
@@ -332,7 +370,8 @@ standardise_dep <- function(x) {
 #' Works similarly to \code{install.packages()} but doesn't install packages
 #' that are already installed, and also upgrades out dated dependencies.
 #'
-#' @param pkgs Character vector of packages to update.
+#' @param pkgs Character vector of packages to update. If \code{NULL} all
+#'   installed packages are updated.
 #' @inheritParams package_deps
 #' @seealso \code{\link{package_deps}} to see which packages are out of date/
 #'   missing.
@@ -342,10 +381,23 @@ standardise_dep <- function(x) {
 #' update_packages("ggplot2")
 #' update_packages(c("plyr", "ggplot2"))
 #' }
-update_packages <- function(pkgs, dependencies = NA,
+update_packages <- function(pkgs = NULL, dependencies = NA,
                             repos = getOption("repos"),
                             type = getOption("pkgType")) {
-  pkgs <- package_deps(pkgs, repos = repos, type = type)
+
+  if (is.null(pkgs)) {
+    if (!yesno("Are you sure you want to update all installed packages?")) {
+      pkgs <- installed.packages()[, "Package"]
+    } else {
+      return(invisible())
+    }
+  }
+
+  pkgs <- package_deps(pkgs,
+    dependencies = dependencies,
+    repos = repos,
+    type = type)
+
   update(pkgs)
 }
 
@@ -361,4 +413,11 @@ parse_additional_repositories <- function(pkg) {
   if (has_additional_repositories(pkg)) {
     strsplit(pkg[["additional_repositories"]], "[,[:space:]]+")[[1]]
   }
+}
+
+#' @export
+`[.remotes` <- function(x,i,...) {
+  r <- NextMethod("[")
+  mostattributes(r) <- attributes(x)
+  r
 }
