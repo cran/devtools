@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/hadley/devtools.svg?branch=master)](https://travis-ci.org/hadley/devtools)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/hadley/devtools?branch=master&svg=true)](https://ci.appveyor.com/project/hadley/devtools)
 [![Coverage Status](https://codecov.io/github/hadley/devtools/coverage.svg?branch=master)](https://codecov.io/github/hadley/devtools?branch=master)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/devtools)](http://cran.r-project.org/package=devtools)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/devtools)](https://cran.r-project.org/package=devtools)
 
 
 The aim of `devtools` is to make package development easier by providing R functions that simplify common tasks.
@@ -23,31 +23,15 @@ You can track (and contribute to) the development of `devtools` at https://githu
 1. Install the release version of `devtools` from CRAN with `install.packages("devtools")`.
 
 2. Make sure you have a working development environment.
-    * **Windows**: Install [Rtools](http://cran.r-project.org/bin/windows/Rtools/).
+    * **Windows**: Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/).
     * **Mac**: Install Xcode from the Mac App Store.
     * **Linux**: Install a compiler and various development libraries (details vary across different flavors of Linux).
 
-3. Follow the instructions below depending on platform.
+3. Install the development version of devtools.
 
-    * **Mac and Linux**:
-
-        ```R
-        devtools::install_github("hadley/devtools")
-        ```
-
-    * **Windows**:
-
-        ```R
-        library(devtools)
-        build_github_devtools()
-
-        #### Restart R before continuing ####
-        install.packages("devtools.zip", repos = NULL, type = "source")
-
-        # Remove the package after installation
-        unlink("devtools.zip")
-        ```
-
+   ```R
+   devtools::install_github("hadley/devtools")
+   ```
 
 ## Package development tools
 

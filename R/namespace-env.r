@@ -1,7 +1,7 @@
 #' Return the namespace environment for a package.
 #'
 #' Contains all (exported and non-exported) objects, and is a descendent of
-#' \code{R_GlobalEnv}. The hieararchy is \code{<namespace:pkg>},
+#' \code{R_GlobalEnv}. The hierarchy is \code{<namespace:pkg>},
 #' \code{<imports:pkg>}, \code{<namespace:base>}, and then
 #' \code{R_GlobalEnv}.
 #'
@@ -175,11 +175,11 @@ is_loaded <- function(pkg = ".") {
 
 
 # Returns the namespace registry
-#' @useDynLib devtools nsreg
 ns_registry <- function() {
-  .Call(nsreg)
+  (get(".Internal", envir = baseenv(), mode = "function"))(getNamespaceRegistry())
 }
-
+# To avoid a note about getNamespaceRegistry being missing
+utils::globalVariables("getNamespaceRegistry")
 
 # Register a namespace
 register_namespace <- function(name = NULL, env = NULL) {

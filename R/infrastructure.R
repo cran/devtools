@@ -134,21 +134,28 @@ use_rcpp <- function(pkg = ".") {
 #' @section \code{use_travis}:
 #' Add basic travis template to a package. Also adds \code{.travis.yml} to
 #' \code{.Rbuildignore} so it isn't included in the built package.
+#' @param browse open a browser window to enable Travis builds for the package
+#' automatically.
 #' @export
 #' @aliases add_travis
-use_travis <- function(pkg = ".") {
+use_travis <- function(pkg = ".", browse = interactive()) {
   pkg <- as.package(pkg)
 
   use_template("travis.yml", ".travis.yml", ignore = TRUE, pkg = pkg)
 
   gh <- github_info(pkg$path)
+  travis_url <- file.path("https://travis-ci.org", gh$fullname)
+
   message("Next: \n",
-    " * Turn on travis for this repo at https://travis-ci.org/profile\n",
     " * Add a travis shield to your README.md:\n",
     "[![Travis-CI Build Status]",
        "(https://travis-ci.org/", gh$fullname, ".svg?branch=master)]",
-       "(https://travis-ci.org/", gh$fullname, ")"
+       "(https://travis-ci.org/", gh$fullname, ")\n",
+    " * Turn on travis for your repo at ", travis_url, "\n"
   )
+  if (browse) {
+    utils::browseURL(travis_url)
+  }
 
   invisible(TRUE)
 }
@@ -248,8 +255,8 @@ use_package_doc <- function(pkg = ".") {
 #' about how to best use it.
 #'
 #' @param package Name of package to depend on.
-#' @param type Type of dependency: must be one of "Imports", "Suggests",
-#'   "Depends", "Suggests", "Enhances", or "LinkingTo" (or unique abbreviation)
+#' @param type Type of dependency: must be one of "Imports", "Depends", 
+#'   "Suggests", "Enhances", or "LinkingTo" (or unique abbreviation)
 #' @param pkg package description, can be path or package name. See
 #'   \code{\link{as.package}} for more information.
 #' @family infrastructure
@@ -312,7 +319,7 @@ add_desc_package <- function(pkg = ".", field, name) {
     new <- name
     changed <- TRUE
   } else {
-    if (!grepl(name, old)) {
+    if (!grepl(paste0('\\b', name, '\\b'), old)) {
       new <- paste0(old, ",\n    ", name)
       changed <- TRUE
     } else {
@@ -466,18 +473,36 @@ use_build_ignore <- function(files, escape = TRUE, pkg = ".") {
 
 #' Create README files.
 #'
+#' Creates skeleton README files with sections for
+#' \itemize{
+#' \item a high-level description of the package and its goals
+#' \item R code to install from GitHub, if GitHub usage detected
+#' \item a basic example
+#' }
 #' Use \code{Rmd} if you want a rich intermingling of code and data. Use
 #' \code{md} for a basic README. \code{README.Rmd} will be automatically
-#' added to \code{.Rbuildignore}.
+#' added to \code{.Rbuildignore}. The resulting README is populated with default
+#' YAML frontmatter and R fenced code blocks (\code{md}) or chunks (\code{Rmd}).
 #'
 #' @param pkg package description, can be path or package name.  See
 #'   \code{\link{as.package}} for more information
 #' @export
+#' @examples
+#' \dontrun{
+#' use_readme_rmd()
+#' use_readme_md()
+#' }
 #' @family infrastructure
 use_readme_rmd <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
-  use_template("README.Rmd", ignore = TRUE, open = TRUE, pkg = pkg)
+  if (uses_github(pkg$path)) {
+    pkg$github <- github_info(pkg$path)
+  }
+  pkg$Rmd <- TRUE
+
+  use_template("omni-README", save_as = "README.Rmd", data = pkg,
+               ignore = TRUE, open = TRUE, pkg = pkg)
   use_build_ignore("^README-.*\\.png$", escape = FALSE, pkg = pkg)
 
   if (uses_git(pkg$path) && !file.exists(pkg$path, ".git", "hooks", "pre-commit")) {
@@ -497,7 +522,8 @@ use_readme_md <- function(pkg = ".") {
     pkg$github <- github_info(pkg$path)
   }
 
-  use_template("README.md", data = pkg, open = TRUE, pkg = pkg)
+  use_template("omni-README", save_as = "README.md",
+               data = pkg, open = TRUE, pkg = pkg)
 }
 
 #' Use NEWS.md
@@ -529,6 +555,7 @@ use_revdep <- function(pkg = ".") {
     data = list(name = pkg$package),
     pkg = pkg
   )
+  use_git_ignore(revdep_cache_path_raw(""), pkg = pkg)
 }
 
 #' @rdname infrastructure
@@ -630,6 +657,24 @@ use_mit_license <- function(pkg = ".", copyright_holder = getOption("devtools.na
 }
 
 
+#' @rdname infrastructure
+#' @section \code{use_gpl3_license}:
+#' Adds the necessary infrastructure to declare your package as
+#' distributed under the GPL v3.
+#' @export
+use_gpl3_license <- function(pkg = ".") {
+  pkg <- as.package(pkg)
+
+  # Update the DESCRIPTION
+  message("* Updating license field in DESCRIPTION.")
+  descPath <- file.path(pkg$path, "DESCRIPTION")
+  DESCRIPTION <- read_dcf(descPath)
+  DESCRIPTION$License <- "GPL-3 + file LICENSE"
+  write_dcf(descPath, DESCRIPTION)
+
+  use_template("gpl-v3.md", "LICENSE", pkg = pkg)
+}
+
 #' @section \code{use_dev_version}:
 #' This adds ".9000" to the package \code{DESCRIPTION}, adds a new heading to
 #' \code{NEWS.md} (if it exists), and then checks the result into git.
@@ -724,7 +769,7 @@ use_template <- function(template, save_as = template, data = list(),
 
   if (open) {
     message("* Modify `", save_as, "`.")
-    open_in_rstudio(save_as)
+    open_in_rstudio(path)
   }
 
   invisible(TRUE)

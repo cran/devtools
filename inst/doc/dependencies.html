@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jim Hester, Hadley Wickham" />
 
-<meta name="date" content="2016-06-02" />
+<meta name="date" content="2017-05-04" />
 
 <title>Devtools dependencies</title>
 
@@ -70,13 +70,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Devtools dependencies</h1>
 <h4 class="author"><em>Jim Hester, Hadley Wickham</em></h4>
-<h4 class="date"><em>2016-06-02</em></h4>
+<h4 class="date"><em>2017-05-04</em></h4>
 
 
 
 <div id="package-remotes" class="section level1">
 <h1>Package remotes</h1>
-<p>Devtools version 1.9 supports package dependency installation for packages not yet in a standard package repository such as <a href="http://cran.r-project.org">CRAN</a> or <a href="http://bioconductor.org">Bioconductor</a>.</p>
+<p>Devtools version 1.9 supports package dependency installation for packages not yet in a standard package repository such as <a href="https://cran.r-project.org">CRAN</a> or <a href="http://bioconductor.org">Bioconductor</a>.</p>
 <p>You can mark any regular dependency defined in the <code>Depends</code>, <code>Imports</code>, <code>Suggests</code> or <code>Enhances</code> fields as being installed from a remote location by adding the remote location to <code>Remotes</code> in your <code>DESCRIPTION</code> file. This will cause devtools to download and install them prior to installing your package (so they won’t be installed from CRAN).</p>
 <p>The remote dependencies specified in <code>Remotes</code> should be described in the following form.</p>
 <pre><code>Remotes: [type::]&lt;Repository&gt;, [type2::]&lt;Repository2&gt;</code></pre>
@@ -100,6 +100,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <span class="co"># Bitbucket</span>
 <span class="fu">Remotes:</span> bitbucket::sulab/mygene.r@default, dannavarro/lsr-package
+
+<span class="co"># Bioconductor</span>
+<span class="fu">Remotes:</span> bioc::3.3/SummarizedExperiment<span class="co">#117513, bioc::release/Biobase</span>
 
 <span class="co"># SVN</span>
 <span class="fu">Remotes:</span> svn::https://github.com/hadley/stringr
@@ -126,7 +129,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

@@ -23,6 +23,8 @@
 #'   installation.
 #'
 #' @param object A \code{package_deps} object.
+#' @param bioconductor Install Bioconductor dependencies if the package has a
+#' BiocViews field in the DESCRIPTION.
 #' @param ... Additional arguments passed to \code{install_packages}.
 #'
 #' @return
@@ -55,12 +57,14 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
     repos <- character()
 
   repos[repos == "@CRAN@"] <- cran_mirror()
-  cran <- available_packages(repos, type)
 
   if (missing(pkg)) {
     pkg <- as.package(".")$package
   }
-  deps <- sort(find_deps(pkg, cran, top_dep = dependencies))
+
+  # It is important to not extract available_packages() to a variable,
+  # for the case when pkg is empty (e.g., install(dependencies = FALSE) ).
+  deps <- sort_ci(find_deps(pkg, available_packages(repos, type), top_dep = dependencies))
 
   # Remove base packages
   inst <- installed.packages()
@@ -95,7 +99,8 @@ package_deps <- function(pkg, dependencies = NA, repos = getOption("repos"),
 #' @rdname package_deps
 dev_package_deps <- function(pkg = ".", dependencies = NA,
                              repos = getOption("repos"),
-                             type = getOption("pkgType")) {
+                             type = getOption("pkgType"),
+                             bioconductor = TRUE) {
   pkg <- as.package(pkg)
 
   repos <- c(repos, parse_additional_repositories(pkg))
@@ -106,8 +111,8 @@ dev_package_deps <- function(pkg = ".", dependencies = NA,
   parsed <- lapply(pkg[tolower(dependencies)], parse_deps)
   deps <- unlist(lapply(parsed, `[[`, "name"), use.names = FALSE)
 
-  if (is_bioconductor(pkg)) {
-    check_suggested("BiocInstaller")
+  if (isTRUE(bioconductor) && is_bioconductor(pkg)) {
+    check_bioconductor()
     bioc_repos <- BiocInstaller::biocinstallRepos()
 
     missing_repos <- setdiff(names(bioc_repos), names(repos))
@@ -214,9 +219,9 @@ remote_deps <- function(pkg) {
   dev_packages <- split_remotes(pkg[["remotes"]])
   remote <- lapply(dev_packages, parse_one_remote)
 
-  package <- vapply(remote, remote_package_name, character(1))
-  installed <- vapply(package, local_sha, character(1))
-  available <- vapply(remote, remote_sha, character(1))
+  package <- vapply(remote, remote_package_name, character(1), USE.NAMES = FALSE)
+  installed <- vapply(package, local_sha, character(1), USE.NAMES = FALSE)
+  available <- vapply(remote, remote_sha, character(1), USE.NAMES = FALSE)
   diff <- installed == available
   diff <- ifelse(!is.na(diff) & diff, CURRENT, BEHIND)
 
@@ -370,8 +375,9 @@ standardise_dep <- function(x) {
 #' Works similarly to \code{install.packages()} but doesn't install packages
 #' that are already installed, and also upgrades out dated dependencies.
 #'
-#' @param pkgs Character vector of packages to update. If \code{NULL} all
-#'   installed packages are updated.
+#' @param pkgs Character vector of packages to update. IF \code{TRUE} all
+#'   installed packages are updated. If \code{NULL} user is prompted to
+#'   confirm update of all installed packages.
 #' @inheritParams package_deps
 #' @seealso \code{\link{package_deps}} to see which packages are out of date/
 #'   missing.
@@ -385,7 +391,10 @@ update_packages <- function(pkgs = NULL, dependencies = NA,
                             repos = getOption("repos"),
                             type = getOption("pkgType")) {
 
-  if (is.null(pkgs)) {
+  if (isTRUE(pkgs)) {
+    pkgs <- installed.packages()[, "Package"]
+  }
+  else if (is.null(pkgs)) {
     if (!yesno("Are you sure you want to update all installed packages?")) {
       pkgs <- installed.packages()[, "Package"]
     } else {

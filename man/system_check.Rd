@@ -24,10 +24,9 @@ system_check(cmd, args = character(), env_vars = character(), path = ".",
 \item{...}{additional arguments passed to \code{\link[base]{system}}}
 }
 \value{
-(Invisibly) the return value of the function.
+The exit status of the command, invisibly.
 }
 \description{
 Run a system command and check if it succeeds.
 }
 \keyword{internal}
-

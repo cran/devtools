@@ -13,7 +13,7 @@
 #' through the separate build-restart-install steps.
 #'
 #' This function requires a working development environment. On Windows, it
-#' needs \url{http://cran.r-project.org/bin/windows/Rtools/}.
+#' needs \url{https://cran.r-project.org/bin/windows/Rtools/}.
 #'
 #' @param outfile The name of the output file. If NULL (the default), it uses
 #'   ./devtools.tgz (Mac and Linux), or ./devtools.zip (Windows).
@@ -32,6 +32,7 @@
 #' }
 #' @export
 build_github_devtools <- function(outfile = NULL) {
+  .Deprecated(msg = "`build_github_devtools()` is deprecated, you can simply use `install_github(\"hadley/devtools\")`")
   if (!has_devel()) {
     stop("This requires a working development environment.")
   }
