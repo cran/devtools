@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jim Hester, Hadley Wickham" />
 
-<meta name="date" content="2017-05-04" />
+<meta name="date" content="2017-05-12" />
 
 <title>Devtools dependencies</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Devtools dependencies</h1>
 <h4 class="author"><em>Jim Hester, Hadley Wickham</em></h4>
-<h4 class="date"><em>2017-05-04</em></h4>
+<h4 class="date"><em>2017-05-12</em></h4>
 
 
 
@@ -84,37 +84,37 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="github" class="section level3">
 <h3>Github</h3>
 <p>Because github is the most commonly used unofficial package distribution in R, it’s the default:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span> hadley/testthat</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span><span class="at"> hadley/testthat</span></code></pre></div>
 <p>You can also specify a specific hash, tag, or pull request (using the same syntax as <code>install_github()</code> if you want a particular commit. Otherwise the latest commit on the master branch is used.</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span> hadley/httr@v0.4,
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span><span class="at"> hadley/httr@v0.4,</span>
   klutometis/roxygen<span class="co">#142,</span>
   hadley/testthat@c67018fa4970</code></pre></div>
 <p>A type of ‘github’ can be specified, but is not required</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span> github::hadley/ggplot2</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">Remotes:</span><span class="at"> github::hadley/ggplot2</span></code></pre></div>
 </div>
 <div id="other-sources" class="section level3">
 <h3>Other sources</h3>
 <p>All of the currently supported install sources are available, see the ‘See Also’ section in <code>?install</code> for a complete list.</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="co"># Git</span>
-<span class="fu">Remotes:</span> git::https://github.com/hadley/ggplot2.git
+<span class="fu">Remotes:</span><span class="at"> git::https://github.com/hadley/ggplot2.git</span>
 
 <span class="co"># Bitbucket</span>
-<span class="fu">Remotes:</span> bitbucket::sulab/mygene.r@default, dannavarro/lsr-package
+<span class="fu">Remotes:</span><span class="at"> bitbucket::sulab/mygene.r@default, dannavarro/lsr-package</span>
 
 <span class="co"># Bioconductor</span>
-<span class="fu">Remotes:</span> bioc::3.3/SummarizedExperiment<span class="co">#117513, bioc::release/Biobase</span>
+<span class="fu">Remotes:</span><span class="at"> bioc::3.3/SummarizedExperiment</span><span class="co">#117513, bioc::release/Biobase</span>
 
 <span class="co"># SVN</span>
-<span class="fu">Remotes:</span> svn::https://github.com/hadley/stringr
+<span class="fu">Remotes:</span><span class="at"> svn::https://github.com/hadley/stringr</span>
 
 <span class="co"># URL</span>
-<span class="fu">Remotes:</span> url::https://github.com/hadley/stringr/archive/master.zip
+<span class="fu">Remotes:</span><span class="at"> url::https://github.com/hadley/stringr/archive/master.zip</span>
 
 <span class="co"># Local</span>
-<span class="fu">Remotes:</span> local::/pkgs/testthat
+<span class="fu">Remotes:</span><span class="at"> local::/pkgs/testthat</span>
 
 <span class="co"># Gitorious</span>
-<span class="fu">Remotes:</span> gitorious::r-mpc-package/r-mpc-package</code></pre></div>
+<span class="fu">Remotes:</span><span class="at"> gitorious::r-mpc-package/r-mpc-package</span></code></pre></div>
 </div>
 <div id="cran-submission" class="section level3">
 <h3>CRAN submission</h3>
