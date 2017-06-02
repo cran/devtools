@@ -5,6 +5,16 @@
 
 using namespace Rcpp;
 
+// rcpp_hello_world
+SEXP rcpp_hello_world();
+RcppExport SEXP testDllRcpp_rcpp_hello_world() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_test_attributes
 bool rcpp_test_attributes();
 RcppExport SEXP testDllRcpp_rcpp_test_attributes() {
@@ -14,4 +24,15 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(rcpp_test_attributes());
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"testDllRcpp_rcpp_hello_world", (DL_FUNC) &testDllRcpp_rcpp_hello_world, 0},
+    {"testDllRcpp_rcpp_test_attributes", (DL_FUNC) &testDllRcpp_rcpp_test_attributes, 0},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_testDllRcpp(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
