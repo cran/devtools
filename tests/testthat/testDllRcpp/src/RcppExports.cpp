@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // rcpp_hello_world
 SEXP rcpp_hello_world();
-RcppExport SEXP testDllRcpp_rcpp_hello_world() {
+RcppExport SEXP _testDllRcpp_rcpp_hello_world() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -17,7 +17,7 @@ END_RCPP
 }
 // rcpp_test_attributes
 bool rcpp_test_attributes();
-RcppExport SEXP testDllRcpp_rcpp_test_attributes() {
+RcppExport SEXP _testDllRcpp_rcpp_test_attributes() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -27,8 +27,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"testDllRcpp_rcpp_hello_world", (DL_FUNC) &testDllRcpp_rcpp_hello_world, 0},
-    {"testDllRcpp_rcpp_test_attributes", (DL_FUNC) &testDllRcpp_rcpp_test_attributes, 0},
+    {"_testDllRcpp_rcpp_hello_world", (DL_FUNC) &_testDllRcpp_rcpp_hello_world, 0},
+    {"_testDllRcpp_rcpp_test_attributes", (DL_FUNC) &_testDllRcpp_rcpp_test_attributes, 0},
     {NULL, NULL, 0}
 };
 

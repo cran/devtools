@@ -1,6 +1,6 @@
-5f3c9aac7b45fa487076b44bf1ea7bf6 *DESCRIPTION
+beadd08dc5901422bb0df358ab677c8a *DESCRIPTION
 08658ca9568769d35a6da202561c767f *NAMESPACE
-f98ee99f0589f3fa967d410f9d6daf91 *NEWS.md
+aa48ef05ee0e6e6efb64ae012d6feb14 *NEWS.md
 752f58de5622cdaeca45ec6a16ac8295 *R/R.r
 4e9dcebb7f5130f7fe646c6925a70f0b *R/aaa.r
 4cae753257b3807c1b41086da55eeb2b *R/bash.r
@@ -93,7 +93,7 @@ e7cd30f87e06a509ef03e075c362e264 *R/vignettes.r
 f8cc1bac8dc6b84491ba0293042fc614 *README.md
 c28e7b8c5b011d53bc5b95fb511ea24b *build/vignette.rds
 8b5a68edbe3593efcb2764da9d4c7733 *inst/doc/dependencies.Rmd
-e87653202c9d78d337213ab0efa6e978 *inst/doc/dependencies.html
+0b53e4b1071db3bef52748761048682b *inst/doc/dependencies.html
 f87ef290340322089c32b4e573d8f1e8 *inst/templates/CONDUCT.md
 fccaad4db171eb4173c05286ad2b4b91 *inst/templates/NEWS.md
 c311ca55d43ba49ec7e9ff5a2a93a6f6 *inst/templates/appveyor.yml
@@ -337,11 +337,11 @@ af96180ec981f03fbd476eb546ce0091 *tests/testthat/testDllLoad/DESCRIPTION
 68c4f21a77f2f7cc331e49d03918a326 *tests/testthat/testDllLoad/src/null-test.c
 0da7dd55d206c37fd1fedfd552c51b45 *tests/testthat/testDllRcpp/DESCRIPTION
 029ade657ecf41cfeabeba27c10f35e7 *tests/testthat/testDllRcpp/NAMESPACE
-c81d1286eba98645b07941c6fc15359a *tests/testthat/testDllRcpp/R/RcppExports.R
-c6804fec37eeb4cf63294f6123c96ca5 *tests/testthat/testDllRcpp/R/rcpp_hello_world.R
+6c1c2c0de9fc0036209d9ae52af0b4c7 *tests/testthat/testDllRcpp/R/RcppExports.R
+d41d8cd98f00b204e9800998ecf8427e *tests/testthat/testDllRcpp/R/rcpp_hello_world.R
 b3f86c20b81b51f5162874977d38784d *tests/testthat/testDllRcpp/src/Makevars
 73505498722ad4b07b0ddb3067e92523 *tests/testthat/testDllRcpp/src/Makevars.win
-02593d00567d0a308c0b7fda94169d21 *tests/testthat/testDllRcpp/src/RcppExports.cpp
+6a302d3644bcf956a1c0d73224f2a184 *tests/testthat/testDllRcpp/src/RcppExports.cpp
 cdae79fe661bbb694dd79074547735b9 *tests/testthat/testDllRcpp/src/rcpp_hello_world.cpp
 3ef2ad4e721c38bf6b4dbd213ca8e474 *tests/testthat/testError/DESCRIPTION
 482ad90a326645dfd29cb4009d87fc77 *tests/testthat/testError/R/error.r
