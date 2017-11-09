@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 1.13.3
+Version: 1.13.4
 Authors@R: c(
     person("Hadley", "Wickham", , "hadley@rstudio.com", role = c("aut", "cre")),
     person("Winston", "Chang", role = "aut"),
@@ -23,8 +23,8 @@ Suggests: curl (>= 0.9), crayon, testthat (>= 1.0.2), BiocInstaller,
 License: GPL (>= 2)
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
-NeedsCompilation: no
-Packaged: 2017-08-01 13:17:50 UTC; jhester
+NeedsCompilation: yes
+Packaged: 2017-11-08 19:37:59 UTC; jhester
 Author: Hadley Wickham [aut, cre],
   Winston Chang [aut],
   RStudio [cph],
@@ -32,4 +32,4 @@ Author: Hadley Wickham [aut, cre],
     R)
 Maintainer: Hadley Wickham <hadley@rstudio.com>
 Repository: CRAN
-Date/Publication: 2017-08-02 07:05:15 UTC
+Date/Publication: 2017-11-09 10:44:37 UTC
