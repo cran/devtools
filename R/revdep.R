@@ -1,10 +1,10 @@
 #' Reverse dependency tools.
 #'
-#' Tools to check and notify maintainers of all CRAN and bioconductor
+#' Tools to check and notify maintainers of all CRAN and Bioconductor
 #' packages that depend on the specified package.
 #'
 #' The first run in a session will be time-consuming because it must download
-#' all package metadata from CRAN and bioconductor. Subsequent runs will
+#' all package metadata from CRAN and Bioconductor. Subsequent runs will
 #' be faster.
 #'
 #' @param pkg Package name. This is unlike most devtools packages which
@@ -13,15 +13,15 @@
 #'   current package.
 #' @param ignore A character vector of package names to ignore. These packages
 #'   will not appear in returned vector. This is used in
-#'   \code{\link{revdep_check}} to avoid packages with installation problems
+#'   [revdep_check()] to avoid packages with installation problems
 #'   or extremely long check times.
 #' @param dependencies A character vector listing the types of dependencies
 #'   to follow.
-#' @param bioconductor If \code{TRUE} also look for dependencies amongst
-#'   bioconductor packages.
-#' @param recursive If \code{TRUE} look for full set of recursive dependencies.
+#' @param bioconductor If `TRUE` also look for dependencies amongst
+#'   Bioconductor packages.
+#' @param recursive If `TRUE` look for full set of recursive dependencies.
 #' @inheritParams tools::dependsOnPkgs
-#' @seealso \code{\link{revdep_check}()} to run R CMD check on all reverse
+#' @seealso [revdep_check()] to run R CMD check on all reverse
 #'   dependencies.
 #' @export
 #' @examples
@@ -29,7 +29,7 @@
 #' revdep("ggplot2")
 #'
 #' revdep("ggplot2", ignore = c("xkcd", "zoo"))
-#'}
+#' }
 revdep <- function(pkg,
                    dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"),
                    recursive = FALSE, ignore = NULL,
@@ -61,58 +61,11 @@ print.maintainers <- function(x, ...) {
   cat("\n")
 }
 
-#' Run R CMD check on all downstream dependencies.
-#'
-#' Use \code{revdep_check()} to run \code{\link{check_cran}()} on all downstream
-#' dependencies. Summarises the results with \code{revdep_check_summary()} and
-#' see problems with \code{revdep_check_print_problems()}.
-#'
-#' Revdep checks are resumable - this is very helpful if somethings goes
-#' wrong (like you run out of power or you lose your internet connection) in
-#' the middle of a check. You can resume a partially completed check with
-#' \code{revdep_check_resume()}, or blow away the cached result so you can
-#' start afresh with \code{revdep_check_reset()}.
-#'
-#' @section Check process:
-#' \enumerate{
-#' \item Install \code{pkg} (in special library, see below).
-#' \item Find all CRAN packages that depend on \code{pkg}.
-#' \item Install those packages, along with their dependencies.
-#' \item Run \code{R CMD check} on each package.
-#' \item Uninstall \code{pkg} (so other reverse dependency checks don't
-#'   use the development version instead of the CRAN version)
-#' }
-#'
-#' @section Package library:
-#' By default \code{revdep_check} uses a temporary library to store any packages
-#' that are required by the packages being tested. This ensures that they don't
-#' interfere with your default library, but means that if you restart R
-#' between checks, you'll need to reinstall all the packages. If you're
-#' doing reverse dependency checks frequently, I recommend that you create
-#' a directory for these packages and set \code{options(devtools.revdep.libpath)}.
-#'
-#' @inheritParams revdep
-#' @param pkg Path to package. Defaults to current directory.
-#' @param skip A character vector of package names to exclude from the
-#'   checks.
-#' @inheritParams check_cran
-#' @param check_dir A temporary directory to hold the results of the package
-#'   checks. This should not exist as after the revdep checks complete
-#'   successfully this directory is blown away.
-#' @seealso \code{\link{revdep_maintainers}()} to get a list of all revdep
-#'   maintainers.
+#' @details
+#' Instead of the revdep functions in devtools a better alternative is
+#' \sQuote{revdepcheck::revdep_check()}.
+#' @rdname devtools-deprecated
 #' @export
-#' @return An invisible list of results. But you'll probably want to look
-#'   at the check results on disk, which are saved in \code{check_dir}.
-#'   Summaries of all ERRORs and WARNINGs will be stored in
-#'   \code{check_dir/00check-summary.txt}.
-#' @examples
-#' \dontrun{
-#' # Run R CMD check on all downstream dependencies
-#' revdep_check()
-#' revdep_check_save_summary()
-#' revdep_check_print_problems()
-#' }
 revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
                          dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"),
                          skip = character(),
@@ -124,6 +77,7 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
                          check_dir = NULL,
                          install_dir = NULL,
                          quiet_check = TRUE) {
+  .Deprecated("revdepcheck::revdep_check()", package = "devtools")
 
   pkg <- as.package(pkg)
 
@@ -136,10 +90,15 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
     stop("Cache file `revdep/.cache.rds` exists.\n",
       "Use `revdep_check_resume()` to resume\n",
       "Use `revdep_check_reset()` to start afresh.",
-      call. = FALSE)
+      call. = FALSE
+    )
   }
 
-  rule("Reverse dependency checks for ", pkg$package, pad = "=")
+  cat_rule(
+    left = "Reverse dependency checks",
+    right = pkg$package,
+    line = 2
+  )
 
   if (is.null(check_dir)) {
     check_dir <- file.path(pkg$path, "revdep", "checks")
@@ -147,7 +106,8 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   }
   if (dir.exists(check_dir) && length(dir(check_dir, all.files = TRUE, no.. = TRUE)) > 0) {
     stop("`check_dir()` must not already exist: it is deleted after a successful run",
-      call. = FALSE)
+      call. = FALSE
+    )
   }
 
   if (is.null(install_dir)) {
@@ -156,8 +116,10 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   }
 
   message("Computing reverse dependencies... ")
-  revdeps <- revdep(pkg$package, recursive = recursive, ignore = ignore,
-    bioconductor = bioconductor, dependencies = dependencies)
+  revdeps <- revdep(pkg$package,
+    recursive = recursive, ignore = ignore,
+    bioconductor = bioconductor, dependencies = dependencies
+  )
 
   # Save arguments and revdeps to a cache
   cache <- list(
@@ -178,11 +140,10 @@ revdep_check <- function(pkg = ".", recursive = FALSE, ignore = NULL,
   revdep_check_from_cache(pkg, cache)
 }
 
+#' @rdname devtools-deprecated
 #' @export
-#' @rdname revdep_check
-#' @param ... Optionally, override original value of arguments to
-#'   \code{revdep_check}. Use with care.
 revdep_check_resume <- function(pkg = ".", ...) {
+  .Deprecated("revdepcheck::revdep_check()", package = "devtools")
   pkg <- as.package(pkg)
 
   cache_path <- revdep_cache_path(pkg)
@@ -204,9 +165,10 @@ revdep_check_resume <- function(pkg = ".", ...) {
   revdep_check_from_cache(pkg, cache)
 }
 
-#' @rdname revdep_check
+#' @rdname devtools-deprecated
 #' @export
 revdep_check_reset <- function(pkg = ".") {
+  .Deprecated("revdepcheck::revdep_reset()", package = "devtools")
   pkg <- as.package(pkg)
 
   cache_path <- revdep_cache_path(pkg)
@@ -274,11 +236,11 @@ revdep_check_from_cache <- function(pkg, cache) {
 
   do.call(check_cran, cache)
 
-  rule("Saving check results to `revdep/check.rds`")
+  cat_rule("Saving check results to `revdep/checks.rds`")
   revdep_check_save(pkg, cache$revdeps, cache$check_dir, cache$libpath)
 
   # Delete cache and check_dir on successful run
-  rule("Cleaning up")
+  cat_rule("Cleaning up")
   revdep_check_reset(pkg)
   unlink(revdep_cache_path(pkg))
   unlink(cache$check_dir, recursive = TRUE)
@@ -288,7 +250,9 @@ revdep_check_from_cache <- function(pkg, cache) {
 
 
 revdep_check_save <- function(pkg, revdeps, check_path, lib_path) {
-  platform <- platform_info()
+  check_suggested("sessioninfo")
+
+  platform <- sessioninfo::platform_info()
 
   # Revdep results
   results <- lapply(check_dirs(check_path), parse_package_check)
@@ -298,7 +262,7 @@ revdep_check_save <- function(pkg, revdeps, check_path, lib_path) {
   pkgs <- unlist(lapply(deps, function(x) parse_deps(x)$name), use.names = FALSE)
   pkgs <- c(pkg$package, unique(pkgs))
   pkgs <- intersect(pkgs, dir(lib_path))
-  dependencies <- package_info(pkgs, libpath = lib_path)
+  dependencies <- sessioninfo::package_info(pkgs, libpath = lib_path)
 
   out <- list(
     revdeps = revdeps,
@@ -354,7 +318,8 @@ cran_packages <- memoise::memoise(
   function() {
     local <- file.path(tempdir(), "packages.rds")
     utils::download.file("http://cran.R-project.org/web/packages/packages.rds", local,
-      mode = "wb", quiet = TRUE)
+      mode = "wb", quiet = TRUE
+    )
     on.exit(unlink(local))
     cp <- readRDS(local)
     rownames(cp) <- unname(cp[, 1])
@@ -364,7 +329,7 @@ cran_packages <- memoise::memoise(
 )
 
 bioc_packages <- memoise::memoise(
-  function(views = paste(BiocInstaller::biocinstallRepos()[["BioCsoft"]], "VIEWS", sep = "/")) {
+  function(views = paste(BiocManager::repositories()[["BioCsoft"]], "VIEWS", sep = "/")) {
     con <- url(views)
     on.exit(close(con))
     bioc <- read.dcf(con)

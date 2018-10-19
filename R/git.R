@@ -4,13 +4,13 @@ uses_git <- function(path = ".") {
 
 # sha of most recent commit
 git_repo_sha1 <- function(r) {
-  rev <- git2r_head(r)
+  rev <- git2r::repository_head(r)
   if (is.null(rev)) {
     return(NULL)
   }
 
   if (git2r::is_commit(rev)) {
-    git2r_attrib(rev, "sha")
+    rev$sha
   } else {
     git2r::branch_target(rev)
   }
@@ -31,8 +31,8 @@ git_uncommitted <- function(path = ".") {
 git_sync_status <- function(path = ".", check_ahead = TRUE, check_behind = TRUE) {
   r <- git2r::repository(path, discover = TRUE)
 
-  r_head <- git2r_head(r)
-  if (!methods::is(r_head, "git_branch")) {
+  r_head <- git2r::repository_head(r)
+  if (!inherits(r_head, "git_branch")) {
     stop("HEAD is not a branch", call. = FALSE)
   }
 
@@ -47,10 +47,10 @@ git_sync_status <- function(path = ".", check_ahead = TRUE, check_behind = TRUE)
   c2 <- git2r::lookup(r, git2r::branch_target(upstream))
   ab <- git2r::ahead_behind(c1, c2)
 
-#   if (ab[1] > 0)
-#     message(ab[1], " ahead of remote")
-#   if (ab[2] > 0)
-#     message(ab[2], " behind remote")
+  #   if (ab[1] > 0)
+  #     message(ab[1], " ahead of remote")
+  #   if (ab[2] > 0)
+  #     message(ab[2], " behind remote")
 
   is_ahead <- ab[[1]] != 0
   is_behind <- ab[[2]] != 0
@@ -90,17 +90,18 @@ git_branch <- function(path = ".") {
   r <- git2r::repository(path, discover = TRUE)
 
   if (git2r::is_detached(r)) {
-     return(NULL)
+    return(NULL)
   }
 
-  git2r_attrib(git2r_head(r), "name")
+  git2r::repository_head(r)$name
 }
 
 # GitHub ------------------------------------------------------------------
 
 uses_github <- function(path = ".") {
-  if (!uses_git(path))
+  if (!uses_git(path)) {
     return(FALSE)
+  }
 
   r <- git2r::repository(path, discover = TRUE)
   r_remote_urls <- git2r::remote_url(r)
@@ -109,14 +110,16 @@ uses_github <- function(path = ".") {
 }
 
 github_info <- function(path = ".", remote_name = NULL) {
-  if (!uses_github(path))
+  if (!uses_github(path)) {
     return(github_dummy)
+  }
 
   r <- git2r::repository(path, discover = TRUE)
   r_remote_urls <- grep("github", remote_urls(r), value = TRUE)
 
-  if (!is.null(remote_name) && !remote_name %in% names(r_remote_urls))
+  if (!is.null(remote_name) && !remote_name %in% names(r_remote_urls)) {
     stop("no github-related remote named ", remote_name, " found")
+  }
 
   remote_name <- c(remote_name, "origin", names(r_remote_urls))
   x <- r_remote_urls[remote_name]
@@ -137,9 +140,9 @@ github_remote_parse <- function(x) {
   if (!grepl("github", x)) return(github_dummy)
 
   if (grepl("^(https|git)", x)) {
-    # https://github.com/hadley/devtools.git
-    # https://github.com/hadley/devtools
-    # git@github.com:hadley/devtools.git
+    # https://github.com/r-lib/devtools.git
+    # https://github.com/r-lib/devtools
+    # git@github.com:r-lib/devtools.git
     re <- "github[^/:]*[/:]([^/]+)/(.*?)(?:\\.git)?$"
   } else {
     stop("Unknown GitHub repo format", call. = FALSE)

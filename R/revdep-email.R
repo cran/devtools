@@ -1,20 +1,6 @@
-#' Experimental email notification system.
-#'
-#' This currently assumes that you use github and gmail, and you have a
-#' \code{revdep/email.md} email template.
-#'
-#' @inheritParams revdep_check
-#' @param date Date package will be submitted to CRAN
-#' @param version Version which will be used for the CRAN submission (usually
-#'   different from the current package version)
-#' @param author Name used to sign email
-#' @param draft If \code{TRUE}, creates as draft email; if \code{FALSE},
-#'   sends immediately.
-#' @param template Path of template to use
-#' @param only_problems Only inform authors with problems?
-#' @param unsent If some emails fail to send, in a previous
 #' @keywords internal
 #' @export
+#' @rdname devtools-deprecated
 revdep_email <- function(pkg = ".", date,
                          version,
                          author = getOption("devtools.name"),
@@ -22,6 +8,8 @@ revdep_email <- function(pkg = ".", date,
                          unsent = NULL,
                          template = "revdep/email.md",
                          only_problems = TRUE) {
+  .Deprecated("revdepcheck::revdep_email()", package = "devtools")
+  check_suggested("whisker")
 
   pkg <- as.package(pkg)
   force(date)
@@ -63,11 +51,13 @@ revdep_email <- function(pkg = ".", date,
   }
 
   gh <- github_info(pkg$path)
-  data <- lapply(results, maintainer_data, pkg = pkg, version = version,
-                 gh = gh, date = date, author = author)
+  data <- lapply(results, maintainer_data,
+    pkg = pkg, version = version,
+    gh = gh, date = date, author = author
+  )
   bodies <- lapply(data, whisker::whisker.render, template = template)
   subjects <- lapply(data, function(x) {
-    paste0(x$your_package, " and " , x$my_package, " ", x$my_version, " release")
+    paste0(x$your_package, " and ", x$my_package, " ", x$my_version, " release")
   })
 
   emails <- Map(maintainer_email, maintainers, bodies, subjects)
@@ -75,8 +65,9 @@ revdep_email <- function(pkg = ".", date,
   message("Testing first email")
   send_email(emails[[1]], draft = TRUE)
 
-  if (yesno("Did first draft email look ok?"))
+  if (yesno("Did first draft email look ok?")) {
     return(invisible())
+  }
 
   sent <- vapply(emails, send_email, draft = draft, FUN.VALUE = logical(1))
 
@@ -93,20 +84,19 @@ revdep_email <- function(pkg = ".", date,
 send_email <- function(email, draft = TRUE) {
   send <- if (draft) gmailr::create_draft else gmailr::send_message
   msg <- if (draft) "Drafting" else "Sending"
-  tryCatch(
-    {
-      message(msg, ": ", gmailr::subject(email))
-      send(email)
-      TRUE
-    },
-    interrupt = function(e) {
-      message("Aborted by user")
-      invokeRestart("abort")
-    },
-    error = function(e) {
-      message("Failed")
-      FALSE
-    }
+  tryCatch({
+    message(msg, ": ", gmailr::subject(email))
+    send(email)
+    TRUE
+  },
+  interrupt = function(e) {
+    message("Aborted by user")
+    invokeRestart("abort")
+  },
+  error = function(e) {
+    message("Failed")
+    FALSE
+  }
   )
 }
 
