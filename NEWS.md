@@ -1,3 +1,18 @@
+# devtools 2.0.1
+
+This is a minor release mainly fixing bugs which snuck through in the devtools
+2.0.0 release.
+
+* `install()` now correctly passes the `upgrade` parameter to
+  `remotes::install_deps()` (@Paxanator, #1898).
+
+* `install_deps()` now again works from any directory within a package (#1905)
+
+* Add a RStudio addin for `test_coverage()`.
+
+* All tests which use remote resources are now skipped on CRAN, to avoid
+  spurious failures
+
 # devtools 2.0.0
 
 Devtools 2.0.0 is a _major_ release that contains work from the past year and a

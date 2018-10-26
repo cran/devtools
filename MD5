@@ -1,6 +1,6 @@
-cfe8008054b1b1474b346b2e70f11503 *DESCRIPTION
-c0a65beee7bf0b7a18b2f27b44c415fa *NAMESPACE
-c9906c45c8080a0a9b1219aaa92b7f21 *NEWS.md
+2b97e1c2f6dd8b3776ce347247919d17 *DESCRIPTION
+3f51776a5c604c3030846d41cb3f6386 *NAMESPACE
+82f3599925e42c78647ca81b4be81fdd *NEWS.md
 f72c92122cbbe5562dd8614be2dd36f7 *R/R.R
 6933efb85582ebfd2f13fe88e4e6a995 *R/bash.R
 d24fc71fe2a4939c85dcbdf445460fa2 *R/build-manual.R
@@ -12,7 +12,7 @@ fc69d99fb6b55cfcd59064d5d2668ac7 *R/check-doc.R
 6beb7205f19e08930833ae6dcea596ff *R/check-git.R
 32e63c0e2aca83e2d69989570c8fde7b *R/check-results.R
 74680be5c561cd407a7a0c983a245fa7 *R/check-win.R
-42461482ea3b2bdfd51baaa00cb621b7 *R/check.R
+9d6eaae98ece6c995e9b8d95d8a53962 *R/check.R
 3c7b646b94f6de0e5d9e80820c629f6c *R/cran.R
 319ee7f6a95d99bd584881c8743b2d80 *R/create.R
 c1fb694faaa49dcfc3adfba60f4aef30 *R/dev-mode.R
@@ -22,9 +22,9 @@ c1fb694faaa49dcfc3adfba60f4aef30 *R/dev-mode.R
 867136951ab869a508fc73c3814e4500 *R/github.R
 4e5fc50cfdc279ab70244882a3a525bf *R/has-tests.R
 26ae21e5457277f4e76d26e968200fbe *R/infrastructure-git.R
-d36351135f94e7965ca18581c5a09f61 *R/infrastructure.R
+bbdea2cadbb37b8a53cb2b783ee6c585 *R/infrastructure.R
 364f142760ed36685682ff7b1393772d *R/inst.R
-a101659287c2ab763cc668c1cb783ea5 *R/install.R
+f2c207603551fedd78554dda4ef05a0e *R/install.R
 390696ed0475e55687388622c6816325 *R/lint.R
 07c5fe13470e224038741e839fb5f9ef *R/missing-s3.R
 eae46eb28401fb52029c3145d17eda78 *R/package-deps.R
@@ -34,7 +34,7 @@ d1fd6744db297430f1ae93b5ce389da7 *R/package.R
 f88e278aa8f08df35d88980bf36a782e *R/r-hub.R
 09da9eaa1cbc710bd273f67ea769afee *R/release.R
 07d531902234beaaeddc57ce4fee16c7 *R/reload.R
-524d06cfcfb9495e864c5faf5940a6e7 *R/remotes.R
+2b6abab4d9c3a11c8d11d09773077f6a *R/remotes.R
 1d02048c12adbade0ea6e6f628abea17 *R/revdep-email.R
 bce8c0709013e176d1db447105b5b938 *R/revdep-summarise.R
 3107c01eec5953a08538fed89971eaca *R/revdep.R
@@ -58,8 +58,8 @@ bbbfa1e3de394eaa834243260607f8cc *README.md
 e5b3e7f979b0bd21db22398acca28dba *build/vignette.rds
 c557a85663ef0055c42301150e25780f *inst/WORDLIST
 3d389b0abf295f770a67932f86404d69 *inst/doc/dependencies.Rmd
-052093cc8beb0b6d786ccd9bf74f976f *inst/doc/dependencies.html
-0758985a7e40dc1034578091f58824b9 *inst/rstudio/addins.dcf
+9fe75891705ded3e0ab47749785ec1f7 *inst/doc/dependencies.html
+40630cf2bfced69882fa05206d0b431b *inst/rstudio/addins.dcf
 f87ef290340322089c32b4e573d8f1e8 *inst/templates/CONDUCT.md
 fccaad4db171eb4173c05286ad2b4b91 *inst/templates/NEWS.md
 c311ca55d43ba49ec7e9ff5a2a93a6f6 *inst/templates/appveyor.yml
@@ -101,7 +101,7 @@ ba45afd8a1c2d42910cbc4f82cc8ebfc *man/figures/logo.svg
 7768dda1e568c18b9955b2748746c0f6 *man/github_pat.Rd
 2caa4f66807eec87e14bdb2e6b83aded *man/has_tests.Rd
 7dd26e21bb8315695a3d182f9844f5fa *man/install.Rd
-60a4dda9d64905eb1778f1f7edad12a8 *man/install_dev_deps.Rd
+dcf5a8643d5fe6091384f8eb9a65ca51 *man/install_deps.Rd
 77ed6f21da974951f90d961e63cf1189 *man/is.package.Rd
 12a57dcddecdd5c25ede42f21cdba6ae *man/lint.Rd
 011882750ab880df39e9e5a4c7e32462 *man/load_all.Rd
@@ -109,7 +109,7 @@ ba45afd8a1c2d42910cbc4f82cc8ebfc *man/figures/logo.svg
 173a40b7a565bf2c2cfe0961bdf5c4e2 *man/missing_s3.Rd
 6df7977f87a0c5acad9db50012761b04 *man/package_file.Rd
 241029e6ba9792bef15c93b07047e2d1 *man/r_env_vars.Rd
-42ba7d0f6a3e89aed117ae1d846d64a0 *man/reexports.Rd
+e31383b29db770b3d880687ccc75c6ad *man/reexports.Rd
 d4b118ef02efe0ed33332d74bad113c5 *man/release.Rd
 ff99151ca92d9d1ca6c760330e245675 *man/release_checks.Rd
 c33cee640f0d5272034352589ea06dc9 *man/reload.Rd
@@ -141,12 +141,12 @@ a0a7c3fff21f2aea3cfa1d0316dd816c *tests/testthat/shallowRepo/description
 e09030d939f08dcad3985f33db51c18f *tests/testthat/shallowRepo/refs/tags/v1.10.0
 4ef4145c4fc7a472499a55cb0b25e3d3 *tests/testthat/shallowRepo/shallow
 08475250c4c48d33822025b1c8305df2 *tests/testthat/test-build-readme.R
-eb4743c39800503c114d7f2312d432dc *tests/testthat/test-build-site.R
+a12b6dfa8ed5d2b3a30f7ecca889de77 *tests/testthat/test-build-site.R
 3030999e343c5efe13ef93253a36d343 *tests/testthat/test-check.R
 ffd2509e22200eb0a50dab7141f373a0 *tests/testthat/test-examples.R
 4d4b80469382d5f528be5e56f5a2ba9f *tests/testthat/test-github-connections.R
 ea40ce7a0c1748bc48c22b4405ed23e3 *tests/testthat/test-sort.R
-50cc3ceeadae59fba8764fc6a61171d7 *tests/testthat/test-source_gist.R
+625a20d069e2338b12a3f0d32ceeb43e *tests/testthat/test-source_gist.R
 1e938dd86a5fcaa683d58befa59f6630 *tests/testthat/test-test.R
 6f392ad708217331ba827a5e1db6e112 *tests/testthat/test-uninstall.R
 a1a4f6736444c00f65d0bdef46ce861a *tests/testthat/test-vignettes.R
