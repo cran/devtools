@@ -1,3 +1,18 @@
+# devtools 2.0.2
+
+* Two tests are not skipped when run on CRAN, as they fail due to an outdated
+  pandoc and restrictions on writing to the package library respectively.
+
+* `load_all()` now accepts 'package' objects, regaining previous behavior in
+  devtools prior to 2.0.0 (#1923)
+
+* `test()`, `test_coverage()` and `test_coverage_file()` now set the
+  `TESTTHAT_PKG` environment variable, so it is more consistent with running
+  the tests during `R CMD check` (testthat#787).
+
+* `check()` now replaces existing environment variables rather than appending
+  them (#1914).
+
 # devtools 2.0.1
 
 This is a minor release mainly fixing bugs which snuck through in the devtools

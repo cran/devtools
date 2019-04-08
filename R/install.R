@@ -99,7 +99,7 @@ install <-
   }
 
 #' Install package dependencies if needed.
-
+#'
 #' `install_deps()` will install the
 #' user dependencies needed to run the package, `install_dev_deps()` will also
 #' install the development dependencies needed to test and build the package.
@@ -110,7 +110,7 @@ install_deps <- function(pkg = ".",
                          dependencies = NA,
                          repos = getOption("repos"),
                          type = getOption("pkgType"),
-                         upgrade = c("ask", "always", "never"),
+                         upgrade = c("default", "ask", "always", "never"),
                          quiet = FALSE,
                          build = TRUE,
                          build_opts = c("--no-resave-data", "--no-manual", " --no-build-vignettes"),
@@ -135,7 +135,7 @@ install_dev_deps <- function(pkg = ".",
                              dependencies = TRUE,
                              repos = getOption("repos"),
                              type = getOption("pkgType"),
-                             upgrade = c("ask", "always", "never"),
+                             upgrade = c("default", "ask", "always", "never"),
                              quiet = FALSE,
                              build = TRUE,
                              build_opts = c("--no-resave-data", "--no-manual", " --no-build-vignettes"),
