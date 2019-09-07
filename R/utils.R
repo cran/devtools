@@ -174,3 +174,33 @@ escape_special_regex <- function(x) {
 has_dev_remotes <- function(pkg) {
   !is.null(pkg[["remotes"]])
 }
+
+vcapply <- function(x, FUN, ...) {
+  vapply(x, FUN, FUN.VALUE = character(1), ...)
+}
+
+hd_line <- function(name) {
+  cat_rule(crayon::bold(name))
+}
+
+kv_line <- function (key, value, path = FALSE) {
+  if (is.null(value)) {
+    value <- crayon::silver("<unset>")
+  }
+  else {
+    if (path) {
+      value <- ui_path(value, base = NA)
+    } else {
+      value <- ui_value(value)
+    }
+  }
+  cat_line("* ", key, ": ", value)
+}
+
+cat_line <- function (..., quiet = getOption("usethis.quiet", default = FALSE)) {
+  if (quiet) {
+    return(invisible())
+  }
+  lines <- paste0(..., "\n")
+  cat(lines, sep = "")
+}

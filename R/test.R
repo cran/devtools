@@ -9,8 +9,7 @@
 #'   shortcut for [covr::file_coverage()] and [covr::report()].
 #'
 #' @md
-#' @param pkg package description, can be path or package name. See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param ... additional arguments passed to [testthat::test_dir()] and
 #'   [covr::package_coverage()]
 #' @param file One or more source or test files. If a source file the
@@ -66,6 +65,8 @@ test <- function(pkg = ".", filter = NULL, ...) {
     testthat_args <- c(testthat_args, load_helpers = FALSE)
   }
 
+  check_dots_used()
+
   withr::with_options(
     c(useFancyQuotes = FALSE),
     withr::with_envvar(
@@ -80,12 +81,14 @@ test <- function(pkg = ".", filter = NULL, ...) {
 #' @param show_report Show the test coverage report.
 #' @export
 #' @rdname test
+#' @importFrom DT datatable
+# we now depend on DT in devtools so DT is installed when users call test_coverage
 test_coverage <- function(pkg = ".", show_report = interactive(), ...) {
   pkg <- as.package(pkg)
 
-  check_suggested("covr")
-
   save_all()
+
+  check_dots_used()
 
   withr::with_envvar(
     c(r_env_vars(),
@@ -151,7 +154,6 @@ src_ext <- c("c", "cc", "cpp", "cxx", "h", "hpp", "hxx")
 #' @export
 #' @rdname test
 test_file <- function(file = find_active_file(), ...) {
-
   ext <- tolower(tools::file_ext(file))
   valid_files <- ext %in% c("r", src_ext)
   if (any(!valid_files)) {
@@ -173,6 +175,8 @@ test_file <- function(file = find_active_file(), ...) {
     basename(tools::file_path_sans_ext(test_files)))
 
   regex <- paste0("^", escape_special_regex(test_files), "$", collapse = "|")
+
+  check_dots_used()
 
   test(filter = regex, ...)
 }
@@ -229,7 +233,6 @@ find_source_file <- function(file) {
 #' @rdname test
 #' @export
 test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_report = interactive(), ...) {
-  check_suggested("covr")
 
   is_source_file <- basename(dirname(file)) %in% c("R", "src")
 
@@ -247,6 +250,8 @@ test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_re
 
   env <- load_all(pkg$path, quiet = TRUE)$env
 
+  check_dots_used()
+
   withr::with_envvar(
     c(r_env_vars(),
       "TESTTHAT_PKG" = pkg$package
@@ -255,6 +260,8 @@ test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_re
       coverage <- covr::environment_coverage(env, test_files, ...)
     })
   )
+
+  filter <- isTRUE(filter) && all(file.exists(source_files))
 
   if (isTRUE(filter)) {
     coverage <- coverage[covr::display_name(coverage) %in% source_files]
@@ -265,7 +272,11 @@ test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_re
   attr(coverage, "package") <- pkg
 
   if (isTRUE(show_report)) {
-    covr::file_report(coverage)
+    if (isTRUE(filter)) {
+      covr::file_report(coverage)
+    } else {
+      covr::report(coverage)
+    }
   }
 
   invisible(coverage)

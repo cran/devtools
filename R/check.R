@@ -38,8 +38,7 @@
 #' }
 #'
 #' @return An object containing errors, warnings, and notes.
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param document If `NA` and the package uses roxygen2, will
 #'   rerun [document()] prior to checking. Use `TRUE`
 #'   and `FALSE` to override this default.
@@ -87,7 +86,7 @@ check <- function(pkg = ".",
     document <- !is.null(pkg$roxygennote)
   }
   if (document) {
-    document(pkg)
+    document(pkg, quiet = quiet)
   }
 
   if (!quiet) {
@@ -98,6 +97,8 @@ check <- function(pkg = ".",
     )
     show_env_vars(pkgbuild::compiler_flags(FALSE))
   }
+
+  check_dots_used()
 
   withr::with_envvar(pkgbuild::compiler_flags(FALSE), action = "prefix", {
     built_path <- pkgbuild::build(

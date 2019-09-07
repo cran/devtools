@@ -21,20 +21,14 @@
 #' many of polices as possible, but it's impossible to be completely
 #' comprehensive, and they do change in between releases of devtools.
 #'
-#' @section Guarantee:
-#'
-#' If a devtools bug causes one of the CRAN maintainers to treat you
-#' impolitely, I will personally send you a handwritten apology note.
-#' Please forward me the email and your address, and I'll get a card in
-#' the mail.
-#'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param check if `TRUE`, run checking, otherwise omit it.  This
 #'   is useful if you've just checked your package and you're ready to
 #'   release it.
 #' @param args An optional character vector of additional command
 #'   line arguments to be passed to `R CMD build`.
+#' @seealso [usethis::use_release_issue()] to create a checklist of release
+#'   tasks that you can use in addition to or in place of `release`.
 #' @export
 release <- function(pkg = ".", check = FALSE, args = NULL) {
   pkg <- as.package(pkg)
@@ -91,7 +85,7 @@ release <- function(pkg = ".", check = FALSE, args = NULL) {
         cat_rule()
       }
       cran_url <- paste0(
-        getOption("repos")[["CRAN"]], "/web/checks/check_results_",
+        cran_mirror(), "/web/checks/check_results_",
         pkg$package, ".html"
       )
       if (yesno(
@@ -163,28 +157,6 @@ find_release_questions <- function(pkg = ".") {
   } else {
     q_fun()
   }
-}
-
-release_email <- function(name, new_pkg) {
-  paste(
-    "Dear CRAN maintainers,\n",
-    "\n",
-    if (new_pkg) {
-      paste("I have uploaded a new package, ", name, ", to CRAN. ",
-        "I have read and agree to the CRAN policies.\n",
-        sep = ""
-      )
-    } else {
-      paste("I have just uploaded a new version of ", name, " to CRAN.\n",
-        sep = ""
-      )
-    },
-    "\n",
-    "Thanks!\n",
-    "\n",
-    getOption("devtools.name"), "\n",
-    sep = ""
-  )
 }
 
 yesno <- function(...) {
@@ -290,8 +262,7 @@ cran_submission_url <- "http://xmpalantir.wu.ac.at/cransubmit/index2.php"
 #' It's recommended that you use [release()] rather than this
 #' function as it performs more checks prior to submission.
 #'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @inheritParams release
 #' @export
 #' @keywords internal
@@ -309,7 +280,9 @@ submit_cran <- function(pkg = ".", args = NULL) {
 
   upload_cran(pkg, built_path)
 
-  flag_release(pkg)
+  usethis::with_project(pkg$path,
+    flag_release(pkg)
+  )
 }
 
 build_cran <- function(pkg, args) {

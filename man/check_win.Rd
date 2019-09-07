@@ -8,17 +8,17 @@
 \title{Build windows binary package.}
 \usage{
 check_win_devel(pkg = ".", args = NULL, manual = TRUE,
-  quiet = FALSE, ...)
+  email = NULL, quiet = FALSE, ...)
 
 check_win_release(pkg = ".", args = NULL, manual = TRUE,
-  quiet = FALSE, ...)
+  email = NULL, quiet = FALSE, ...)
 
 check_win_oldrelease(pkg = ".", args = NULL, manual = TRUE,
-  quiet = FALSE, ...)
+  email = NULL, quiet = FALSE, ...)
 }
 \arguments{
-\item{pkg}{package description, can be path or package name.  See
-\code{\link[=as.package]{as.package()}} for more information}
+\item{pkg}{The package to use, can be a file path to the package or a
+package object.  See \code{\link[=as.package]{as.package()}} for more information.}
 
 \item{args}{An optional character vector of additional command
 line arguments to be passed to \code{R CMD build} if \code{binary = FALSE},
@@ -26,6 +26,9 @@ or \code{R CMD install} if \code{binary = TRUE}.}
 
 \item{manual}{For source packages: if \code{FALSE}, don't build PDF
 vignettes (\code{--no-build-vignettes}) or manual (\code{--no-manual}).}
+
+\item{email}{An alternative email to use, default \code{NULL} uses the package
+Maintainer's email.}
 
 \item{quiet}{If \code{TRUE}, suppresses output.}
 

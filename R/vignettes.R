@@ -10,8 +10,7 @@
 #' `browseVignettes()` and `vignette()` if the package has been
 #' loaded with `load_all()` without needing to re-build them locally.
 #'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param quiet If `TRUE`, suppresses most output. Set to `FALSE`
 #'   if you need to debug.
 #' @param install If `TRUE`, install the package before building
@@ -22,6 +21,7 @@
 #'   <https://bookdown.org/yihui/rmarkdown/html-document.html#keeping-markdown>.
 #' @inheritParams tools::buildVignettes
 #' @inheritParams remotes::install_deps
+#' @importFrom stats update
 #' @keywords programming
 #' @seealso [clean_vignettes()] to remove the pdfs in
 #'   \file{doc} created from vignettes
@@ -35,10 +35,12 @@ build_vignettes <- function(pkg = ".",
                             install = TRUE,
                             keep_md = TRUE) {
   pkg <- as.package(pkg)
+
+  deps <- remotes::dev_package_deps(pkg$path, dependencies)
+  update(deps, upgrade = upgrade)
+
   vigns <- tools::pkgVignettes(dir = pkg$path)
   if (length(vigns$docs) == 0) return()
-
-  install_deps(pkg$path, dependencies, upgrade = upgrade)
 
   message("Building ", pkg$package, " vignettes")
 
@@ -91,8 +93,7 @@ create_vignette_index <- function(pkg, vigns) {
 #' This uses a fairly rudimentary algorithm where any files in \file{doc}
 #' with a name that exists in \file{vignettes} are removed.
 #'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @export
 clean_vignettes <- function(pkg = ".") {
   pkg <- as.package(pkg)

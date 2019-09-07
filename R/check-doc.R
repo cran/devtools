@@ -5,8 +5,7 @@
 #' all because some tests require the package to be loaded, and the way
 #' they attempt to load the code conflicts with how devtools does it.
 #'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @return Nothing. This function is called purely for it's side effects: if
 #   no errors there will be no output.
 #' @export
@@ -43,7 +42,10 @@ check_man <- function(pkg = ".") {
 }
 
 man_message <- function(x) {
-  if ("bad" %in% names(x) && length(x$bad) == 0) {
+  if (inherits(x, "undoc") && length(x$code) == 0) {
+    # Returned by tools::undoc()
+    TRUE
+  } else if ("bad" %in% names(x) && length(x$bad) == 0) {
     # Returned by check_Rd_xrefs()
     TRUE
   } else if (length(x) == 0) {

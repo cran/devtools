@@ -1,7 +1,6 @@
 #' Show package news
 #'
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param latest if `TRUE`, only show the news for the most recent
 #'   version.
 #' @param ... other arguments passed on to `news`
@@ -13,6 +12,8 @@ show_news <- function(pkg = ".", latest = TRUE, ...) {
   if (!file.exists(news_path)) {
     stop("No NEWS found", call. = FALSE)
   }
+
+  check_dots_used()
 
   out <- utils::news(..., db = ("tools" %:::% ".news_reader_default")(news_path))
   if (latest) {

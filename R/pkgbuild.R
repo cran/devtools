@@ -1,4 +1,4 @@
-#' @param pkg Path to a package, or within a package.
+#' @template devtools
 #' @param path Path in which to produce package.  If `NULL`, defaults to
 #'   the parent directory of the package.
 #' @inherit pkgbuild::build
@@ -7,6 +7,9 @@
 build <- function(pkg = ".", path = NULL, binary = FALSE, vignettes = TRUE,
                   manual = FALSE, args = NULL, quiet = FALSE, ...) {
   save_all()
+
+  check_dots_used()
+
   pkgbuild::build(
     path = pkg, dest_path = path, binary = binary,
     vignettes = vignettes, manual = manual, args = args, quiet = quiet, ...

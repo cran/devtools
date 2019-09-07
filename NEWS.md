@@ -1,3 +1,52 @@
+# devtools 2.2.0
+
+## New Features
+
+* `create()` added back, the RStudio IDE uses `create()` in the create packages
+  dialog, so removing it in version 2.1.0 broke old versions of the IDE.
+
+* New `dev_sitrep()` function to return information about your development
+  environment and diagnose common problems. The former functions
+  `dr_devtools()` and `dr_github()` have been deprecated. (#1970)
+
+* All functions taking `...` now use the ellipsis package. This catches errors
+  when arguments are misspelled or incorrectly specified (#2016)
+
+## Minor improvements and fixes
+
+* `build_vignettes()` now correctly installs the vignette builder if it is not
+  already installed (#2089).
+
+* `dev_sitrep()` now uses the same endpoint to detect the current RStudio
+  version as the IDE (#2050).
+
+* `document()` gains a `quiet` parameter, to silence output and `check()` now
+  passes its quiet argument to it (#1986).
+
+* Add the DT package as a dependency, so that `test_coverage()` and
+  `test_coverage_file()` work without having to install additional packages
+  (#2085).
+
+* `check_man()` now succeeds when `tools::undoc()` returns empty results
+  (#1944).
+
+* `check_win_*()` functions gain a `email` argument, so temporarily change the
+  email the check results will be sent to (#1723).
+
+* `install()` now explicitly unloads packages before trying to install a new
+  version (#2094).
+
+* All `install_*()` functions now attach build tools to the PATH, which makes them work on
+  Windows when RTools is not on the default PATH (#2093).
+
+* `test_coverage_file()` now works when there is not a 1 to 1 correspondence
+  between test and source files (#2011).
+
+* `release()` now works again when `pkg` is not the current working directory
+  (#1974).
+
+* `release()` now works without error when `options("repos")` is unnamed (#1956).
+
 # devtools 2.1.0
 
 ## New Features

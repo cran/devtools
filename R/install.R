@@ -15,9 +15,8 @@
 #'
 #' To install a package in a non-default library, use [withr::with_libpaths()].
 #'
+#' @template devtools
 #' @inheritParams remotes::install_local
-#' @param pkg package description, can be path or package name.  See
-#'   [as.package()] for more information
 #' @param reload if `TRUE` (the default), will automatically reload the
 #'   package after installing.
 #' @param quick if `TRUE` skips docs, multiple-architectures,
@@ -76,6 +75,8 @@ install <-
     }
     opts <- c(opts, args)
 
+    check_dots_used()
+
     remotes::install_deps(pkg$path,
       build = build, build_opts = build_opts,
       INSTALL_opts = opts, dependencies = dependencies, quiet = quiet,
@@ -89,7 +90,13 @@ install <-
       install_path <- pkg$path
     }
 
-    callr::rcmd("INSTALL", c(install_path, opts), echo = !quiet, show = !quiet)
+    if (is_loaded(pkg)) {
+      pkgload::unload(pkg$package)
+    }
+
+    pkgbuild::with_build_tools(required = FALSE,
+      callr::rcmd("INSTALL", c(install_path, opts), echo = !quiet, show = !quiet)
+    )
 
     if (reload) {
       reload(pkg, quiet = quiet)
@@ -117,6 +124,8 @@ install_deps <- function(pkg = ".",
                          ...) {
   pkg <- as.package(pkg)
 
+  check_dots_used()
+
   remotes::install_deps(pkg$path,
     dependencies = dependencies,
     repos = repos,
@@ -143,6 +152,8 @@ install_dev_deps <- function(pkg = ".",
   remotes::update_packages("roxygen2")
 
   pkg <- as.package(pkg)
+
+  check_dots_used()
 
   remotes::install_deps(pkg$path, ...,
     dependencies = TRUE, upgrade = upgrade

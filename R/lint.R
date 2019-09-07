@@ -3,8 +3,7 @@
 #' The default linters correspond to the style guide at
 #' <http://r-pkgs.had.co.nz/r.html#style>, however it is possible to
 #' override any or all of them using the `linters` parameter.
-#' @param pkg package description, can be path or package name. See
-#'   [as.package()] for more information
+#' @template devtools
 #' @param cache store the lint results so repeated lints of the same content
 #' use the previous results.
 #' @param ... additional arguments passed to [lintr::lint_package()]
@@ -19,5 +18,8 @@ lint <- function(pkg = ".", cache = TRUE, ...) {
   pkg <- as.package(pkg)
 
   message("Linting ", pkg$package, appendLF = FALSE)
+
+  check_dots_used()
+
   lintr::lint_package(pkg$path, cache = cache, ...)
 }
