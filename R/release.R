@@ -36,15 +36,6 @@ release <- function(pkg = ".", check = FALSE, args = NULL) {
   cran_version <- cran_pkg_version(pkg$package)
   new_pkg <- is.null(cran_version)
 
-  dr_d <- dr_devtools()
-  if (!dr_d) {
-    print(dr_d)
-
-    if (yesno("Proceed anyway?")) {
-      return(invisible())
-    }
-  }
-
   if (yesno("Have you checked for spelling errors (with `spell_check()`)?")) {
     return(invisible())
   }
@@ -170,7 +161,7 @@ yesno <- function(...) {
   menu(qs[rand]) != which(rand == 1)
 }
 
-# http://tools.ietf.org/html/rfc2368
+# https://tools.ietf.org/html/rfc2368
 email <- function(address, subject, body) {
   url <- paste(
     "mailto:",
@@ -251,7 +242,7 @@ cran_comments <- function(pkg = ".") {
   paste0(readLines(path, warn = FALSE), collapse = "\n")
 }
 
-cran_submission_url <- "http://xmpalantir.wu.ac.at/cransubmit/index2.php"
+cran_submission_url <- "https://xmpalantir.wu.ac.at/cransubmit/index2.php"
 
 #' Submit a package to CRAN.
 #'
@@ -362,7 +353,7 @@ flag_release <- function(pkg = ".") {
 }
 
 cran_mirror <- function(repos = getOption("repos")) {
-  repos[repos == "@CRAN@"] <- "http://cloud.r-project.org"
+  repos[repos == "@CRAN@"] <- "https://cloud.r-project.org"
 
   if (is.null(names(repos))) {
     names(repos) <- "CRAN"

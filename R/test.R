@@ -58,7 +58,7 @@ test <- function(pkg = ".", filter = NULL, ...) {
 
   env <- new.env(parent = ns_env)
 
-  testthat_args <- list(test_path, filter = filter, env = env, ... = ...)
+  testthat_args <- list(test_path, filter = filter, env = env, stop_on_failure = FALSE, ... = ...)
   if (packageVersion("testthat") >= "1.0.2.9000") { # 2.0.0
     testthat_args <- c(testthat_args, load_helpers = FALSE)
   } else if (packageVersion("testthat") > "1.0.2") {
@@ -81,9 +81,11 @@ test <- function(pkg = ".", filter = NULL, ...) {
 #' @param show_report Show the test coverage report.
 #' @export
 #' @rdname test
-#' @importFrom DT datatable
 # we now depend on DT in devtools so DT is installed when users call test_coverage
 test_coverage <- function(pkg = ".", show_report = interactive(), ...) {
+  # This is just here to avoid a R CMD check NOTE about unused dependencies
+  DT::datatable
+
   pkg <- as.package(pkg)
 
   save_all()

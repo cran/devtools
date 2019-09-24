@@ -1,7 +1,7 @@
 #' @importFrom utils available.packages contrib.url install.packages
 #'   installed.packages modifyList packageDescription
 #'   packageVersion remove.packages
-#' @importFrom cli cat_rule cat_line cat_bullet
+#' @importFrom cli cat_rule cat_bullet
 NULL
 
 #' Package development tools for R.
@@ -48,7 +48,8 @@ NULL
 
 devtools_default_options <- list(
   devtools.path = "~/R-dev",
-  devtools.install.args = ""
+  devtools.install.args = "",
+  devtools.ellipsis_action = rlang::warn
 )
 
 .onLoad <- function(libname, pkgname) {

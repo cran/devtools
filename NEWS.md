@@ -1,3 +1,29 @@
+# devtools 2.2.1
+
+* New `options("devtools.ellipsis_action")` option added to control the action
+  of ellipsis in devtools. This should be one of
+  - `rlang::abort` - to emit an error if arguments are unused
+  - `rlang::warn` - to emit a warning if arguments are unused
+  - `rlang::inform` - to emit a message if arguments are unused
+  - `rlang::signal` - to emit a message if arguments are unused
+  Using `rlang::signal` will produce no output unless the custom condition is
+  caught, so it is the best way to retain backwards compatibility with devtools
+  behavior prior to 2.2.0.
+  The default behavior was also changed to issue a
+  warning rather than an error if any arguments are unused, as there are some
+  cases where devtools does not need to install the package, so unused
+  arguments are false positives (#2109).
+
+* `install()` now throws an error when it fails, as intended (#2120)
+
+* `install()` now again reloads and re-attaches packages if they were
+  previously loaded (#2111).
+
+* `release()` no longer calls the deprecated `dr_devtools()` (#2105)
+
+* `test()` now explicitly passes `stop_on_failure = FALSE` to
+  `testthat::test_dir()` (@jameslamb, #2099)
+
 # devtools 2.2.0
 
 ## New Features
@@ -46,6 +72,14 @@
   (#1974).
 
 * `release()` now works without error when `options("repos")` is unnamed (#1956).
+* `create()` added, the RStudio IDE uses `create()`, so removing it in version 2.1.0
+  broke old versions of the IDE.
+  
+* In several places `http:` URLs were used instead of `https:`, the most 
+  critical being in the `cran_mirror`, `cran_pacakges`, and `cran_submission_url`
+  values which could have enabled discrete activity disclosure and person-in-the-middle 
+  attacks (i.e. changing the contents while uploading/downloading). All `http:` 
+  URLS have been changed to `https:` URLs. (@hrbrmstr, #2091)
 
 # devtools 2.1.0
 
@@ -71,7 +105,7 @@
 * `check_cran()`, `revdep_check()`, `revdep_check_print_problems()`,
   `revdep_check_reset()`, `revdep_check_resume()`, `revdep_check_save_summary()`,
   `revdep_email()` have been removed after being
-  deprecated in prevous releases. It is recommended to use the
+  deprecated in previous releases. It is recommended to use the
   [revdepcheck](https://github.com/r-lib/revdepcheck) package instead.
 
 * `system_check()`, `system_output()` have been removed after being deprecated
@@ -963,7 +997,7 @@ There were a handful of smaller fixes:
   `utils::unzip()` (#761, @robertzk).
 
 * `release()` now reminds you to check the existing CRAN check results page
-  (#613) ands shows file size before uploading to CRAN (#683, @krlmlr).
+  (#613) and shows file size before uploading to CRAN (#683, @krlmlr).
 
 * `RCMD()` and `system_check()` are now exported so they can be used by other 
   packages. (@jimhester, #699).
@@ -1397,7 +1431,7 @@ Two dependencies were incremented:
 
 * `source_url()` (and `source_gist()`) accept SHA1 prefixes.
 
-* `source_gist()` uses the github api to reliably locate the raw gist.
+* `source_gist()` uses the GitHub API to reliably locate the raw gist.
   Additionally it now only attempts to source files with `.R` or `.r`
   extensions, and gains a `quiet` argument. (#348)
 
@@ -1762,7 +1796,7 @@ Two dependencies were incremented:
 * The NAMESPACE file is now used for loading imports, instead of the
   DESCRIPTION file. Previously, `load_all` loaded all objects from the
   packages listed in DESCRIPTION. Now it loads packages (and,
-  when 'importfrom' is used, specific objects from packages) listed in
+  when 'importFrom' is used, specific objects from packages) listed in
   NAMESPACE. This more closely simulates normal package loading. It
   still checks version numbers of packages listed in DESCRIPTION.
   (Winston Chang)
