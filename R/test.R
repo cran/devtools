@@ -16,9 +16,10 @@
 #'   corresponding test file will be run. The default is to use the active file
 #'   in RStudio (if available).
 #' @inheritParams testthat::test_dir
+#' @inheritParams pkgload::load_all
 #' @inheritParams run_examples
 #' @export
-test <- function(pkg = ".", filter = NULL, ...) {
+test <- function(pkg = ".", filter = NULL, stop_on_failure = FALSE, export_all = TRUE, ...) {
   save_all()
 
   pkg <- as.package(pkg)
@@ -50,7 +51,7 @@ test <- function(pkg = ".", filter = NULL, ...) {
   # Run tests in a child of the namespace environment, like
   # testthat::test_package
   message("Loading ", pkg$package)
-  ns_env <- load_all(pkg$path, quiet = TRUE)$env
+  ns_env <- load_all(pkg$path, quiet = TRUE, export_all = export_all)$env
 
   message("Testing ", pkg$package)
   Sys.sleep(0.05)
@@ -58,22 +59,25 @@ test <- function(pkg = ".", filter = NULL, ...) {
 
   env <- new.env(parent = ns_env)
 
-  testthat_args <- list(test_path, filter = filter, env = env, stop_on_failure = FALSE, ... = ...)
+  testthat_args <- list(test_path, filter = filter, env = env, stop_on_failure = stop_on_failure, ... = ...)
+
   if (packageVersion("testthat") >= "1.0.2.9000") { # 2.0.0
     testthat_args <- c(testthat_args, load_helpers = FALSE)
   } else if (packageVersion("testthat") > "1.0.2") {
     testthat_args <- c(testthat_args, load_helpers = FALSE)
   }
 
-  check_dots_used()
+  check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
-  withr::with_options(
-    c(useFancyQuotes = FALSE),
-    withr::with_envvar(
-      c(r_env_vars(),
-        "TESTTHAT_PKG" = pkg$package
-      ),
-      do.call(testthat::test_dir, testthat_args)
+  withr::with_collate("C",
+    withr::with_options(
+      c(useFancyQuotes = FALSE),
+      withr::with_envvar(
+        c(r_env_vars(),
+          "TESTTHAT_PKG" = pkg$package
+          ),
+        do.call(testthat::test_dir, testthat_args)
+      )
     )
   )
 }
@@ -90,7 +94,7 @@ test_coverage <- function(pkg = ".", show_report = interactive(), ...) {
 
   save_all()
 
-  check_dots_used()
+  check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
   withr::with_envvar(
     c(r_env_vars(),
@@ -178,7 +182,7 @@ test_file <- function(file = find_active_file(), ...) {
 
   regex <- paste0("^", escape_special_regex(test_files), "$", collapse = "|")
 
-  check_dots_used()
+  check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
   test(filter = regex, ...)
 }
@@ -234,7 +238,7 @@ find_source_file <- function(file) {
 
 #' @rdname test
 #' @export
-test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_report = interactive(), ...) {
+test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_report = interactive(), export_all = TRUE, ...) {
 
   is_source_file <- basename(dirname(file)) %in% c("R", "src")
 
@@ -250,9 +254,9 @@ test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_re
 
   pkg <- as.package(dirname(file)[[1]])
 
-  env <- load_all(pkg$path, quiet = TRUE)$env
+  env <- load_all(pkg$path, quiet = TRUE, export_all = export_all)$env
 
-  check_dots_used()
+  check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
   withr::with_envvar(
     c(r_env_vars(),
