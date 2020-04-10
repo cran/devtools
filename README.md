@@ -1,9 +1,10 @@
 # devtools <img src="man/figures/logo.svg" align="right" height = 150/>
 
-[![Build Status](https://travis-ci.org/r-lib/devtools.svg?branch=master)](https://travis-ci.org/r-lib/devtools)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/r-lib/devtools?branch=master&svg=true)](https://ci.appveyor.com/project/hadley/devtools)
+<!-- badges: start -->
+[![R build status](https://github.com/r-lib/devtools/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/devtools/actions)
 [![Coverage Status](https://codecov.io/github/r-lib/devtools/coverage.svg?branch=master)](https://codecov.io/github/r-lib/devtools?branch=master)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/devtools)](https://cran.r-project.org/package=devtools)
+<!-- badges: end -->
 
 The aim of devtools is to make package development easier by providing R
 functions that simplify and expedite common tasks. [R
@@ -28,13 +29,13 @@ devtools::install_github("r-lib/devtools")
 
 All devtools functions accept a path as an argument, e.g.
 `load_all("path/to/mypkg")`. If you don't specify a path, devtools will
-look in the current working directory - this is recommended practice.
+look in the current working directory - this is a recommended practice.
 
 ### Frequent development tasks:
 
 * `load_all()` simulates installing and reloading your package, loading R code
   in `R/`, compiled shared objects in `src/` and data files in `data/`. During
-  development you usually want to access all functions (even un-exported
+  development you would usually want to access all functions (even un-exported
   internal ones) so `load_all()` works as if all functions were exported in the
   package `NAMESPACE`.
 
@@ -154,12 +155,12 @@ includes:
 * [usethis](https://github.com/r-lib/usethis): Automating package setup (i.e.
   `use_test()`).
 
-Generally, you should not need to worry about these different packages, because
-devtools installs them all automatically. You will need to care, however, if
+Generally, you would not need to worry about these different packages, because
+devtools installs all of them automatically. You will need to care, however, if
 you're filing a bug because reporting it at the correct place will lead to a
 speedier resolution.
 
-You also may need to care if you are trying to use some devtools functionality
+You may also need to care if you are trying to use some devtools functionality
 in your own package or deployed application. Generally in these cases it
 is better to depend on the particular package directly rather than depend on devtools,
 e.g. use `sessioninfo::session_info()` rather than `devtools::session_info()`,

@@ -59,13 +59,13 @@ test <- function(pkg = ".", filter = NULL, stop_on_failure = FALSE, export_all =
 
   env <- new.env(parent = ns_env)
 
-  testthat_args <- list(test_path, filter = filter, env = env, stop_on_failure = stop_on_failure, ... = ...)
-
-  if (packageVersion("testthat") >= "1.0.2.9000") { # 2.0.0
-    testthat_args <- c(testthat_args, load_helpers = FALSE)
-  } else if (packageVersion("testthat") > "1.0.2") {
-    testthat_args <- c(testthat_args, load_helpers = FALSE)
-  }
+  testthat_args <- list(
+    test_path,
+    filter = filter,
+    env = env,
+    stop_on_failure = stop_on_failure,
+    load_helpers = FALSE,
+    ... = ...)
 
   check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
@@ -260,7 +260,8 @@ test_coverage_file <- function(file = find_active_file(), filter = TRUE, show_re
 
   withr::with_envvar(
     c(r_env_vars(),
-      "TESTTHAT_PKG" = pkg$package
+      "TESTTHAT_PKG" = pkg$package,
+      TESTTHAT = "true"
     ),
     withr::with_dir("tests/testthat", {
       coverage <- covr::environment_coverage(env, test_files, ...)

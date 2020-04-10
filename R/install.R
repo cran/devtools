@@ -56,11 +56,13 @@ install <-
     # Forcing all of the promises for the current namespace now will avoid lazy-load
     # errors when the new package is installed overtop the old one.
     # https://stat.ethz.ch/pipermail/r-devel/2015-December/072150.html
-    if (is_loaded(pkg)) {
+    if (reload && is_loaded(pkg)) {
       eapply(pkgload::ns_env(pkg$package), force, all.names = TRUE)
     }
 
     if (isTRUE(build_vignettes)) {
+      # we likely need all Suggested dependencies if building vignettes
+      dependencies <- TRUE
       build_opts <- c("--no-resave-data", "--no-manual")
     } else {
       build_opts <- c("--no-resave-data", "--no-manual", "--no-build-vignettes")
@@ -93,7 +95,7 @@ install <-
     was_loaded <- is_loaded(pkg)
     was_attached <- is_attached(pkg)
 
-    if (was_loaded) {
+    if (reload && was_loaded) {
       pkgload::unload(pkg$package)
     }
 
