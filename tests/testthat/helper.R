@@ -1,8 +1,23 @@
-skip_if_offline <- function(host = "httpbin.org", port = 80) {
-  res <- tryCatch(
-    pingr::ping_port(host, count = 1L, port = port),
-    error = function(e) NA
-  )
+# This is a trimmed down version of create_local_thing from usethis
+# https://github.com/jimhester/usethis/blob/de8aa116820a8e54f2f952b341039985d78d0352/tests/testthat/helper.R#L28-L68
+create_local_package <- function() {
+  old_project <- asNamespace("usethis")$proj_get_() # this could be `NULL`, i.e. no active project
+  old_wd <- getwd()
+  dir <- file_temp()
 
-  if (is.na(res)) skip("No internet connection")
+  withr::defer(envir = parent.frame(), {
+    proj_set(old_project, force = TRUE)
+    setwd(old_wd)
+    dir_delete(dir)
+  })
+
+  usethis::ui_silence({
+    create_package(dir, rstudio = FALSE, open = FALSE, check_name = FALSE)
+    proj_set(dir)
+  })
+
+  proj_dir <- proj_get()
+  setwd(proj_dir)
+
+  invisible(proj_dir)
 }

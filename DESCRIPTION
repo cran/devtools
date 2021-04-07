@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.3.2
+Version: 2.4.0
 Authors@R: 
     c(person(given = "Hadley",
              family = "Wickham",
@@ -13,39 +13,34 @@ Authors@R:
              family = "Chang",
              role = "aut"),
       person(given = "RStudio",
-             role = "cph"),
-      person(given = "R Core team",
-             role = "ctb",
-             comment = "Some namespace and vignette code extracted from base R"))
+             role = c("cph", "fnd")))
 Description: Collection of package development tools.
-License: GPL (>= 2)
+License: MIT + file LICENSE
 URL: https://devtools.r-lib.org/, https://github.com/r-lib/devtools
 BugReports: https://github.com/r-lib/devtools/issues
-Depends: R (>= 3.0.2), usethis (>= 1.6.3)
-Imports: callr (>= 3.4.4), cli (>= 2.0.2), covr (>= 3.5.1), desc (>=
-        1.2.0), DT (>= 0.15), ellipsis (>= 0.3.1), httr (>= 1.4.2),
-        jsonlite (>= 1.7.1), memoise (>= 1.1.0), pkgbuild (>= 1.1.0),
-        pkgload (>= 1.1.0), rcmdcheck (>= 1.3.3), remotes (>= 2.2.0),
-        rlang (>= 0.4.7), roxygen2 (>= 7.1.1), rstudioapi (>= 0.11),
-        rversions (>= 2.0.2), sessioninfo (>= 1.1.1), stats, testthat
-        (>= 2.3.2), tools, utils, withr (>= 2.2.0)
-Suggests: BiocManager (>= 1.30.10), curl (>= 4.3), digest (>= 0.6.25),
-        foghorn (>= 1.3.1), gmailr (>= 1.0.0), knitr (>= 1.29), lintr
-        (>= 2.0.1), MASS, mockery (>= 0.4.2), pingr (>= 2.0.1), pkgdown
-        (>= 1.6.1), rhub (>= 1.1.1), rmarkdown (>= 2.3), spelling (>=
-        2.1)
+Depends: R (>= 3.0.2), usethis (>= 2.0.1)
+Imports: callr (>= 3.6.0), cli (>= 2.4.0), desc (>= 1.3.0), ellipsis
+        (>= 0.3.1), fs (>= 1.5.0), httr (>= 1.4.2), jsonlite (>=
+        1.7.2), lifecycle (>= 1.0.0), memoise (>= 2.0.0), pkgbuild (>=
+        1.2.0), pkgload (>= 1.2.1), rcmdcheck (>= 1.3.3), remotes (>=
+        2.3.0), rlang (>= 0.4.10), roxygen2 (>= 7.1.1), rstudioapi (>=
+        0.13), rversions (>= 2.0.2), sessioninfo (>= 1.1.1), stats,
+        testthat (>= 3.0.2), tools, utils, withr (>= 2.4.1)
+Suggests: BiocManager (>= 1.30.12), covr (>= 3.5.1), curl (>= 4.3),
+        digest (>= 0.6.27), DT (>= 0.17), foghorn (>= 1.3.2), gh (>=
+        1.2.1), gmailr (>= 1.0.0), knitr (>= 1.31), lintr (>= 2.0.1),
+        MASS, mockery (>= 0.4.2), pingr (>= 2.0.1), pkgdown (>= 1.6.1),
+        rhub (>= 1.1.1), rmarkdown (>= 2.7), spelling (>= 2.2)
 VignetteBuilder: knitr
 Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2020-09-17 19:11:59 UTC; jhester
+Packaged: 2021-04-06 20:05:27 UTC; jhester
 Author: Hadley Wickham [aut],
   Jim Hester [aut, cre],
   Winston Chang [aut],
-  RStudio [cph],
-  R Core team [ctb] (Some namespace and vignette code extracted from base
-    R)
+  RStudio [cph, fnd]
 Maintainer: Jim Hester <jim.hester@rstudio.com>
 Repository: CRAN
-Date/Publication: 2020-09-18 07:20:11 UTC
+Date/Publication: 2021-04-07 09:10:05 UTC

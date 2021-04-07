@@ -30,12 +30,10 @@
 #' }
 source_url <- function(url, ..., sha1 = NULL) {
   stopifnot(is.character(url), length(url) == 1)
-  if (!requireNamespace("digest", quietly = TRUE)) {
-    stop("`digest` must be installed to use `source_url()`", call. = FALSE)
-  }
+  rlang::check_installed("digest")
 
-  temp_file <- tempfile()
-  on.exit(unlink(temp_file))
+  temp_file <- file_temp()
+  on.exit(file_delete(temp_file))
 
   request <- httr::GET(url)
   httr::stop_for_status(request)
@@ -44,7 +42,7 @@ source_url <- function(url, ..., sha1 = NULL) {
   file_sha1 <- digest::digest(file = temp_file, algo = "sha1")
 
   if (is.null(sha1)) {
-    message("SHA-1 hash of file is ", file_sha1)
+    cli::cli_alert_info("SHA-1 hash of file is {file_sha1}")
   } else {
     if (nchar(sha1) < 6) {
       stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
@@ -108,6 +106,7 @@ source_url <- function(url, ..., sha1 = NULL) {
 #' source_gist(6872663, filename = "hi.r", sha1 = "54f1db27e60")
 #' }
 source_gist <- function(id, ..., filename = NULL, sha1 = NULL, quiet = FALSE) {
+  rlang::check_installed("gh")
   stopifnot(length(id) == 1)
 
   url_match <- "((^https://)|^)gist.github.com/([^/]+/)?([0-9a-f]+)$"
@@ -123,7 +122,7 @@ source_gist <- function(id, ..., filename = NULL, sha1 = NULL, quiet = FALSE) {
     stop("Unknown id: ", id)
   }
 
-  if (!quiet) message("Sourcing ", url)
+  if (!quiet) cli::cli_alert_info("Sourcing {url}")
 
   check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
@@ -131,7 +130,7 @@ source_gist <- function(id, ..., filename = NULL, sha1 = NULL, quiet = FALSE) {
 }
 
 find_gist <- function(id, filename) {
-  files <- github_GET(sprintf("gists/%s", id))$files
+  files <- gh::gh("GET /gists/:id", id = id)$files
   r_files <- files[grepl("\\.[rR]$", names(files))]
 
   if (length(r_files) == 0) {

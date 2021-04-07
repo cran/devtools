@@ -16,24 +16,30 @@ build_rmd <- function(files, path = ".", output_options = list(), ..., quiet = T
 
   pkg <- as.package(path)
 
-  check_suggested("rmarkdown")
+  rlang::check_installed("rmarkdown")
   save_all()
 
-  message("Installing ", pkg$package, " in temporary library")
+  cli::cli_alert_info("Installing {.pkg {pkg$package}} in temporary library")
   withr::local_temp_libpaths()
   install(pkg, upgrade = "never", reload = FALSE, quick = TRUE, quiet = quiet)
 
   # Ensure rendering github_document() doesn't generate HTML file
   output_options$html_preview <- FALSE
 
-  paths <- file.path(pkg$path, files)
+  paths <- files
+
+  abs_files <- is_absolute_path(files)
+
+  paths[!abs_files] <- path(pkg$path, files[!abs_files])
+
   for (path in paths) {
-    message("Building ", path)
+    cli::cli_alert_info("Building {.path {path}}")
     callr::r_safe(
       function(...) rmarkdown::render(...),
       args = list(input = path, ..., output_options = output_options, quiet = quiet),
       show = TRUE,
-      spinner = FALSE
+      spinner = FALSE,
+      stderr = "2>&1"
     )
   }
 
@@ -45,15 +51,14 @@ build_rmd <- function(files, path = ".", output_options = list(), ..., quiet = T
 build_readme <- function(path = ".", quiet = TRUE, ...) {
   pkg <- as.package(path)
 
-  readme_path <- grep(
-    ignore.case = TRUE, value = TRUE,
-    "readme[.]rmd",
-    list.files(c(pkg$path, file.path(pkg$path, "inst"),
-      full.names = TRUE
-    ))
-  )
+  readme_path <- path_abs(dir_ls(ignore.case = TRUE, regexp = "(inst/)?readme[.]rmd", recurse = 1, type = "file"))
+
   if (length(readme_path) == 0) {
-    return(invisible())
+    rlang::abort("Can't find a 'README.Rmd' or 'inst/README.Rmd' file.")
+  }
+
+  if (length(readme_path) > 1) {
+    rlang::abort("Can't have both a 'README.Rmd' and 'inst/README.Rmd' file.")
   }
 
   build_rmd(readme_path, path = path, quiet = quiet, ...)

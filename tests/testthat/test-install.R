@@ -1,17 +1,27 @@
-context("Install")
-
 library(mockery)
 
-pkg <- normalizePath(test_path("testReadme"))
+local({
+
+pkg <- create_local_package()
+
+path2char <- function(x) {
+  if (inherits(x, "fs_path")) {
+    as.character(x)
+  } else {
+    x
+  }
+}
 
 expect_passes_args <- function(fn, stub, input_args = list(), expected_args) {
   mck <- mockery::mock(NULL)
   mockery::stub(fn, stub, mck)
 
-  do.call(fn, input_args)
+  suppressMessages(do.call(fn, input_args))
 
   mockery::expect_called(mck, 1)
-  expect_equal(mockery::mock_args(mck)[[1]], expected_args)
+  mock_args <- mockery::mock_args(mck)[[1]]
+  mock_args <- lapply(mock_args, path2char)
+  expect_equal(mock_args, expected_args)
 }
 
 custom_args <- list(
@@ -98,4 +108,6 @@ test_that("install_dev_deps passes ellipsis args to remotes::install_deps", {
     c(pkg, extra),
     c(pkg, dev_dep_defaults, extra)
   )
+})
+
 })

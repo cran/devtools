@@ -42,7 +42,7 @@ build_vignettes <- function(pkg = ".",
   vigns <- tools::pkgVignettes(dir = pkg$path)
   if (length(vigns$docs) == 0) return()
 
-  message("Building ", pkg$package, " vignettes")
+  cli::cli_alert_info("Building {.pkg {pkg$package}} vignettes")
 
   if (isTRUE(install)) {
     build <- function(pkg_path, clean, quiet, upgrade) {
@@ -60,8 +60,9 @@ build_vignettes <- function(pkg = ".",
   callr::r(
     build,
     args = list(pkg_path = pkg$path, clean = clean, upgrade = upgrade, quiet = quiet),
-    show = TRUE,
-    spinner = FALSE
+    show = !quiet,
+    spinner = FALSE,
+    stderr = "2>&1"
   )
 
   # We need to re-run pkgVignettes now that they are built to get the output
@@ -77,13 +78,13 @@ build_vignettes <- function(pkg = ".",
 
 create_vignette_index <- function(pkg, vigns) {
   usethis_use_directory(pkg, "Meta", ignore = TRUE)
-  usethis_use_git_ignore(pkg, "Meta")
+  usethis_use_git_ignore(pkg, "/Meta/")
 
-  message("Building vignette index")
+  cli::cli_alert_info("Building vignette index")
 
   vignette_index <- ("tools" %:::% ".build_vignette_index")(vigns)
 
-  vignette_index_path <- file.path(pkg$path, "Meta", "vignette.rds")
+  vignette_index_path <- path(pkg$path, "Meta", "vignette.rds")
 
   saveRDS(vignette_index, vignette_index_path, version = 2L)
 }
@@ -98,35 +99,41 @@ create_vignette_index <- function(pkg, vigns) {
 clean_vignettes <- function(pkg = ".") {
   pkg <- as.package(pkg)
   vigns <- tools::pkgVignettes(dir = pkg$path)
-  if (basename(vigns$dir) != "vignettes") return()
+  if (path_file(vigns$dir) != "vignettes") return()
 
-  message("Cleaning built vignettes and index from ", pkg$package)
+  cli::cli_alert_info("Cleaning built vignettes and index from {.pkg {pkg$package}}")
 
-  doc_path <- file.path(pkg$path, "doc")
+  doc_path <- path(pkg$path, "doc")
 
-  vig_candidates <- dir(doc_path, full.names = TRUE)
+  vig_candidates <- if (dir_exists(doc_path)) dir_ls(doc_path) else character()
   vig_rm <- vig_candidates[file_name(vig_candidates) %in% file_name(vigns$docs)]
 
-  extra_candidates <- file.path(doc_path, basename(find_vignette_extras(pkg)))
-  extra_rm <- extra_candidates[file.exists(extra_candidates)]
+  extra_candidates <- path(doc_path, path_file(find_vignette_extras(pkg)))
+  extra_rm <- extra_candidates[file_exists(extra_candidates)]
 
-  vig_index_path <- file.path(pkg$path, "Meta", "vignette.rds")
-  vig_index_rm <- if (file.exists(vig_index_path)) vig_index_path
+  meta_path <- path(pkg$path, "Meta")
+  vig_index_path <- path(meta_path, "vignette.rds")
+  vig_index_rm <- if (file_exists(vig_index_path)) vig_index_path
 
   to_remove <- c(vig_rm, extra_rm, vig_index_rm)
   if (length(to_remove) > 0) {
-    message("Removing ", paste(basename(to_remove), collapse = ", "))
-    file.remove(to_remove)
+    cli::cli_alert_warning("Removing {.file {path_file(to_remove)}}")
+    file_delete(to_remove)
   }
+
+  lapply(c(doc_path, meta_path), dir_delete_if_empty)
 
   invisible(TRUE)
 }
 
-ext_variations <- function(path, valid_ext) {
-  unique(c(outer(file_name(path), valid_ext, FUN = paste, sep = ".")))
+dir_delete_if_empty <- function(x) {
+  if (dir_exists(x) && rlang::is_empty(dir_ls(x))) {
+    dir_delete(x)
+    cli::cli_alert_warning("Removing {.file {path_file(x)}}")
+  }
 }
 
 file_name <- function(x) {
   if (length(x) == 0) return(NULL)
-  tools::file_path_sans_ext(basename(x))
+  path_ext_remove(path_file(x))
 }

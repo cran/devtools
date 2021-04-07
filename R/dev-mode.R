@@ -22,16 +22,16 @@ dev_mode <- local({
   function(on = NULL, path = getOption("devtools.path")) {
     lib_paths <- .libPaths()
 
-    path <- normalizePath(path, winslash = "/", mustWork = FALSE)
+    path <- path_real(path)
     if (is.null(on)) {
       on <- !(path %in% lib_paths)
     }
 
     if (on) {
-      if (!file.exists(path)) {
-        dir.create(path, recursive = TRUE, showWarnings = FALSE)
+      if (!file_exists(path)) {
+        dir_create(path)
       }
-      if (!file.exists(path)) {
+      if (!file_exists(path)) {
         stop("Failed to create ", path, call. = FALSE)
       }
 
@@ -42,7 +42,7 @@ dev_mode <- local({
         )
       }
 
-      message("Dev mode: ON")
+      cli::cli_alert_success("Dev mode: ON")
       options(dev_path = path)
 
       if (is.null(.prompt)) .prompt <<- getOption("prompt")
@@ -50,7 +50,7 @@ dev_mode <- local({
 
       .libPaths(c(path, lib_paths))
     } else {
-      message("Dev mode: OFF")
+      cli::cli_alert_success("Dev mode: OFF")
       options(dev_path = NULL)
 
       if (!is.null(.prompt)) options(prompt = .prompt)
@@ -63,14 +63,13 @@ dev_mode <- local({
 
 is_library <- function(path) {
   # empty directories can be libraries
-  if (length(dir(path)) == 0) return(TRUE)
+  if (length(dir_ls(path)) == 0) return(TRUE)
 
   # otherwise check that the directories are compiled R directories -
   # i.e. that they contain a Meta directory
-  dirs <- dir(path, full.names = TRUE)
-  dirs <- dirs[utils::file_test("-d", dirs)]
+  dirs <- dir_ls(path, type = "folder")
 
-  has_pkg_dir <- function(path) length(dir(path, pattern = "Meta")) > 0
+  has_pkg_dir <- function(path) length(dir_ls(path, regexp = "Meta")) > 0
   help_dirs <- vapply(dirs, has_pkg_dir, logical(1))
 
   all(help_dirs)

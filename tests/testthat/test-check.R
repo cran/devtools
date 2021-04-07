@@ -1,26 +1,15 @@
-context("Check")
-
-test_that("successful check doesn't trigger error", {
-  skip_on_cran()
-  results <- check("testTest", document = FALSE, quiet = TRUE)
-
-  expect_error(signal_check_results(results), NA)
-  expect_equal(
-    summarise_check_results(results),
-    "0 errors | 0 warnings | 0 notes",
-    fixed = TRUE
-  )
+test_that("can determine when to document", {
+  expect_false(can_document(list()))
+  # TODO: switch to expect_snapshot()
+  suppressMessages(expect_message(
+    expect_false(can_document(list(roxygennote = "15.0.00"))),
+    "doesn't match required"
+  ))
+  expect_true(can_document(list(roxygennote = packageVersion("roxygen2"))))
 })
 
-test_that("check with NOTES captured", {
-  skip_on_cran()
-
-  results <- parse_check_results("check-results-note.log")
-
-  expect_error(signal_check_results(results), NA)
-  expect_error(
-    signal_check_results(results, "note"),
-    "0 errors | 0 warnings | 2 notes",
-    fixed = TRUE
-  )
+test_that("fail instead of sending an email to wrong recipient", {
+  # The testTest package has both Authors@R and Maintainer field - this causes problems in change_maintainer_email().
+  # The function checks if the provided email is actually the one in the maintainer field instead of sending the report to the wrong recipient
+  expect_error(check_win_release(path("testTest"), email = "foo@bar.com"))
 })

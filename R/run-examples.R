@@ -38,11 +38,9 @@ run_examples <- function(pkg = ".", start = NULL, show = TRUE, run_donttest = FA
 
   if (fresh) {
     to_run <-
-      eval(substitute(
-        function() devtools::run_examples(pkg = path, start = start, test = test, run = run, fresh = FALSE),
-        list(path = pkg$path, start = start, test = test, run = run)
-      ))
-    callr::r(to_run, show = TRUE, spinner = FALSE)
+        function(path, start, run_donttest, run_dontrun) devtools::run_examples(pkg = path, start = start, run_donttest = run_donttest, run_dontrun = run_dontrun, document = FALSE)
+
+    callr::r(to_run, args = list(path = pkg$path, start = start, run_donttest = run_donttest, run_dontrun = run_dontrun), show = TRUE, spinner = FALSE, stderr = "2>&1")
     return(invisible())
   }
 
@@ -83,14 +81,14 @@ run_examples <- function(pkg = ".", start = NULL, show = TRUE, run_donttest = FA
 rd_files <- function(pkg = ".", start = NULL) {
   pkg <- as.package(pkg)
 
-  path_man <- file.path(pkg$path, "man")
-  files <- dir(path_man, pattern = "\\.[Rr]d$", full.names = TRUE)
-  names(files) <- basename(files)
+  path_man <- path(pkg$path, "man")
+  files <- dir_ls(path_man, regexp = "\\.[Rr]d$")
+  names(files) <- path_file(files)
   files <- sort_ci(files)
 
   if (!is.null(start)) {
     topic <- pkgload::dev_help(start, dev_packages = pkg$package)
-    start_path <- basename(topic$path)
+    start_path <- path_file(topic$path)
 
     start_pos <- which(names(files) == start_path)
     if (length(start_pos) == 1) {

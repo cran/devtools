@@ -36,12 +36,12 @@ check_rhub <- function(pkg = ".",
                        interactive = TRUE,
                        build_args = NULL,
                        ...) {
-  check_suggested("rhub")
+  rlang::check_installed("rhub")
   pkg <- as.package(pkg)
 
   built_path <- build(pkg$path, tempdir(), quiet = !interactive,
                       args = build_args)
-  on.exit(unlink(built_path), add = TRUE)
+  on.exit(file_delete(built_path), add = TRUE)
 
   check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
@@ -54,7 +54,7 @@ check_rhub <- function(pkg = ".",
   )
 
   if (!interactive) {
-    message("R-hub check for package ", sQuote(pkg$package), " submitted.")
+    cli::cli_alert_success("R-hub check for package {.pkg {pkg$package}} submitted.")
     status
   } else {
     status

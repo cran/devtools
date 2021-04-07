@@ -10,8 +10,8 @@ check_for_rstudio_updates <- function(os = tolower(Sys.info()[["sysname"]]), ver
 
   url <- sprintf("https://www.rstudio.org/links/check_for_update?version=%s&os=%s&format=kvp", version, os, "kvp")
 
-  tmp <- tempfile()
-  on.exit(unlink(tmp))
+  tmp <- file_temp()
+  on.exit(file_delete(tmp))
   utils::download.file(url, tmp, quiet = TRUE)
   result <- readLines(tmp, warn = FALSE)
 
@@ -78,7 +78,7 @@ dev_sitrep <- function(pkg = ".", debug = FALSE) {
     list(
       pkg = pkg,
       r_version = getRversion(),
-      r_path = normalizePath(R.home()),
+      r_path = path_real(R.home()),
       r_release_version = r_release(),
       has_build_tools = has_build_tools,
       rtools_path = if (has_build_tools) pkgbuild::rtools_path(),
@@ -165,4 +165,25 @@ print.dev_sitrep <- function(x, ...) {
   }
 
   invisible(x)
+}
+
+
+# Helpers -----------------------------------------------------------------
+
+hd_line <- function(name) {
+  cat_rule(cli::style_bold(name))
+}
+
+kv_line <- function (key, value, path = FALSE) {
+  if (is.null(value)) {
+    value <- cli::col_silver("<unset>")
+  }
+  else {
+    if (path) {
+      value <- ui_path(value, base = NA)
+    } else {
+      value <- ui_value(value)
+    }
+  }
+  cli::cat_line(cli::symbol$bullet, " ", key, ": ", value)
 }

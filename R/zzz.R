@@ -2,6 +2,7 @@
 #'   installed.packages modifyList packageDescription
 #'   packageVersion remove.packages
 #' @importFrom cli cat_rule cat_bullet
+#' @import fs
 NULL
 
 #' Package development tools for R.
@@ -35,6 +36,7 @@ NULL
 #'
 #' }
 #' @docType package
+#' @keywords internal
 #' @name devtools
 "_PACKAGE"
 

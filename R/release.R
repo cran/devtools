@@ -111,8 +111,8 @@ release <- function(pkg = ".", check = FALSE, args = NULL) {
     "Have you updated `NEWS.md` file?",
     "Have you updated `DESCRIPTION`?",
     "Have you updated `cran-comments.md?`",
-    if (dir.exists("docs/")) "Have you updated website in `docs/`?",
-    if (file.exists("codemeta.json")) "Have you updated codemeta.json with codemetar::write_codemeta()?",
+    if (dir_exists("docs/")) "Have you updated website in `docs/`?",
+    if (file_exists("codemeta.json")) "Have you updated codemeta.json with codemetar::write_codemeta()?",
     find_release_questions(pkg)
   )
   for (question in questions) {
@@ -158,7 +158,7 @@ yesno <- function(...) {
   qs <- c(sample(yeses, 1), sample(nos, 2))
   rand <- sample(length(qs))
 
-  menu(qs[rand]) != which(rand == 1)
+  utils::menu(qs[rand]) != which(rand == 1)
 }
 
 # https://tools.ietf.org/html/rfc2368
@@ -175,7 +175,7 @@ email <- function(address, subject, body) {
     utils::browseURL(url, browser = email_browser())
   },
   error = function(e) {
-    message("Sending failed with error: ", e$message)
+    cli::cli_alert_danger("Sending failed with error: {e$message}")
     cat("To: ", address, "\n", sep = "")
     cat("Subject: ", subject, "\n", sep = "")
     cat("\n")
@@ -229,8 +229,8 @@ maintainer <- function(pkg = ".") {
 cran_comments <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
-  path <- file.path(pkg$path, "cran-comments.md")
-  if (!file.exists(path)) {
+  path <- path(pkg$path, "cran-comments.md")
+  if (!file_exists(path)) {
     warning("Can't find cran-comments.md.\n",
       "This file gives CRAN volunteers comments about the submission,\n",
       "Create it with use_cran_comments().\n",
@@ -277,13 +277,11 @@ submit_cran <- function(pkg = ".", args = NULL) {
 }
 
 build_cran <- function(pkg, args) {
-  message("Building")
+  cli::cli_alert_info("Building")
   built_path <- pkgbuild::build(pkg$path, tempdir(), manual = TRUE, args = args)
-  message("Submitting file: ", built_path)
-  message(
-    "File size: ",
-    format(as.object_size(file.info(built_path)$size), units = "auto")
-  )
+  cli::cli_alert_info("Submitting file: {built_path}")
+  size <- format(as.object_size(file_info(built_path)$size), units = "auto")
+  cli::cli_alert_info("File size: {size}")
   built_path
 }
 
@@ -309,7 +307,7 @@ upload_cran <- function(pkg, built_path) {
   comments <- cran_comments(pkg)
 
   # Initial upload ---------
-  message("Uploading package & comments")
+  cli::cli_alert_info("Uploading package & comments")
   body <- list(
     pkg_id = "",
     name = maint$name,
@@ -334,7 +332,7 @@ upload_cran <- function(pkg, built_path) {
   new_url <- httr::parse_url(r$url)
 
   # Confirmation -----------
-  message("Confirming submission")
+  cli::cli_alert_info("Confirming submission")
   body <- list(
     pkg_id = new_url$query$pkg_id,
     name = maint$name,
@@ -346,10 +344,8 @@ upload_cran <- function(pkg, built_path) {
   httr::stop_for_status(r)
   new_url <- httr::parse_url(r$url)
   if (new_url$query$submit == "1") {
-    message(
-      "Package submission successful.\n",
-      "Check your email for confirmation link."
-    )
+    cli::cli_alert_success("Package submission successful")
+    cli::cli_alert_info("Check your email for confirmation link.")
   } else {
     stop("Package failed to upload.", call. = FALSE)
   }
@@ -365,7 +361,7 @@ flag_release <- function(pkg = ".") {
     return(invisible())
   }
 
-  message("Don't forget to tag this release once accepted by CRAN")
+  cli::cli_alert_warning("Don't forget to tag this release once accepted by CRAN")
 
   date <- Sys.Date()
   withr::with_dir(pkg$path, {
@@ -376,7 +372,7 @@ flag_release <- function(pkg = ".") {
     "This package was submitted to CRAN on ", date, ".\n",
     "Once it is accepted, delete this file and tag the release (commit ", sha, ")."
   )
-  writeLines(msg, file.path(pkg$path, "CRAN-RELEASE"))
+  writeLines(msg, path(pkg$path, "CRAN-RELEASE"))
   usethis::use_build_ignore("CRAN-RELEASE")
 }
 
@@ -388,4 +384,16 @@ cran_mirror <- function(repos = getOption("repos")) {
   }
 
   repos[["CRAN"]]
+}
+
+# Return the version of a package on CRAN (or other repository)
+# @param package The name of the package.
+# @param available A matrix of information about packages.
+cran_pkg_version <- function(package, available = available.packages()) {
+  idx <- available[, "Package"] == package
+  if (any(idx)) {
+    as.package_version(available[package, "Version"])
+  } else {
+    NULL
+  }
 }

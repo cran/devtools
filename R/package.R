@@ -26,6 +26,7 @@ as.package <- function(x = NULL, create = NA) {
 #'
 #' @param ... Components of the path.
 #' @param path Place to start search for package directory.
+#' @keywords internal
 #' @export
 #' @examples
 #' \dontrun{
@@ -35,33 +36,33 @@ package_file <- function(..., path = ".") {
   if (!is.character(path) || length(path) != 1) {
     stop("`path` must be a string.", call. = FALSE)
   }
-  path <- strip_slashes(normalizePath(path, mustWork = FALSE))
+  path <- strip_slashes(path_real(path))
 
-  if (!file.exists(path)) {
+  if (!file_exists(path)) {
     stop("Can't find '", path, "'.", call. = FALSE)
   }
-  if (!file.info(path)$isdir) {
+  if (!is_dir(path)) {
     stop("'", path, "' is not a directory.", call. = FALSE)
   }
 
   # Walk up to root directory
   while (!has_description(path)) {
-    path <- dirname(path)
+    path <- path_dir(path)
 
     if (is_root(path)) {
-      stop("Could not find package root, is your working directory inside a package?", call. = FALSE)
+      stop("Could not find package root. Is your working directory inside a package?", call. = FALSE)
     }
   }
 
-  file.path(path, ...)
+  path(path, ...)
 }
 
 has_description <- function(path) {
-  file.exists(file.path(path, "DESCRIPTION"))
+  file_exists(path(path, "DESCRIPTION"))
 }
 
 is_root <- function(path) {
-  identical(path, dirname(path))
+  identical(path, path_dir(path))
 }
 
 strip_slashes <- function(x) {
@@ -71,13 +72,13 @@ strip_slashes <- function(x) {
 
 # Load package DESCRIPTION into convenient form.
 load_pkg_description <- function(path, create) {
-  path_desc <- file.path(path, "DESCRIPTION")
+  path_desc <- path(path, "DESCRIPTION")
 
-  if (!file.exists(path_desc)) {
+  if (!file_exists(path_desc)) {
     if (is.na(create)) {
       if (interactive()) {
-        message("No package infrastructure found in ", path, ". Create it?")
-        create <- (menu(c("Yes", "No")) == 1)
+        cli::cli_alert_danger("No package infrastructure found in {.file {path}}. Create it?")
+        create <- (utils::menu(c("Yes", "No")) == 1)
       } else {
         create <- FALSE
       }

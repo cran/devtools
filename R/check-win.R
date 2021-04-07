@@ -55,10 +55,10 @@ check_win <- function(pkg = ".", version = c("R-devel", "R-release", "R-oldrelea
   pkg <- as.package(pkg)
 
   if (!is.null(email)) {
-    desc_file <- file.path(pkg$path, "DESCRIPTION")
-    backup <- tempfile()
-    file.copy(desc_file, backup)
-    on.exit(file.rename(backup, desc_file), add = TRUE)
+    desc_file <- path(pkg$path, "DESCRIPTION")
+    backup <- file_temp()
+    file_copy(desc_file, backup)
+    on.exit(file_move(backup, desc_file), add = TRUE)
 
     change_maintainer_email(desc_file, email)
 
@@ -68,12 +68,13 @@ check_win <- function(pkg = ".", version = c("R-devel", "R-release", "R-oldrelea
   version <- match.arg(version, several.ok = TRUE)
 
   if (!quiet) {
-    message(
-      "Building windows version of ", pkg$package, " (", pkg$version, ")",
-      " for ", paste(version, collapse = ", "),
-      " with win-builder.r-project.org.\n"
+    cli::cli_alert_info(
+      "Building windows version of {.pkg {pkg$package}} ({pkg$version})",
+      " for {paste(version, collapse = ', ')} with win-builder.r-project.org."
     )
-    if (interactive() && yesno("Email results to ", maintainer(pkg)$email, "?")) {
+
+    email <- cli::style_bold(maintainer(pkg)$email)
+    if (interactive() && yesno("Email results to ", email, "?")) {
       return(invisible())
     }
   }
@@ -82,20 +83,20 @@ check_win <- function(pkg = ".", version = c("R-devel", "R-release", "R-oldrelea
     args = args,
     manual = manual, quiet = quiet, ...
   )
-  on.exit(unlink(built_path), add = TRUE)
+  on.exit(file_delete(built_path), add = TRUE)
 
   url <- paste0(
     "ftp://win-builder.r-project.org/", version, "/",
-    basename(built_path)
+    path_file(built_path)
   )
   lapply(url, upload_ftp, file = built_path)
 
   if (!quiet) {
-    message(
-      "[", strftime(Sys.time(), "%I:%M %p (%Y-%m-%d)"), "] ",
-      "Check ", maintainer(pkg)$email, " for a link to the built package",
-      if (length(version) > 1) "s" else "",
-      " in 15-30 mins."
+    time <- strftime(Sys.time() + 30 * 60, "%I:%M %p")
+    email <- maintainer(pkg)$email
+
+    cli::cli_alert_success(
+      "[{Sys.Date()}] Check <{.email {email}}> for a link to results in 15-30 mins (~{time})."
     )
   }
 
@@ -116,6 +117,24 @@ change_maintainer_email <- function(desc, email) {
   aut[is_maintainer]$email <- email
 
   desc$set_authors(aut)
+  ## Check if the email is actually changed before we actually send the email
+  if(!grepl(email, desc$get_maintainer())){
+    stop("Changing maintainer email failed. Possible reason is using both Authors@R and Maintainer fields in the DESCRIPTION file.", call. = FALSE)
+  }
 
   desc$write()
+}
+
+upload_ftp <- function(file, url, verbose = FALSE) {
+  rlang::check_installed("curl")
+
+  stopifnot(file_exists(file))
+  stopifnot(is.character(url))
+  con <- file(file, open = "rb")
+  on.exit(close(con), add = TRUE)
+  h <- curl::new_handle(upload = TRUE, filetime = FALSE)
+  curl::handle_setopt(h, readfunction = function(n) {
+    readBin(con, raw(), n = n)
+  }, verbose = verbose)
+  curl::curl_fetch_memory(url, handle = h)
 }
