@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.4.0
+Version: 2.4.1
 Authors@R: 
     c(person(given = "Hadley",
              family = "Wickham",
@@ -20,12 +20,12 @@ URL: https://devtools.r-lib.org/, https://github.com/r-lib/devtools
 BugReports: https://github.com/r-lib/devtools/issues
 Depends: R (>= 3.0.2), usethis (>= 2.0.1)
 Imports: callr (>= 3.6.0), cli (>= 2.4.0), desc (>= 1.3.0), ellipsis
-        (>= 0.3.1), fs (>= 1.5.0), httr (>= 1.4.2), jsonlite (>=
-        1.7.2), lifecycle (>= 1.0.0), memoise (>= 2.0.0), pkgbuild (>=
-        1.2.0), pkgload (>= 1.2.1), rcmdcheck (>= 1.3.3), remotes (>=
-        2.3.0), rlang (>= 0.4.10), roxygen2 (>= 7.1.1), rstudioapi (>=
-        0.13), rversions (>= 2.0.2), sessioninfo (>= 1.1.1), stats,
-        testthat (>= 3.0.2), tools, utils, withr (>= 2.4.1)
+        (>= 0.3.1), fs (>= 1.5.0), httr (>= 1.4.2), lifecycle (>=
+        1.0.0), memoise (>= 2.0.0), pkgbuild (>= 1.2.0), pkgload (>=
+        1.2.1), rcmdcheck (>= 1.3.3), remotes (>= 2.3.0), rlang (>=
+        0.4.10), roxygen2 (>= 7.1.1), rstudioapi (>= 0.13), rversions
+        (>= 2.0.2), sessioninfo (>= 1.1.1), stats, testthat (>= 3.0.2),
+        tools, utils, withr (>= 2.4.1)
 Suggests: BiocManager (>= 1.30.12), covr (>= 3.5.1), curl (>= 4.3),
         digest (>= 0.6.27), DT (>= 0.17), foghorn (>= 1.3.2), gh (>=
         1.2.1), gmailr (>= 1.0.0), knitr (>= 1.31), lintr (>= 2.0.1),
@@ -36,11 +36,11 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2021-04-06 20:05:27 UTC; jhester
+Packaged: 2021-05-05 17:50:50 UTC; jhester
 Author: Hadley Wickham [aut],
   Jim Hester [aut, cre],
   Winston Chang [aut],
   RStudio [cph, fnd]
 Maintainer: Jim Hester <jim.hester@rstudio.com>
 Repository: CRAN
-Date/Publication: 2021-04-07 09:10:05 UTC
+Date/Publication: 2021-05-05 19:00:02 UTC
