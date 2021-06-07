@@ -1,3 +1,13 @@
+# devtools 2.4.2
+
+* `check_man()` now works with R versions 4.1+ (#2354)
+
+* `test_active_file()` now again works on windows projects stored under the user's home directory (`~`) (#2355)
+
+* `document(quiet = TRUE)` now works without failure on windows (#2351)
+
+* Minor test failure on R 4.2 has been fixed.
+
 # devtools 2.4.1
 
 * `build_readme()` now uses the `path` argument, as designed (#2344)

@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.4.1
+Version: 2.4.2
 Authors@R: 
     c(person(given = "Hadley",
              family = "Wickham",
@@ -36,11 +36,11 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2021-05-05 17:50:50 UTC; jhester
+Packaged: 2021-06-04 17:12:50 UTC; jhester
 Author: Hadley Wickham [aut],
   Jim Hester [aut, cre],
   Winston Chang [aut],
   RStudio [cph, fnd]
 Maintainer: Jim Hester <jim.hester@rstudio.com>
 Repository: CRAN
-Date/Publication: 2021-05-05 19:00:02 UTC
+Date/Publication: 2021-06-07 07:10:04 UTC
