@@ -1,7 +1,9 @@
 test_that("gist containing single file works unambiguously", {
   skip_if_offline()
   skip_on_cran()
-  withr::local_envvar(list("GITHUB_PAT" = bundled_pat))
+  # TODO remove the CI skips once remotes is on CRAN
+  skip_on_ci()
+  withr::local_envvar(list("GITHUB_PAT" = asNamespace("remotes")$github_pat()))
 
   a <- 10
   source_gist(
@@ -16,7 +18,8 @@ test_that("gist containing single file works unambiguously", {
 test_that("gist with multiple files uses first with warning", {
   skip_if_offline()
   skip_on_cran()
-  withr::local_envvar(list("GITHUB_PAT" = bundled_pat))
+  skip_on_ci()
+  withr::local_envvar(list("GITHUB_PAT" = asNamespace("remotes")$github_pat()))
 
   a <- 10
   expect_warning(
@@ -34,7 +37,8 @@ test_that("gist with multiple files uses first with warning", {
 test_that("can specify filename", {
   skip_if_offline()
   skip_on_cran()
-  withr::local_envvar(list("GITHUB_PAT" = bundled_pat))
+  skip_on_ci()
+  withr::local_envvar(list("GITHUB_PAT" = asNamespace("remotes")$github_pat()))
 
   b <- 10
   source_gist(
@@ -50,7 +54,8 @@ test_that("can specify filename", {
 test_that("error if file doesn't exist or no files", {
   skip_if_offline()
   skip_on_cran()
-  withr::local_envvar(list("GITHUB_PAT" = bundled_pat))
+  skip_on_ci()
+  withr::local_envvar(list("GITHUB_PAT" = asNamespace("remotes")$github_pat()))
 
   expect_error(
     source_gist("605a984e764f9ed358556b4ce48cbd08", filename = "c.r", local = environment()),
