@@ -6,7 +6,7 @@
 \usage{
 check_mac_release(
   pkg = ".",
-  dep_pkgs = ".",
+  dep_pkgs = character(),
   args = NULL,
   manual = TRUE,
   quiet = FALSE,
@@ -23,8 +23,7 @@ package object.  See \code{\link[=as.package]{as.package()}} for more informatio
 line arguments to be passed to \verb{R CMD build} if \code{binary = FALSE},
 or \verb{R CMD install} if \code{binary = TRUE}.}
 
-\item{manual}{For source packages: if \code{FALSE}, don't build PDF
-vignettes (\code{--no-build-vignettes}) or manual (\code{--no-manual}).}
+\item{manual}{Should the manual be built?}
 
 \item{quiet}{If \code{TRUE}, suppresses output.}
 

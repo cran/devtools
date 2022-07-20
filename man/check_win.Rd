@@ -42,8 +42,7 @@ package object.  See \code{\link[=as.package]{as.package()}} for more informatio
 line arguments to be passed to \verb{R CMD build} if \code{binary = FALSE},
 or \verb{R CMD install} if \code{binary = TRUE}.}
 
-\item{manual}{For source packages: if \code{FALSE}, don't build PDF
-vignettes (\code{--no-build-vignettes}) or manual (\code{--no-manual}).}
+\item{manual}{Should the manual be built?}
 
 \item{email}{An alternative email to use, default \code{NULL} uses the package
 Maintainer's email.}
@@ -62,13 +61,13 @@ is also useful to check that your package is ok on windows.
 }
 \section{Functions}{
 \itemize{
-\item \code{check_win_devel}: Check package on the development version of R.
+\item \code{check_win_devel()}: Check package on the development version of R.
 
-\item \code{check_win_release}: Check package on the release version of R.
+\item \code{check_win_release()}: Check package on the release version of R.
 
-\item \code{check_win_oldrelease}: Check package on the previous major release version of R.
+\item \code{check_win_oldrelease()}: Check package on the previous major release version of R.
+
 }}
-
 \seealso{
 Other build functions: 
 \code{\link{check_mac_release}()},

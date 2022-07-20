@@ -22,17 +22,20 @@ test <- function(pkg = ".", filter = NULL, stop_on_failure = FALSE, export_all =
   save_all()
   pkg <- as.package(pkg)
 
-  if (!uses_testthat(pkg) && interactive()) {
-    cli::cli_alert_danger("No testing infrastructure found. Create it?")
-    if (utils::menu(c("Yes", "No")) == 1) {
-      usethis_use_testthat(pkg)
+  if (!uses_testthat(pkg)) {
+    cli::cli_inform(c(i = "No testing infrastructure found."))
+    if (!interactive()) {
+      ui_todo('Setup testing with {ui_code("usethis::use_testthat()")}.')
+      return(invisible())
     }
+    if (yesno("Create it?")) {
+      return(invisible())
+    }
+    usethis_use_testthat(pkg)
     return(invisible())
   }
 
-  load_all(pkg$path)
-
-  cli::cli_alert_info("Testing {.pkg {pkg$package}}")
+  cli::cli_inform(c(i = "Testing {.pkg {pkg$package}}"))
   withr::local_envvar(r_env_vars())
   testthat::test_local(
     pkg$path,
@@ -57,8 +60,7 @@ test_active_file <- function(file = find_active_file(), ...) {
   pkg <- as.package(path_dir(test_files)[[1]])
 
   withr::local_envvar(r_env_vars())
-  load_all(pkg$path, quiet = TRUE)
-  testthat::test_file(test_files, ...)
+  testthat::test_file(test_files, ..., load_package = "source")
 }
 
 #' @param show_report Show the test coverage report.
@@ -69,7 +71,7 @@ test_coverage <- function(pkg = ".", show_report = interactive(), ...) {
 
   save_all()
   pkg <- as.package(pkg)
-  cli::cli_alert_info("Computing test coverage for {.pkg {pkg$package}}")
+  cli::cli_inform(c(i = "Computing test coverage for {.pkg {pkg$package}}"))
 
   check_dots_used(action = getOption("devtools.ellipsis_action", rlang::warn))
 
@@ -104,7 +106,7 @@ test_coverage_active_file <- function(file = find_active_file(), filter = TRUE, 
 
   withr::local_envvar(r_env_vars())
   testthat::local_test_directory(pkg$path, pkg$package)
-  reporter <- testthat::local_snapshotter(cleanup = TRUE)
+  reporter <- testthat::local_snapshotter()
   reporter$start_file(file, "test")
 
   env <- load_all(pkg$path, quiet = TRUE, export_all = export_all)$env

@@ -96,7 +96,7 @@ install <-
     was_attached <- is_attached(pkg)
 
     if (reload && was_loaded) {
-      pkgload::unload(pkg$package)
+      pkgload::unregister(pkg$package)
     }
 
     pkgbuild::with_build_tools(required = FALSE,
@@ -176,4 +176,12 @@ install_dev_deps <- function(pkg = ".",
     build_opts = build_opts,
     ...
   )
+}
+
+local_install <- function(pkg = ".", quiet = TRUE, env = parent.frame()) {
+  pkg <- as.package(pkg)
+
+  cli::cli_inform(c(i = "Installing {.pkg {pkg$package}} in temporary library"))
+  withr::local_temp_libpaths(.local_envir = env)
+  install(pkg, upgrade = "never", reload = FALSE, quick = TRUE, quiet = quiet)
 }

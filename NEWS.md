@@ -1,3 +1,23 @@
+# devtools 2.4.4
+
+* `install(reload = TRUE)` now calls `pkgload::unregister()` instead
+  of `pkload::unload()` (#2349). This allows the package to keep
+  functioning if it is still in use in the R session (e.g. through
+  event handlers).
+
+* `test()` no longer calls `load_all()` twice. `test_active_file()`
+  now calls `load_all()` via testthat.
+
+* `aspell_env_var()` does a better job of matching `R CMD check` behaviour,
+  which is only to use `aspell`, not `hunspell` or `ispell` (#2376).
+
+* Installing devtools now installs pkgdown, profvis, bench, miniUI,
+  and urlchecker, ensuring that you have everything needed for package
+  development (#2388).
+
+* `dev_sitrep()` has been updated for the calendar-based version number scheme
+  adopted by the RStudio IDE in September 2021 (#2397, #2410).
+
 # devtools 2.4.3
 
 * New `check_mac_release()` function to check a package using the macOS builder at https://mac.r-project.org/macbuilder/submit.html (#2375)

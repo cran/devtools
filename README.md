@@ -1,7 +1,7 @@
 # devtools <img src="man/figures/logo.svg" align="right" height = 150/>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/r-lib/devtools/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/devtools/actions)
+[![R-CMD-check](https://github.com/r-lib/devtools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-lib/devtools/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/r-lib/devtools/branch/main/graph/badge.svg)](https://app.codecov.io/gh/r-lib/devtools?branch=main)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/devtools)](https://cran.r-project.org/package=devtools)
 <!-- badges: end -->
@@ -23,7 +23,8 @@ devtools::install_github("r-lib/devtools")
 
 ## Cheatsheet
 
-<a href="https://rawgit.com/rstudio/cheatsheets/main/package-development.pdf"><img src="https://raw.githubusercontent.com/batpigandme/cheatsheets/1c942c36846559b3e8efbd40d023bc351aeed6ba/pngs/thumbnails/package-development-thumbs.png" height="252"/></a>
+<a href="https://raw.githubusercontent.com/rstudio/cheatsheets/main/package-development.pdf"><img src="https://github.com/rstudio/cheatsheets/raw/main/pngs/thumbnails/package-development-thumbs.png" height="252"/></a>
+
 
 ## Usage
 

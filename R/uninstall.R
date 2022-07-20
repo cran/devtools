@@ -1,17 +1,15 @@
-#' Uninstall a local development package.
+#' Uninstall a local development package
 #'
-#' Uses `remove.package` to uninstall the package.
-#' To uninstall a package from a non-default library,
-#' use [withr::with_libpaths()].
+#' Uses `remove.packages()` to uninstall the package. To uninstall a package
+#' from a non-default library, use in combination with [withr::with_libpaths()].
 #'
 #' @inheritParams install
-#' @param unload if `TRUE` (the default), will automatically unload the
-#'   package prior to uninstalling.
+#' @param unload if `TRUE` (the default), ensures the package is unloaded, prior
+#'   to uninstalling.
 #' @inheritParams utils::remove.packages
 #' @export
 #' @family package installation
-#' @seealso [with_debug()] to install packages with debugging flags
-#'   set.
+#' @seealso [with_debug()] to install packages with debugging flags set.
 uninstall <- function(pkg = ".", unload = TRUE, quiet = FALSE, lib = .libPaths()[[1]]) {
   pkg <- as.package(pkg)
 
@@ -20,7 +18,7 @@ uninstall <- function(pkg = ".", unload = TRUE, quiet = FALSE, lib = .libPaths()
   }
 
   if (!quiet) {
-    cli::cli_alert_info("Uninstalling {.pkg {pkg$package}}")
+    cli::cli_inform(c(i = "Uninstalling {.pkg {pkg$package}}"))
   }
 
   remove.packages(pkg$package, .libPaths()[[1]])
