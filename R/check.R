@@ -1,18 +1,20 @@
-#' Build and check a package, cleaning up automatically on success.
+#' Build and check a package
 #'
-#' `check` automatically builds and checks a source package, using all
-#' known best practices. `check_built` checks an already built package.
+#' @description
+#' `check()` automatically builds and checks a source package, using all known
+#' best practices. `check_built()` checks an already-built package.
 #'
-#' Passing `R CMD check` is essential if you want to submit your package
-#' to CRAN: you must not have any ERRORs or WARNINGs, and you want to ensure
-#' that there are as few NOTEs as possible.  If you are not submitting to CRAN,
-#' at least ensure that there are no ERRORs or WARNINGs: these typically
-#' represent serious problems.
+#' Passing `R CMD check` is essential if you want to submit your package to
+#' CRAN: you must not have any ERRORs or WARNINGs, and you want to ensure that
+#' there are as few NOTEs as possible.  If you are not submitting to CRAN, at
+#' least ensure that there are no ERRORs or WARNINGs: these typically represent
+#' serious problems.
 #'
-#' `check` automatically builds a package before calling `check_built`
-#' as this is the recommended way to check packages.  Note that this process
-#' runs in an independent realisation of R, so nothing in your current
-#' workspace will affect the process.
+#' `check()` automatically builds a package before calling `check_built()`, as
+#' this is the recommended way to check packages.  Note that this process runs
+#' in an independent R session, so nothing in your current workspace will affect
+#' the process. Under-the-hood, `check()` and `check_built()` rely on
+#' [pkgbuild::build()] and [rcmdcheck::rcmdcheck()].
 #'
 #' @section Environment variables:
 #'
@@ -37,19 +39,17 @@
 #'    `force_suggests`
 #' }
 #'
-#' @return An object containing errors, warnings, and notes.
+#' @return An object containing errors, warnings, notes, and more.
 #' @template devtools
+#' @inheritParams rcmdcheck::rcmdcheck
 #' @param document By default (`NULL`) will document if your installed
 #'   roxygen2 version matches the version declared in the `DESCRIPTION`
 #'   file. Use `TRUE` or `FALSE` to override the default.
 #' @param build_args Additional arguments passed to `R CMD build`
-#' @param check_dir the directory in which the package is checked
-#'   compatibility. `args = "--output=/foo/bar"` can be used to change the
-#'   check directory.
 #' @param ... Additional arguments passed on to [pkgbuild::build()].
 #' @param vignettes If `FALSE`, do not build or check vignettes, equivalent to
 #'   using `args = '--ignore-vignettes' and `build_args = '--no-build-vignettes'.
-#' @param cleanup Deprecated.
+#' @param cleanup `r lifecycle::badge("deprecated")` See `check_dir` for details.
 #' @seealso [release()] if you want to send the checked package to
 #'   CRAN.
 #' @export
@@ -66,8 +66,8 @@ check <- function(pkg = ".",
                   args = "--timings",
                   env_vars = c(NOT_CRAN = "true"),
                   quiet = FALSE,
-                  check_dir = tempdir(),
-                  cleanup = TRUE,
+                  check_dir = NULL,
+                  cleanup = deprecated(),
                   vignettes = TRUE,
                   error_on = c("never", "error", "warning", "note")) {
   pkg <- as.package(pkg)
@@ -75,8 +75,8 @@ check <- function(pkg = ".",
 
   save_all()
 
-  if (!missing(cleanup)) {
-    lifecycle::deprecate_stop("1.11.0", "lifecycle::check(cleanup = )")
+  if (lifecycle::is_present(cleanup)) {
+    lifecycle::deprecate_stop("1.11.0", "check(cleanup = )")
   }
 
   if (missing(error_on) && !interactive()) {
@@ -158,22 +158,21 @@ can_document <- function(pkg) {
 #' @export
 #' @rdname check
 #' @param path Path to built package.
-#' @param cran if `TRUE` (the default), check using the same settings as
-#'   CRAN uses.
-#' @param remote Sets `_R_CHECK_CRAN_INCOMING_REMOTE_` env var.
-#'   If `TRUE`, performs a number of CRAN incoming checks that require
-#'   remote access.
-#' @param incoming Sets `_R_CHECK_CRAN_INCOMING_` env var.
-#'   If `TRUE`, performs a number of CRAN incoming checks.
-#' @param force_suggests Sets `_R_CHECK_FORCE_SUGGESTS_`. If
-#'   `FALSE` (the default), check will proceed even if all suggested
-#'   packages aren't found.
-#' @param run_dont_test Sets `--run-donttest` so that tests surrounded in
-#'   `\donttest{}` are also tested. When `cran = TRUE`, this only affects
-#'   R 3.6 and earlier; in R 4.0.0 code in `\donttest{}` is always run as
-#'   part of CRAN submission.
-#' @param manual If `FALSE`, don't build and check manual
-#'   (`--no-manual`).
+#' @param cran if `TRUE` (the default), check using the same settings as CRAN
+#'   uses. Because this is a moving target and is not uniform across all of
+#'   CRAN's machine, this is on a "best effort" basis. It is more complicated
+#'   than simply setting `--as-cran`.
+#' @param remote Sets `_R_CHECK_CRAN_INCOMING_REMOTE_` env var. If `TRUE`,
+#'   performs a number of CRAN incoming checks that require remote access.
+#' @param incoming Sets `_R_CHECK_CRAN_INCOMING_` env var. If `TRUE`, performs a
+#'   number of CRAN incoming checks.
+#' @param force_suggests Sets `_R_CHECK_FORCE_SUGGESTS_`. If `FALSE` (the
+#'   default), check will proceed even if all suggested packages aren't found.
+#' @param run_dont_test Sets `--run-donttest` so that examples surrounded in
+#'   `\donttest{}` are also run. When `cran = TRUE`, this only affects R 3.6 and
+#'   earlier; in R 4.0, code in `\donttest{}` is always run as part of CRAN
+#'   submission.
+#' @param manual If `FALSE`, don't build and check manual (`--no-manual`).
 #' @param env_vars Environment variables set during `R CMD check`
 #' @param quiet if `TRUE` suppresses output from this function.
 #' @inheritParams rcmdcheck::rcmdcheck
@@ -191,6 +190,10 @@ check_built <- function(path = NULL, cran = TRUE,
 
   if (cran) {
     args <- c("--as-cran", args)
+    env_vars <- c(
+      "_R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_" = as.character(FALSE),
+      env_vars
+    )
   }
   if (run_dont_test) {
     args <- c("--run-donttest", args)

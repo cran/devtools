@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.4.4
+Version: 2.4.5
 Authors@R: c(
     person("Hadley", "Wickham", role = "aut"),
     person("Jim", "Hester", role = "aut"),
@@ -19,7 +19,7 @@ Imports: cli (>= 3.3.0), desc (>= 1.4.1), ellipsis (>= 0.3.2), fs (>=
         0.1.1.1), pkgbuild (>= 1.3.1), pkgdown (>= 2.0.6), pkgload (>=
         1.3.0), profvis (>= 0.3.7), rcmdcheck (>= 1.4.0), remotes (>=
         2.4.2), rlang (>= 1.0.4), roxygen2 (>= 7.2.1), rversions (>=
-        2.1.1), sessioninfo (>= 1.2.2), stats, testthat (>= 3.1.4),
+        2.1.1), sessioninfo (>= 1.2.2), stats, testthat (>= 3.1.5),
         tools, urlchecker (>= 1.0.1), utils, withr (>= 2.5.0)
 Suggests: BiocManager (>= 1.30.18), callr (>= 3.7.1), covr (>= 3.5.1),
         curl (>= 4.3.2), digest (>= 0.6.29), DT (>= 0.23), foghorn (>=
@@ -34,7 +34,7 @@ Language: en-US
 RoxygenNote: 7.2.1
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-07-20 17:08:03 UTC; jenny
+Packaged: 2022-10-11 16:13:16 UTC; jenny
 Author: Hadley Wickham [aut],
   Jim Hester [aut],
   Winston Chang [aut],
@@ -42,4 +42,4 @@ Author: Hadley Wickham [aut],
   RStudio [cph, fnd]
 Maintainer: Jennifer Bryan <jenny@rstudio.com>
 Repository: CRAN
-Date/Publication: 2022-07-20 18:30:02 UTC
+Date/Publication: 2022-10-11 17:12:36 UTC

@@ -1,3 +1,23 @@
+# devtools 2.4.5
+
+* `check(cleanup =)` was deprecated in devtools v1.11.0 (2016-04-12) and was
+  made defunct in v2.4.4 (2022-07-20). The documentation is more clear now about
+  recommended alternatives.
+
+* `check(check_dir = NULL)` is the new default, to align with the default
+  behaviour of the underlying `rcmdcheck::rcmdcheck()`.
+
+* `check(cran = TRUE)` sets the env var
+  `_R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_` to `FALSE`, in order to
+  surface the `"Namespace in Imports field not imported from"` NOTE. This only
+  applies to R >= 4.2, due to favorable changes in the behaviour of
+  `R CMD check --as-cran` (#2459).
+
+* `test_active_file()` passes the package onto to testthat so it can correctly
+  set the `TESTTHAT_PKG` envvar (#2470).
+
+* `test()` and `test_active_file()` once again work with testthat itself.
+
 # devtools 2.4.4
 
 * `install(reload = TRUE)` now calls `pkgload::unregister()` instead
