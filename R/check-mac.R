@@ -1,12 +1,13 @@
-#' Check macOS package
+#' Check a package on macOS
 #'
-#' This function works by bundling source package, and then uploading to
-#' <https://mac.r-project.org/macbuilder/submit.html>.  This function returns a
-#' link to the page with the check results.
+#' This function first bundles a source package, then uploads it to
+#' <https://mac.r-project.org/macbuilder/submit.html>. This function returns a
+#' link to the page where the check results will appear.
 #'
 #' @template devtools
 #' @inheritParams check_win
-#' @param dep_pkgs Additional custom dependencies to install prior to checking the package.
+#' @param dep_pkgs Additional custom dependencies to install prior to checking
+#'   the package.
 #' @family build functions
 #' @return The url with the check results (invisibly)
 #' @export
@@ -39,6 +40,7 @@ check_mac_release <- function(pkg = ".", dep_pkgs = character(), args = NULL, ma
 
   url <- "https://mac.r-project.org/macbuilder/v1/submit"
 
+  rlang::check_installed("httr")
   body <- list(pkgfile = httr::upload_file(built_path))
 
   if (length(dep_built_paths) > 0) {
@@ -64,7 +66,7 @@ check_mac_release <- function(pkg = ".", dep_pkgs = character(), args = NULL, ma
 
     cli::cat_rule(col = "cyan")
     cli::cli_inform(c(
-      i = "Check {.url {response_url}} the results in 5-10 mins (~{time})."
+      i = "Check {.url {response_url}} for the results in 5-10 mins (~{time})."
     ))
   }
 

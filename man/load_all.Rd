@@ -17,15 +17,13 @@ load_all(
 \arguments{
 \item{path}{Path to a package, or within a package.}
 
-\item{reset}{clear package environment and reset file cache before loading
-any pieces of the package. This largely equivalent to running
-\code{\link[pkgload:unload]{unload()}}, however the old namespaces are not completely removed and no
-\code{.onUnload()} hooks are called. Use \code{reset = FALSE} may be faster for
-large code bases, but is a significantly less accurate approximation.}
+\item{reset}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} This is no longer supported
+because preserving the namespace requires unlocking its environment, which
+is no longer possible in recent versions of R.}
 
 \item{recompile}{DEPRECATED. force a recompile of DLL from source code, if
 present. This is equivalent to running \code{\link[pkgbuild:clean_dll]{pkgbuild::clean_dll()}} before
-\code{load_all}}
+\code{load_all()}}
 
 \item{export_all}{If \code{TRUE} (the default), export all objects.
 If \code{FALSE}, export only the objects that are listed as exports
@@ -38,17 +36,21 @@ in the NAMESPACE file.}
 \item{...}{Additional arguments passed to \code{\link[pkgload:load_all]{pkgload::load_all()}}.}
 }
 \description{
-\code{load_all} loads a package. It roughly simulates what happens
-when a package is installed and loaded with \code{\link[=library]{library()}}.
-}
-\details{
-Currently \code{load_all}:
+\code{load_all()} loads a package. It roughly simulates what happens
+when a package is installed and loaded with \code{\link[=library]{library()}}, without
+having to first install the package. It:
 \itemize{
-\item Loads all data files in \verb{data/}.  See \code{\link[pkgload:load_data]{load_data()}} for more
+\item Loads all data files in \verb{data/}. See \code{\link[pkgload:load_data]{load_data()}} for more
 details.
 \item Sources all R files in the R directory, storing results in
 environment that behaves like a regular package namespace. See
-below and \code{\link[pkgload:load_code]{load_code()}} for more details.
+\code{\link[pkgload:load_code]{load_code()}} for more details.
+\item Adds a shim from \code{\link[pkgload:system.file]{system.file()}} to \code{\link[pkgload:shim_system.file]{shim_system.file()}} in
+the imports environment of the package. This ensures that \code{system.file()}
+works with both development and installed packages despite their differing
+directory structures.
+\item Adds shims from \code{help()} and \verb{?} to \code{\link[pkgload:shim_help]{shim_help()}} and \code{\link[pkgload:shim_question]{shim_question()}}
+to make it easier to preview development documentation.
 \item Compiles any C, C++, or Fortran code in the \verb{src/} directory and
 connects the generated DLL into R. See \code{\link[pkgbuild:compile_dll]{pkgbuild::compile_dll()}}
 for more details.
@@ -57,71 +59,49 @@ for more details.
 the correct times.
 \item If you use \pkg{testthat}, will load all test helpers so you can
 access them interactively. devtools sets the \code{DEVTOOLS_LOAD}
-environment variable to \code{"true"} to let you check whether the
+environment variable to the package name to let you check whether the
 helpers are run during package loading.
 }
 
 \code{is_loading()} returns \code{TRUE} when it is called while \code{load_all()}
-is running. This may be useful e.g. in onLoad hooks.
+is running. This may be useful e.g. in \code{.onLoad} hooks.
+A package loaded with \code{load_all()} can be identified with
+\code{\link[pkgload:is_dev_package]{is_dev_package()}}.
 }
-\section{Differences with \code{loadNamespace()} and \code{library()}}{
-
+\section{Differences to regular loading}{
 
 \code{load_all()} tries its best to reproduce the behaviour of
 \code{\link[=loadNamespace]{loadNamespace()}} and \code{\link[=library]{library()}}. However it deviates from normal
 package loading in several ways.
 \itemize{
-\item It doesn't install the package on disk, so \code{\link[pkgload:system.file]{system.file()}} has no
-way of determining the location of the development files. To work
-around this, pkgload installs its own version of \code{\link[pkgload:system.file]{system.file()}}
-on the search path to make it easier to use interactively while
-developing. However this definition is only visible to the global
-environment, not to the namespaces of third party packages.
-
-One workaround for other packages to see the development files of
-your package while you're developing with devtools is for them to
-use \code{fs::path_package()} instead of \code{system.file()}.
-\item Whereas \code{loadNamespace()} and \code{library()} only load package
-dependencies when they are needed, \code{load_all()} loads all packages
-referenced in \code{Imports} at load time.
+\item \code{load_all()} doesn't install the package to a library, so \code{\link[pkgload:system.file]{system.file()}}
+doesn't work. pkgload fixes this for the package itself installing a shim,
+\code{\link[pkgload:shim_system.file]{shim_system.file()}}. However, this shim is not visible to third party
+packages, so they will fail if they attempt to find files within your
+package. One potential workaround is to use \code{\link[fs:path_package]{fs::path_package()}}
+instead of \code{system.file()}, since that understands the mechanisms that
+devtools uses to load packages.
+\item \code{load_all()} loads all packages referenced in \code{Imports} at load time,
+but \code{loadNamespace()} and \code{library()} only load package dependencies as
+they are needed.
+\item \code{load_all()} copies all objects (not just the ones listed as exports)
+into the package environment. This is useful during development because
+it makes internal objects easy to access.  To export only the objects
+listed as exports, use \code{export_all = FALSE}. This more closely simulates
+behavior when loading an installed package with \code{\link[=library]{library()}}, and can
+be useful for checking for missing exports.
 }
 
 }
 
-\section{Namespaces}{
+\section{Controlling the debug compiler flags}{
 
-
-The namespace environment \verb{<namespace:pkgname>}, is a child of
-the imports environment, which has the name attribute
-\code{imports:pkgname}. It is in turn is a child of
-\verb{<namespace:base>}, which is a child of the global environment.
-(There is also a copy of the base namespace that is a child of the empty
-environment.)
-
-The package environment \verb{<package:pkgname>} is an ancestor of the
-global environment. Normally when loading a package, the objects
-listed as exports in the NAMESPACE file are copied from the namespace
-to the package environment. However, \code{load_all} by default will
-copy all objects (not just the ones listed as exports) to the package
-environment. This is useful during development because it makes all
-objects easy to access.
-
-To export only the objects listed as exports, use
-\code{export_all=FALSE}. This more closely simulates behavior when
-loading an installed package with \code{\link[=library]{library()}}, and can be
-useful for checking for missing exports.
-
-}
-
-\section{Shim files}{
-
-
-\code{load_all} also inserts shim functions into the imports environment
-of the loaded package. It presently adds a replacement version of
-\code{system.file} which returns different paths from
-\code{base::system.file}. This is needed because installed and uninstalled
-package sources have different directory structures. Note that this is not
-a perfect replacement for \code{base::system.file}.
+\code{load_all()} delegates to \code{\link[pkgbuild:compile_dll]{pkgbuild::compile_dll()}} to perform the actual
+compilation, during which by default some debug compiler flags are
+appended. If you would like to produce an optimized build instead, you can
+opt out by either using \code{debug = FALSE}, setting the \code{pkg.build_extra_flags}
+option to \code{FALSE}, or setting the \code{PKG_BUILD_EXTRA_FLAGS} environment variable
+to \code{FALSE}. For further details see the Details section in \code{\link[pkgbuild:compile_dll]{pkgbuild::compile_dll()}}.
 
 }
 
@@ -132,9 +112,6 @@ load_all("./")
 
 # Running again loads changed files
 load_all("./")
-
-# With reset=TRUE, unload and reload the package for a clean start
-load_all("./", TRUE)
 
 # With export_all=FALSE, only objects listed as exports in NAMESPACE
 # are exported

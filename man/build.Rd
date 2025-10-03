@@ -50,6 +50,75 @@ a platform specific extension (e.g. \code{.zip} for windows), and will
 only be installable on the current platform, but no development
 environment is needed.
 }
+\details{
+\subsection{Configuration}{
+\subsection{\code{DESCRIPTION} entries}{
+\itemize{
+\item \code{Config/build/clean-inst-doc} can be set to \code{FALSE} to avoid cleaning up
+\code{inst/doc} when building a source package. Set it to \code{TRUE} to force a
+cleanup. See the \code{clean_doc} argument.
+\item \code{Config/build/copy-method} can be used to avoid copying large
+directories in \verb{R CMD build}. It works by copying (or linking) the
+files of the package to a temporary directory, leaving out the
+(possibly large) files that are not part of the package. Possible
+values:
+\itemize{
+\item \code{none}: pkgbuild does not copy the package tree. This is the default.
+\item \code{copy}: the package files are copied to a temporary directory before
+\verb{ R CMD build}.
+\item \code{link}: the package files are symbolic linked to a temporary
+directory before \verb{R CMD build}. Windows does not have symbolic
+links, so on Windows this is equivalent to \code{copy}.
+}
+
+You can also use the \code{pkg.build_copy_method} option or the
+\code{PKG_BUILD_COPY_METHOD} environment variable to set the copy method.
+The option is consulted first, then the \code{DESCRIPTION} entry, then the
+environment variable.
+\item \code{Config/build/extra-sources} can be used to define extra source files
+for pkgbuild to decide whether a package DLL needs to be recompiled in
+\code{needs_compile()}. The syntax is a comma separated list of file names,
+or globs. (See \code{\link[utils:glob2rx]{utils::glob2rx()}}.) E.g. \verb{src/rust/src/*.rs} or
+\verb{configure*}.
+\item \code{Config/build/bootstrap} can be set to \code{TRUE} to run
+\verb{Rscript bootstrap.R} in the source directory prior to running subsequent
+build steps.
+\item \code{Config/build/never-clean} can be set to \code{TRUE} to never add \code{--preclean}
+to \verb{R CMD INSTALL}, e.g., when header files have changed.
+This helps avoiding rebuilds that can take long for very large C/C++ codebases
+and can lead to build failures if object files are out of sync with header files.
+Control the dependencies between object files and header files
+by adding \verb{include file.d} to \code{Makevars} for each \code{file.c} or \code{file.cpp} source file.
+}
+}
+
+\subsection{Options}{
+\itemize{
+\item \code{pkg.build_copy_method}: use this option to avoid copying large
+directories when building a package. See possible values above, at the
+\code{Config/build/copy-method} \code{DESCRIPTION} entry.
+\item \code{pkg.build_stop_for_warnings}: if it is set to \code{TRUE}, then pkgbuild
+will stop for \verb{R CMD build} errors. It takes precedence over the
+\code{PKG_BUILD_STOP_FOR_WARNINGS} environment variable.
+}
+}
+
+\subsection{Environment variables}{
+\itemize{
+\item \code{PKG_BUILD_COLOR_DIAGNOSTICS}: set it to \code{false} to opt out of colored
+compiler diagnostics. Set it to \code{true} to force colored compiler
+diagnostics.
+\item \code{PKG_BUILD_COPY_METHOD}: use this environment variable to avoid copying
+large directories when building a package. See possible values above,
+at the \code{Config/build/copy-method} \code{DESCRIPTION} entry.
+}
+
+will stop for \verb{R CMD build} errors. The \code{pkg.build_stop_for_warnings}
+option takes precedence over this environment variable.
+}
+
+}
+}
 \note{
 The default \code{manual = FALSE} is not suitable for a CRAN
 submission, which may require \code{manual = TRUE}.  Even better, use

@@ -1,3 +1,15 @@
+# devtools 2.4.6
+
+* Functions that use httr now explicitly check that it is installed
+  (@catalamarti, #2573).
+
+* `test_coverage()` now works if the package has not been installed.
+
+* `test_coverage_active_file()` now reports if any tests failed and does
+  a better job of executing snapshot comparisons.
+
+* `dev_mode()` and `check_rhub()` are deprecated.
+
 # devtools 2.4.5
 
 * `check(cleanup =)` was deprecated in devtools v1.11.0 (2016-04-12) and was
@@ -17,6 +29,8 @@
   set the `TESTTHAT_PKG` envvar (#2470).
 
 * `test()` and `test_active_file()` once again work with testthat itself.
+
+* `dev_mode()` is deprecated (@billdenney, #2467).
 
 # devtools 2.4.4
 
@@ -514,7 +528,7 @@ you should switch your package to depend on **usethis** directly instead.
 * `document()`, `load_all()`, `check()`, `build()` and `test()` now
   automatically save open files when they are run inside the RStudio IDE. (#1576)
 
-* New `check_rhub()` function to check packages using <https://builder.r-hub.io/>.
+* New `check_rhub()` function to check packages using `https://builder.r-hub.io/`.
 
 * `run_examples` was mistakenly passing `show` to
   `pkgload::run_example`, causing it to fail (@amcdavid, #1449)
@@ -903,7 +917,7 @@ There were a handful of smaller fixes:
   (#995, @kevinushey)
 
 * `check(cran = TRUE)` adds `--run-donttest` since you do need to test
-  code in `\dontest()` for CRAN submission (#1002).
+  code in `\donttest()` for CRAN submission (#1002).
 
 ## Package installation
 
@@ -935,7 +949,7 @@ There were a handful of smaller fixes:
 
 * `check_man()` replaces `check_doc()` (since most other functions are
   named after the corresponding directory). `check_doc()` will hang around
-  as an alias for the forseeable future (#958).
+  as an alias for the foreseeable future (#958).
 
 * `create()` produces a dummy namespace will fake comment so roxygen2 will 
   overwrite silently (#1016).
