@@ -1,55 +1,26 @@
 <!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-<html>
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
 
-<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta charset="utf-8" />
-<meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<meta name="author" content="Jim Hester, Hadley Wickham" />
-
-<meta name="date" content="2025-10-01" />
-
-<title>Devtools dependencies</title>
-
-<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
-// be compatible with the behavior of Pandoc < 2.8).
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
-
-<style type="text/css">
+<title>Depending on a development version</title>
+<style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
-</style>
-
-
-
-<style type="text/css">
-code {
-white-space: pre;
+ul.task-list li input[type="checkbox"] {
+width: 0.8em;
+margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 }
-.sourceCode {
-overflow: visible;
-}
-</style>
-<style type="text/css" data-origin="pandoc">
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
 html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
@@ -77,72 +48,14 @@ border: none; display: inline-block;
 -khtml-user-select: none; -moz-user-select: none;
 -ms-user-select: none; user-select: none;
 padding: 0 4px; width: 4em;
-color: #aaaaaa;
 }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+pre.numberSource { margin-left: 3em; padding-left: 4px; }
 div.sourceCode
 { }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } 
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.at { color: #7d9029; } 
-code span.bn { color: #40a070; } 
-code span.bu { color: #008000; } 
-code span.cf { color: #007020; font-weight: bold; } 
-code span.ch { color: #4070a0; } 
-code span.cn { color: #880000; } 
-code span.co { color: #60a0b0; font-style: italic; } 
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.do { color: #ba2121; font-style: italic; } 
-code span.dt { color: #902000; } 
-code span.dv { color: #40a070; } 
-code span.er { color: #ff0000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #40a070; } 
-code span.fu { color: #06287e; } 
-code span.im { color: #008000; font-weight: bold; } 
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.kw { color: #007020; font-weight: bold; } 
-code span.op { color: #666666; } 
-code span.ot { color: #007020; } 
-code span.pp { color: #bc7a00; } 
-code span.sc { color: #4070a0; } 
-code span.ss { color: #bb6688; } 
-code span.st { color: #4070a0; } 
-code span.va { color: #19177c; } 
-code span.vs { color: #4070a0; } 
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
-<script>
-// apply pandoc div.sourceCode style to pre.sourceCode instead
-(function() {
-  var sheets = document.styleSheets;
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
-    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    var j = 0;
-    while (j < rules.length) {
-      var rule = rules[j];
-      // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
-        j++;
-        continue;
-      }
-      var style = rule.style.cssText;
-      // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') {
-        j++;
-        continue;
-      }
-      // replace div.sourceCode by a pre.sourceCode rule
-      sheets[i].deleteRule(j);
-      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
-    }
-  }
-})();
-</script>
 
 
 
@@ -157,34 +70,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
 }
 table {
 margin: 1em auto;
@@ -314,143 +199,66 @@ a[href^="http:"] {
 text-decoration: underline; }
 a[href^="https:"] {
 text-decoration: underline; }
-
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
-
-
-
-
 </head>
 
 <body>
 
 
+<header id="title-block-header">
+<h1 class="title">Depending on a development version</h1>
+
+</header>
 
 
-<h1 class="title toc-ignore">Devtools dependencies</h1>
-<h4 class="author">Jim Hester, Hadley Wickham</h4>
-<h4 class="date">2025-10-01</h4>
-
-
-
-<div id="package-remotes" class="section level1">
-<h1>Package remotes</h1>
-<p>Devtools version 1.9 supports package dependency installation for
-packages not yet in a standard package repository such as <a href="https://cran.r-project.org">CRAN</a> or <a href="https://bioconductor.org/">Bioconductor</a>.</p>
-<p>You can mark any regular dependency defined in the
-<code>Depends</code>, <code>Imports</code>, <code>Suggests</code> or
-<code>Enhances</code> fields as being installed from a remote location
-by adding the remote location to <code>Remotes</code> in your
-<code>DESCRIPTION</code> file. This will cause devtools to download and
-install them prior to installing your package (so they won’t be
-installed from CRAN).</p>
-<p>The remote dependencies specified in <code>Remotes</code> should be
-described in the following form.</p>
-<pre><code>Remotes: [type::]&lt;Repository&gt;, [type2::]&lt;Repository2&gt;</code></pre>
-<p>The <code>type</code> is an optional parameter. If the type is
-missing the default is to install from GitHub. Additional remote
-dependencies should be separated by commas, just like normal
-dependencies elsewhere in the <code>DESCRIPTION</code> file.</p>
-<p>It is important to remember that you <strong>must always declare the
-dependency in the usual way</strong>, i.e. include it in
-<code>Depends</code>, <code>Imports</code>, <code>Suggests</code> or
-<code>Enhances</code>. The <code>Remotes</code> field only provides
-instructions on where to install the dependency from. In this example
-<code>DESCRIPTION</code> file, note how rlang appears in
-<code>Imports</code> and in <code>Remotes</code>:</p>
-<pre><code>Package: xyz
+<p>Sometimes you need your package to depend on a development version of another package that isn’t yet available on <a href="https://cran.r-project.org">CRAN</a> or <a href="https://bioconductor.org/">Bioconductor</a>. The <code>Remotes</code> field in <code>DESCRIPTION</code> lets you specify where to install such a dependency from. <strong><code>Remotes</code> is not a standard <code>DESCRIPTION</code> field</strong>. It is not acceptable when releasing a package on CRAN. The <code>Remotes</code> field is understood by devtools, <a href="https://pak.r-lib.org/">pak</a>, and related tools, and is meant to be a temporary measure during development.</p>
+<p>This vignette covers the mechanics of the <code>Remotes</code> field. For more context, see the <a href="https://r-pkgs.org/dependencies-in-practice.html#nonstandard-dependencies">Nonstandard dependencies</a> section of the R Packages book.</p>
+<h2 id="the-remotes-field">The <code>Remotes</code> field</h2>
+<p>You can mark any dependency listed in <code>Depends</code>, <code>Imports</code>, <code>Suggests</code>, or <code>Enhances</code> as being installed from a non-standard source by adding a package reference to <code>Remotes</code> in your <code>DESCRIPTION</code> file.</p>
+<p>The general form is:</p>
+<pre><code>Remotes: [type::]&lt;source&gt;, [type2::]&lt;source2&gt;</code></pre>
+<p>Multiple remote dependencies are separated by commas, just like regular dependencies elsewhere in <code>DESCRIPTION</code>.</p>
+<p>It is important to remember that you <strong>must always declare the dependency in the usual way</strong>, i.e. in <code>Depends</code>, <code>Imports</code>, <code>Suggests</code>, or <code>Enhances</code>. The <code>Remotes</code> field only provides instructions about <em>where</em> to install the dependency from. For example, note how rlang appears in both <code>Imports</code> and <code>Remotes</code>:</p>
+<pre><code>Package: mypackage
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R:
-    person(given = &quot;First&quot;,
-           family = &quot;Last&quot;,
-           role = c(&quot;aut&quot;, &quot;cre&quot;),
-           email = &quot;first.last@example.com&quot;)
-Description: What the package does (one paragraph).
-License: MIT + file LICENSE
 Imports:
-    rlang
+    rlang (&gt;= 1.1.0.9000)
 Remotes:
     r-lib/rlang</code></pre>
-<div id="github" class="section level3">
-<h3>GitHub</h3>
-<p>Because GitHub is the most commonly used unofficial package
-distribution in R, it’s the default:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> hadley/testthat</span></span></code></pre></div>
-<p>You can also specify a specific hash, tag, or pull request (using the
-same syntax as <code>install_github()</code> if you want a particular
-commit. Otherwise the latest commit on the HEAD of the branch is
-used.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> hadley/httr@v0.4,</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="at">  klutometis/roxygen</span><span class="co">#142,</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="at">  hadley/testthat@c67018fa4970</span></span></code></pre></div>
-<p>A type of <code>github</code> can be specified, but is not
-required</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> github::hadley/ggplot2</span></span></code></pre></div>
-</div>
-<div id="other-sources" class="section level3">
-<h3>Other sources</h3>
-<p>All of the currently supported install sources are available, see the
-‘See Also’ section in <code>?install</code> for a complete list.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># GitLab</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> gitlab::jimhester/covr</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># Git</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> git::git@bitbucket.org:djnavarro/lsr.git</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># Bitbucket</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> bitbucket::sulab/mygene.r@default, djnavarro/lsr</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co"># Bioconductor</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> bioc::3.3/SummarizedExperiment</span><span class="co">#117513, bioc::release/Biobase</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co"># SVN</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> svn::https://github.com/tidyverse/stringr</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co"># URL</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> url::https://github.com/tidyverse/stringr/archive/main.zip</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co"># Local</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> local::/pkgs/testthat</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co"># Gitorious</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> gitorious::r-mpc-package/r-mpc-package</span></span></code></pre></div>
-</div>
-<div id="cran-submission" class="section level3">
-<h3>CRAN submission</h3>
-<p>When you submit your package to CRAN, all of its dependencies must
-also be available on CRAN. For this reason, <code>release()</code> will
-warn you if you try to release a package with a <code>Remotes</code>
-field.</p>
-</div>
-</div>
+<p>You can use <code>usethis::use_dev_package()</code> to add or update a development dependency. It takes care of modifying both the <code>Imports</code> (or <code>Suggests</code>) and <code>Remotes</code> fields.</p>
+<h2 id="github">GitHub</h2>
+<p>GitHub is the most commonly used source for development packages, and the default when no type prefix is specified:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> r-lib/rlang</span></span></code></pre></div>
+<p>You can request a specific branch, tag, commit (SHA), or pull request:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> r-lib/rlang@some-branch,</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  r-lib/rlang@v1.0.0,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  r-lib/rlang@84be6207,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">  r-lib/rlang</span><span class="co">#142</span></span></code></pre></div>
+<p>A <code>github::</code> prefix is accepted but not required:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> github::r-lib/rlang</span></span></code></pre></div>
+<h2 id="other-sources">Other sources</h2>
+<p>There are many other supported source types:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GitLab</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> gitlab::user/repo</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Git (any host)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> git::https://github.com/r-lib/rlang.git</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Bioconductor</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> bioc::SummarizedExperiment</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># URL (package archive)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> url::https://example.com/package-0.1.0.tar.gz</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Local</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">Remotes</span><span class="kw">:</span><span class="at"> local::/path/to/package</span></span></code></pre></div>
+<p>See the <a href="https://pak.r-lib.org/reference/pak_package_sources.html">pak documentation on package sources</a> for a complete list.</p>
+<h2 id="cran-submission">CRAN submission</h2>
+<p>When you submit your package to CRAN, all of its dependencies must also be available on CRAN or Bioconductor. You need to remove the <code>Remotes</code> field from your <code>DESCRIPTION</code> before submission. This means having a <code>Remotes</code> field is a temporary development state: once the dependency you need is released to CRAN or Bioconductor, you should update your minimum version requirement and drop the <code>Remotes</code> entry.</p>
 
 
 
-<!-- code folding -->
 
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
-
-</body>
-</html>
+</body></html>
