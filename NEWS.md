@@ -1,8 +1,16 @@
+# devtools 2.5.1
+
+* `build_readme()` no longer installs dependencies into the temporary library
+  (a regression introduced in 2.5.0). It now exits early if a required
+  dependency is missing and reports any that are out of date or at a dev
+  version (#2683).
+* `dev_sitrep()` reports if devtools itself is out of date (#2687).
+
 # devtools 2.5.0
 
 Deprecations
 
-* Package installation functions are now deprecated: `install_bioc()`, `install_bitbucket()`, `install_cran()`, `install_deps()`, `install_dev()`, `install_dev_deps()`, `install_git()`, `install_github()`, `install_gitlab()`, `install_local()`, `install_svn()`, `install_url()`, `install_version()`, `update_packages()`, `dev_package_deps()`, `github_pull()`, and `github_release()`. We now recommend pak (<https://pak.r-lib.org/>) for general package installation. See `?install-deprecated` for migration guidance.
+* Package installation functions are now deprecated: `install_bioc()`, `install_bitbucket()`, `install_cran()`, `install_deps()`, `install_dev()`, `install_dev_deps()`, `install_git()`, `install_github()`, `install_gitlab()`, `install_local()`, `install_svn()`, `install_url()`, `install_version()`, `update_packages()`, `dev_package_deps()`, `github_pull()`, and `github_release()`. We now recommend pak (<https://pak.r-lib.org/>) for general package installation. See `` ?`install-deprecated` `` for migration guidance.
 * remotes has moved from Imports to Suggests, as part of the pivot towards pak for package installation (#2663).
 * `build_rmd()` is soft-deprecated and is discouraged for external use. It exists to be an internal helper for `build_readme()`.
 * `build_vignettes()` and `clean_vignettes()` are now deprecated. We no longer recommend building vignettes in this way; instead use `pkgdown::build_article()` to render articles locally (#2488).

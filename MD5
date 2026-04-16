@@ -1,12 +1,12 @@
-100d073c71ffbde78971663fd1ffafc5 *DESCRIPTION
+e24cf96cb4a5e5367b82d46318d70e13 *DESCRIPTION
 f5a65cfd67947a06c31f65027666d18e *LICENSE
 92aff32a539593a91aa3a5f35491ca10 *NAMESPACE
-9886b9c7e81791dbe8031c503d2255e4 *NEWS.md
+7182213a48d5cd2cd455eefeb96b3316 *NEWS.md
 f72c92122cbbe5562dd8614be2dd36f7 *R/R.R
 dcb3d159650157aa50a309f201aea63e *R/active.R
 1766e38ecf5a284fb64f65f0469f6292 *R/bash.R
 bd213e07727616d245dc67fd55bebdfe *R/build-manual.R
-acba341ab4b2ba78038c094c843df588 *R/build-readme.R
+56e46db4e68c43263270df749a602ff2 *R/build-readme.R
 a28c528ecf6331cc60c341b195def4fc *R/build-site.R
 d71f97a59af90960b3e62e935466237b *R/check-devtools.R
 e05b9c51958c163adab85d59f75089c7 *R/check-doc.R
@@ -23,7 +23,7 @@ fac1e6c6bc7ea2b4ad69d4e43370726e *R/dev-mode.R
 c9f0f46847bb062472c67e9176d79f4a *R/import-standalone-obj-type.R
 754e065247c6c0636c3fe8440af3bfc9 *R/import-standalone-purrr.R
 f0289ac3a8cc612523ebf40c6bb9e5c7 *R/import-standalone-types-check.R
-c4695c4d5ccb593a9e11d3a50c0b3015 *R/install.R
+86a8eb69c3c5c6265e5b6dd4e9688490 *R/install.R
 4d4234bccb263914d8e7a53f3f26b2cd *R/lint.R
 b5ff1d5ff45edc1cb92ddbb73aeec200 *R/missing-s3.R
 eae46eb28401fb52029c3145d17eda78 *R/package-deps.R
@@ -31,7 +31,7 @@ b635df8920313a4ca5884ddeead3d33e *R/package.R
 ee7b4430cef1e17a6a46b301c9d8ac98 *R/pkgbuild.R
 937cb63e8495a524cc013a72edfb9ba7 *R/pkgload.R
 607c610abe9db0cc38d74b4ec9e86481 *R/r-hub.R
-66852308e92ac70980373971071d6497 *R/release.R
+177f7f4142240e66e18b29c4d14df7cd *R/release.R
 41fdfb0471115aa71cb41a00a45533e1 *R/reload.R
 0e52dad1c3abeb37eedc449a602dcfd5 *R/remotes.R
 ce347af3f3d412820d90e699202b3189 *R/revdep.R
@@ -40,9 +40,9 @@ ccf5f56b87ce8590dd17403a09e82947 *R/run-examples.R
 fddd1a44d6e3107a5d616dc51622472b *R/save-all.R
 9bd935675a2e7be296a0461e5361a929 *R/session-info.R
 2d23b35e06c5b8269f3bc783556a13b3 *R/show-news.R
-bc0d949d49cdb24a8edda42b4313256c *R/sitrep.R
+0db83d697bf9c5e854d8d1c1ebe884d3 *R/sitrep.R
 f0325a6e05beafdadd9a1d0943716531 *R/spell-check.R
-698e1347ae9805611bbb43e22a196193 *R/test.R
+baf5f091da2d4b9e3a1b4e86745f9a07 *R/test.R
 fcd24b91a84e666edbf8d93e919cee3e *R/uninstall.R
 620c8472e2765e78404724111122b670 *R/usethis.R
 b5f96104d62f8fa6a94093dd85eeb940 *R/utils.R
@@ -53,7 +53,7 @@ f27115cded75e2465554a80ddb9aa29c *R/wd.R
 3a6a829cbda4f128608501066891c96b *README.md
 ce7569ee8edf24154935919bac852fbe *build/vignette.rds
 bbc82db8b7174fb213a7d6a6d0e772b8 *inst/WORDLIST
-ca2a0abfdd22eacb0fe00eff630cbb85 *inst/doc/dependencies.html
+93aac2906cd2da86b0c6703f004773f3 *inst/doc/dependencies.html
 5e7274630639d058da26a8063bc886ec *inst/doc/dependencies.qmd
 48df05798555d5765a367c469daf7375 *inst/rstudio/addins.dcf
 efac7420d777383b300dcbac0de272a6 *man/as.package.Rd
@@ -119,7 +119,7 @@ d7ae0f9073286e4bfe31ba9b4a9b1358 *man/wd.Rd
 31fd527cd115d5845c382974ff854359 *tests/testthat.R
 feecdd3def70eaa93201a91c669560be *tests/testthat/_snaps/active.md
 d5b896ff5d8d15ca41dda9aff27056b7 *tests/testthat/_snaps/build-manual.md
-bd5076af0f4d07998bca828087162f39 *tests/testthat/_snaps/build-readme.md
+fb5d5195d4e28b3c8f7d98a6d9c248aa *tests/testthat/_snaps/build-readme.md
 12a32f75e93a4b730338465aea21a05c *tests/testthat/_snaps/check-doc.md
 cc40f5fb1c94849e7aff5b7568bcfd65 *tests/testthat/_snaps/check-win.md
 19983641a6f913719af62d0197fd1855 *tests/testthat/_snaps/check.md
@@ -130,7 +130,7 @@ a034ddf91b6d58209fd3b86d5a94f3b4 *tests/testthat/_snaps/release.md
 bf30140992b0607632691250f800e329 *tests/testthat/_snaps/remotes.md
 d52bf3f66574f460cc5c8ddf74084fef *tests/testthat/_snaps/run-source.md
 7bfbf8beb59146d146d75297a738399b *tests/testthat/_snaps/show-news.md
-9b53b2aa5e98e003fc394a71d229298f *tests/testthat/_snaps/sitrep.md
+e46843e1205377462a232f83238f3108 *tests/testthat/_snaps/sitrep.md
 11a0dbebe5ab8369ad88a3d5da47080e *tests/testthat/_snaps/test.md
 652f13c04439f2f8af36215a81b14aa3 *tests/testthat/_snaps/vignettes.md
 604e31b0e928d069d21ea4a8be3919cb *tests/testthat/archive.rds
@@ -148,7 +148,7 @@ e09030d939f08dcad3985f33db51c18f *tests/testthat/shallowRepo/refs/tags/v1.10.0
 4ef4145c4fc7a472499a55cb0b25e3d3 *tests/testthat/shallowRepo/shallow
 944369718ce804e886deea5988777c9b *tests/testthat/test-active.R
 38480f11b4b34c3481190fa95375eeb5 *tests/testthat/test-build-manual.R
-80ad5cbf0fca65b56ef0a9e20cf69a03 *tests/testthat/test-build-readme.R
+42bcf3c409c536f91dcc855953ac14c4 *tests/testthat/test-build-readme.R
 7d72dfb08817f534d1b8353175b1791e *tests/testthat/test-check-doc.R
 8d1a7c9b3d20cfb2b74b758d3c27dace *tests/testthat/test-check-win.R
 094e1f88746178bf76b03080519b5cc7 *tests/testthat/test-check.R
@@ -161,7 +161,7 @@ a4559c5b960bb8e5f024e99e770563c7 *tests/testthat/test-pkgload.R
 2c5c8c2ecd3ff94e2d4b21798a5a57f6 *tests/testthat/test-run-examples.R
 53ed06d88e3887799305271fc4760f86 *tests/testthat/test-run-source.R
 ed72399c984cd494498bf5d681082a38 *tests/testthat/test-show-news.R
-419f48dc59267b95e9aaac4a8a9dcb59 *tests/testthat/test-sitrep.R
+307445438829715809ab9cc4ae918c48 *tests/testthat/test-sitrep.R
 6cfc6998eb489d67d06f460f710852a4 *tests/testthat/test-test.R
 e97fc73f9d8f1d095a5c966935911b5d *tests/testthat/test-uninstall.R
 20e6a2c01267ceb70002501732000396 *tests/testthat/test-utils.R

@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.5.0
+Version: 2.5.1
 Authors@R: c(
     person("Hadley", "Wickham", role = "aut"),
     person("Jim", "Hester", role = "aut"),
@@ -15,11 +15,11 @@ License: MIT + file LICENSE
 URL: https://devtools.r-lib.org/, https://github.com/r-lib/devtools
 BugReports: https://github.com/r-lib/devtools/issues
 Depends: R (>= 4.1), usethis (>= 3.2.1)
-Imports: cli (>= 3.6.5), desc (>= 1.4.3), ellipsis (>= 0.3.2), fs (>=
-        1.6.7), lifecycle (>= 1.0.5), memoise (>= 2.0.1), miniUI (>=
-        0.1.2), pak (>= 0.9.2), pkgbuild (>= 1.4.8), pkgdown (>=
-        2.2.0), pkgload (>= 1.5.0), profvis (>= 0.4.0), rcmdcheck (>=
-        1.4.0), rlang (>= 1.1.7), roxygen2 (>= 7.3.3), rversions (>=
+Imports: cli (>= 3.6.6), desc (>= 1.4.3), ellipsis (>= 0.3.3), fs (>=
+        2.0.1), lifecycle (>= 1.0.5), memoise (>= 2.0.1), miniUI (>=
+        0.1.2), pak (>= 0.9.3), pkgbuild (>= 1.4.8), pkgdown (>=
+        2.2.0), pkgload (>= 1.5.1), profvis (>= 0.4.0), rcmdcheck (>=
+        1.4.0), rlang (>= 1.2.0), roxygen2 (>= 7.3.3), rversions (>=
         3.0.0), sessioninfo (>= 1.2.3), testthat (>= 3.3.2), urlchecker
         (>= 1.0.1), withr (>= 3.0.2)
 Suggests: BiocManager (>= 1.30.18), callr (>= 3.7.1), covr (>= 3.5.1),
@@ -35,7 +35,7 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-03-13 23:00:32 UTC; jenny
+Packaged: 2026-04-16 15:11:59 UTC; jenny
 Author: Hadley Wickham [aut],
   Jim Hester [aut],
   Winston Chang [aut],
@@ -44,4 +44,4 @@ Author: Hadley Wickham [aut],
   Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)
 Maintainer: Jennifer Bryan <jenny@posit.co>
 Repository: CRAN
-Date/Publication: 2026-03-14 16:40:28 UTC
+Date/Publication: 2026-04-16 16:50:02 UTC
