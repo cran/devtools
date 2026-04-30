@@ -1,6 +1,6 @@
 Package: devtools
 Title: Tools to Make Developing R Packages Easier
-Version: 2.5.1
+Version: 2.5.2
 Authors@R: c(
     person("Hadley", "Wickham", role = "aut"),
     person("Jim", "Hester", role = "aut"),
@@ -16,9 +16,9 @@ URL: https://devtools.r-lib.org/, https://github.com/r-lib/devtools
 BugReports: https://github.com/r-lib/devtools/issues
 Depends: R (>= 4.1), usethis (>= 3.2.1)
 Imports: cli (>= 3.6.6), desc (>= 1.4.3), ellipsis (>= 0.3.3), fs (>=
-        2.0.1), lifecycle (>= 1.0.5), memoise (>= 2.0.1), miniUI (>=
-        0.1.2), pak (>= 0.9.3), pkgbuild (>= 1.4.8), pkgdown (>=
-        2.2.0), pkgload (>= 1.5.1), profvis (>= 0.4.0), rcmdcheck (>=
+        2.1.0), lifecycle (>= 1.0.5), memoise (>= 2.0.1), miniUI (>=
+        0.1.2), pak (>= 0.9.5), pkgbuild (>= 1.4.8), pkgdown (>=
+        2.2.0), pkgload (>= 1.5.2), profvis (>= 0.4.0), rcmdcheck (>=
         1.4.0), rlang (>= 1.2.0), roxygen2 (>= 7.3.3), rversions (>=
         3.0.0), sessioninfo (>= 1.2.3), testthat (>= 3.3.2), urlchecker
         (>= 1.0.1), withr (>= 3.0.2)
@@ -35,7 +35,7 @@ Encoding: UTF-8
 Language: en-US
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-04-16 15:11:59 UTC; jenny
+Packaged: 2026-04-29 15:42:59 UTC; jenny
 Author: Hadley Wickham [aut],
   Jim Hester [aut],
   Winston Chang [aut],
@@ -44,4 +44,4 @@ Author: Hadley Wickham [aut],
   Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)
 Maintainer: Jennifer Bryan <jenny@posit.co>
 Repository: CRAN
-Date/Publication: 2026-04-16 16:50:02 UTC
+Date/Publication: 2026-04-30 07:40:02 UTC

@@ -1,7 +1,7 @@
-e24cf96cb4a5e5367b82d46318d70e13 *DESCRIPTION
+45a8130cde263db2a06b2584035bfb13 *DESCRIPTION
 f5a65cfd67947a06c31f65027666d18e *LICENSE
 92aff32a539593a91aa3a5f35491ca10 *NAMESPACE
-7182213a48d5cd2cd455eefeb96b3316 *NEWS.md
+602e16e55d09b23388c731c43a6efbe2 *NEWS.md
 f72c92122cbbe5562dd8614be2dd36f7 *R/R.R
 dcb3d159650157aa50a309f201aea63e *R/active.R
 1766e38ecf5a284fb64f65f0469f6292 *R/bash.R
@@ -23,7 +23,7 @@ fac1e6c6bc7ea2b4ad69d4e43370726e *R/dev-mode.R
 c9f0f46847bb062472c67e9176d79f4a *R/import-standalone-obj-type.R
 754e065247c6c0636c3fe8440af3bfc9 *R/import-standalone-purrr.R
 f0289ac3a8cc612523ebf40c6bb9e5c7 *R/import-standalone-types-check.R
-86a8eb69c3c5c6265e5b6dd4e9688490 *R/install.R
+dce9c0a0fab53b7a1d8f28e5ae43b38a *R/install.R
 4d4234bccb263914d8e7a53f3f26b2cd *R/lint.R
 b5ff1d5ff45edc1cb92ddbb73aeec200 *R/missing-s3.R
 eae46eb28401fb52029c3145d17eda78 *R/package-deps.R
@@ -38,7 +38,7 @@ ce347af3f3d412820d90e699202b3189 *R/revdep.R
 ccf5f56b87ce8590dd17403a09e82947 *R/run-examples.R
 6ebad0ac61cd4f3afc7be3af57bffb3f *R/run-source.R
 fddd1a44d6e3107a5d616dc51622472b *R/save-all.R
-9bd935675a2e7be296a0461e5361a929 *R/session-info.R
+5f3e7f0da942fad7d8f1e07f83b5449f *R/session-info.R
 2d23b35e06c5b8269f3bc783556a13b3 *R/show-news.R
 0db83d697bf9c5e854d8d1c1ebe884d3 *R/sitrep.R
 f0325a6e05beafdadd9a1d0943716531 *R/spell-check.R
@@ -51,7 +51,7 @@ dcd8628948d5d0a525ee5c0bfa76ab24 *R/vignette-r.R
 f27115cded75e2465554a80ddb9aa29c *R/wd.R
 91c1707b5a4b8c041fbe09fae98e3f76 *R/zzz.R
 3a6a829cbda4f128608501066891c96b *README.md
-ce7569ee8edf24154935919bac852fbe *build/vignette.rds
+23a8d119268fd3958a00455c9816dbf2 *build/vignette.rds
 bbc82db8b7174fb213a7d6a6d0e772b8 *inst/WORDLIST
 93aac2906cd2da86b0c6703f004773f3 *inst/doc/dependencies.html
 5e7274630639d058da26a8063bc886ec *inst/doc/dependencies.qmd
@@ -90,7 +90,7 @@ c3978703d8f40f2679795335715e98f4 *man/figures/lifecycle-experimental.svg
 715182b6ed4782cdaf8eab4c3d8cb963 *man/git_checks.Rd
 2caa4f66807eec87e14bdb2e6b83aded *man/has_tests.Rd
 dc44fb6519df0aa32d77e9e0c423ba27 *man/install-deprecated.Rd
-0a57aa1c98ee4b7e2ee1585360bf601e *man/install.Rd
+2a8f7e13e1c016d4256c079e4be7201a *man/install.Rd
 f554f3cecbfee10a77c9ac107b7d3f45 *man/install_deps.Rd
 77ed6f21da974951f90d961e63cf1189 *man/is.package.Rd
 27157c7addaa94f93f8b8aa08b647184 *man/lint.Rd
@@ -152,7 +152,7 @@ e09030d939f08dcad3985f33db51c18f *tests/testthat/shallowRepo/refs/tags/v1.10.0
 7d72dfb08817f534d1b8353175b1791e *tests/testthat/test-check-doc.R
 8d1a7c9b3d20cfb2b74b758d3c27dace *tests/testthat/test-check-win.R
 094e1f88746178bf76b03080519b5cc7 *tests/testthat/test-check.R
-de32320ad73ab16bec960cd27e3a8aa6 *tests/testthat/test-install.R
+4d499925ab9d17c684349ae065d118fb *tests/testthat/test-install.R
 a9956be39423bad855195284f3c3792d *tests/testthat/test-package.R
 a4559c5b960bb8e5f024e99e770563c7 *tests/testthat/test-pkgload.R
 2cb19075714a60c4e9f71f37b3516890 *tests/testthat/test-release.R
@@ -177,6 +177,9 @@ f2156963e20e8b103d1c56ff19952e05 *tests/testthat/testCheckExtrafile/man/a.Rd
 07493dea1b5bdd08b83fc86e7207e4a6 *tests/testthat/testHelp/NAMESPACE
 ed61308da230ce41b4a2ec373a434237 *tests/testthat/testHelp/R/foofoo.R
 9ea3ed4f53478f3643e1cad9018b8995 *tests/testthat/testHelp/man/foofoo.Rd
+a41a082fb373e20b3b50627693e213ae *tests/testthat/testInstallWithDeps/DESCRIPTION
+6036fda488858f5e98bad80768751cce *tests/testthat/testInstallWithDeps/NAMESPACE
+358443b53ce44783a45e213f20cd0db9 *tests/testthat/testInstallWithDeps/R/hello.R
 94cd54a1ac1228f566e3353a266fda0f *tests/testthat/testMarkdownVignettes/DESCRIPTION
 79b420e1c7ec95ab732d36ed0fc00e5b *tests/testthat/testMarkdownVignettes/vignettes/test.Rmd
 1494bf61f7e5b6e5a36a6df0faf2c486 *tests/testthat/testMissingNsObject/DESCRIPTION
